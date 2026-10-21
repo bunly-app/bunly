@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bunly — Nguyên mẫu tương tác M1</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#1e2725;background:#eef3ef}
+    *{box-sizing:border-box} body{margin:0;padding:24px}
+    .phone{max-width:420px;min-height:760px;margin:auto;background:#fff;border:2px solid #9caea6;border-radius:28px;overflow:hidden;box-shadow:0 18px 50px #1e272522;display:flex;flex-direction:column}
+    header{padding:24px 20px 16px;background:#d9eee2;display:flex;justify-content:space-between;align-items:center}
+    h1{margin:0;font-size:24px} h2{font-size:22px;margin:0 0 14px} h3{font-size:16px;margin:0 0 8px}
+    .tag{font-size:12px;border:1px solid #42785d;border-radius:20px;padding:5px 9px}
+    main{padding:20px;flex:1} section{display:none} section.active{display:block}
+    p{line-height:1.5} .muted{color:#53635c;font-size:14px}
+    .card{border:1px solid #cad8cf;border-radius:16px;padding:16px;margin:12px 0;background:#fafdfa}
+    .row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1}
+    button{font:inherit;border:1px solid #397654;background:#fff;color:#19452c;border-radius:12px;padding:11px 13px;cursor:pointer;min-height:44px}
+    button.primary{background:#1f6840;color:#fff} button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #e39b32;outline-offset:2px}
+    input,textarea{font:inherit;width:100%;border:1px solid #9caea6;border-radius:12px;padding:12px;background:#fff;color:#1e2725}
+    textarea{min-height:110px;resize:vertical} label{display:block;margin:14px 0 6px;font-weight:600}
+    nav{display:flex;border-top:1px solid #cad8cf;background:#f6faf7}
+    nav button{border:0;border-radius:0;flex:1;font-size:13px;padding:12px 3px}
+    nav button[aria-current="page"]{background:#d9eee2;font-weight:700}
+    .choice{display:block;width:100%;text-align:left;margin:8px 0}
+    .status{min-height:24px;font-size:14px;color:#22613e}
+    .ja{font-size:21px;line-height:1.5} mark{background:#fbe3a7}
+    body.dark{background:#18231e;color:#edf3ee}
+    .dark .phone{background:#25332b;border-color:#607b6a}.dark header,.dark nav button[aria-current="page"]{background:#315341}
+    .dark .card,.dark nav{background:#2b3b31;border-color:#56715f}
+    .dark button,.dark input,.dark textarea{background:#25332b;color:#edf3ee;border-color:#8eb39a}
+    .dark button.primary{background:#95d6aa;color:#12281b}.dark .muted{color:#b5cabc}
+    @media(max-width:480px){body{padding:0}.phone{min-height:100dvh;border:0;border-radius:0;box-shadow:none}}
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <header><h1>Bunly</h1><span class="tag">Wireframe M1</span></header>
+    <main>
+      <section id="home" class="active">
+        <h2>Học hôm nay</h2>
+        <p class="muted">Biến câu tiếng Nhật bạn gặp thành kiến thức của riêng mình.</p>
+        <div class="card"><h3>Tiến độ hôm nay</h3><p>2 mẫu cần ôn · 1 mẫu mới</p><button class="primary" data-go="practice">Bắt đầu ôn</button></div>
+        <div class="card"><h3>Gặp một câu mới?</h3><p>Chụp ảnh hoặc dán câu để tìm mẫu ngữ pháp.</p><button class="primary" data-go="scan">Quét câu</button></div>
+        <button data-go="library">Xem kho ngữ pháp</button>
+      </section>
+      <section id="library">
+        <h2>Kho ngữ pháp</h2>
+        <label for="search">Tìm kiếm</label><input id="search" placeholder="Nhập mẫu hoặc ý nghĩa">
+        <p class="muted">Bộ lọc: N5 · N4</p>
+        <div id="grammar-list">
+          <button class="choice" data-go="detail">N4 · 〜たことがある — Đã từng...</button>
+          <button class="choice" data-go="detail">N5 · 〜たい — Muốn làm...</button>
+          <button class="choice" data-go="detail">N5 · 〜ている — Đang...</button>
+        </div>
+      </section>
+      <section id="detail">
+        <button data-go="library">← Kho ngữ pháp</button>
+        <div class="card"><span class="tag">N4</span><h2 style="margin-top:12px">〜たことがある</h2>
+          <p><strong>Ý nghĩa:</strong> Đã từng có trải nghiệm làm việc gì.</p>
+          <p><strong>Công thức:</strong> Động từ thể た + ことがある</p>
+          <p class="ja">日本へ行ったことがあります。</p><p> Tôi đã từng đến Nhật Bản.</p>
+        </div>
+        <label for="note">Ghi chú của bạn</label><textarea id="note" placeholder="Viết điều bạn muốn nhớ..."></textarea>
+        <div class="row"><button id="save-note">Lưu ghi chú</button><button class="primary" data-go="practice">Luyện tập</button></div>
+        <p id="note-status" class="status" aria-live="polite"></p>
+      </section>
+      <section id="scan">
+        <h2>Quét câu</h2>
+        <p class="muted">Trong nguyên mẫu này, nút ảnh mô phỏng kết quả OCR; ứng dụng thật sẽ dùng camera/thư viện và ML Kit.</p>
+        <button id="simulate-ocr">Mô phỏng chụp ảnh + OCR</button>
+        <label for="sentence">Văn bản tiếng Nhật (có thể sửa)</label>
+        <textarea id="sentence" placeholder="Dán câu tiếng Nhật ở đây..."></textarea>
+        <button class="primary" id="analyze">Phân tích ngữ pháp</button>
+        <p id="scan-status" class="status" aria-live="polite"></p>
+      </section>
+      <section id="result">
+        <button data-go="scan">← Sửa câu</button>
+        <h2>Kết quả gợi ý</h2>
+        <p id="result-sentence" class="card ja"></p>
+        <div class="card"><span class="tag">Mẫu trong kho</span><h3 style="margin-top:12px">〜たことがある</h3>
+          <p>Diễn tả kinh nghiệm đã từng làm việc gì.</p><button class="primary" data-go="detail">Xem giải thích và lưu</button>
+        </div>
+        <p class="muted">AI có thể nhầm. Hãy đối chiếu câu gốc và giải thích.</p>
+        <button data-go="library">Tìm thủ công</button>
+      </section>
+      <section id="practice">
+        <h2>Luyện tập</h2><p>Mẫu: <strong>〜たことがある</strong></p>
+        <div class="card"><p>Câu nào có nghĩa “Tôi đã từng đến Nhật Bản”?</p>
+          <button class="choice answer" data-correct="true">日本へ行ったことがあります。</button>
+          <button class="choice answer" data-correct="false">日本へ行きたいです。</button>
+        </div><p id="answer-status" class="status" aria-live="polite"></p>
+        <button data-go="progress">Xem tiến độ</button>
+      </section>
+      <section id="progress">
+        <h2>Tiến độ</h2><div class="card"><p>Mẫu đã học: 1</p><p>Đến hạn ôn: 2</p><p>Độ chính xác mẫu: 75%</p></div>
+        <p class="muted">Các số liệu chỉ minh họa cho nguyên mẫu.</p>
+        <button class="primary" data-go="practice">Ôn mẫu còn yếu</button>
+        <div class="card"><h3>Giao diện</h3><button id="theme">Chuyển sáng / tối</button></div>
+      </section>
+    </main>
+    <nav aria-label="Điều hướng chính">
+      <button data-go="home" aria-current="page">Trang chủ</button>
+      <button data-go="library">Kho</button>
+      <button data-go="scan">Quét</button>
+      <button data-go="practice">Luyện</button>
+      <button data-go="progress">Tiến độ</button>
+    </nav>
+  </div>
+  <script>
+    const sections = [...document.querySelectorAll("main section")];
+    const navButtons = [...document.querySelectorAll("nav button")];
+    function show(id) {
+      sections.forEach(section => section.classList.toggle("active", section.id === id));
+      navButtons.forEach(button => button.setAttribute("aria-current", button.dataset.go === id ? "page" : "false"));
+      window.scrollTo(0, 0);
+    }
+    document.querySelectorAll("[data-go]").forEach(button => button.addEventListener("click", () => show(button.dataset.go)));
+    document.getElementById("simulate-ocr").addEventListener("click", () => {
+      document.getElementById("sentence").value = "日本へ行ったことがあります。";
+      document.getElementById("scan-status").textContent = "Đã tạo văn bản OCR mẫu. Bạn có thể sửa trước khi phân tích.";
+    });
+    document.getElementById("analyze").addEventListener("click", () => {
+      const sentence = document.getElementById("sentence").value.trim();
+      if (!sentence) { document.getElementById("scan-status").textContent = "Hãy nhập hoặc mô phỏng quét một câu."; return; }
+      document.getElementById("result-sentence").textContent = sentence;
+      show("result");
+    });
+    document.getElementById("save-note").addEventListener("click", () => {
+      document.getElementById("note-status").textContent = "Đã lưu ghi chú trong nguyên mẫu.";
+    });
+    document.querySelectorAll(".answer").forEach(button => button.addEventListener("click", () => {
+      document.getElementById("answer-status").textContent = button.dataset.correct === "true"
+        ? "Đúng! Mẫu này diễn tả trải nghiệm đã từng xảy ra."
+        : "Chưa đúng. 〜たい diễn tả mong muốn.";
+    }));
+    document.getElementById("theme").addEventListener("click", () => document.body.classList.toggle("dark"));
+    document.getElementById("search").addEventListener("input", event => {
+      const query = event.target.value.toLocaleLowerCase();
+      document.querySelectorAll("#grammar-list button").forEach(button => {
+        button.hidden = !button.textContent.toLocaleLowerCase().includes(query);
+      });
+    });
+  </script>
+</body>
+</html>
