@@ -92,5 +92,7 @@ Commit file Drift `*.g.dart` đã sinh để thành viên mới mở dự án th
 - Lỗi `connection refused`: kiểm tra dịch vụ sẵn sàng và địa chỉ theo thiết bị; localhost trên điện thoại không phải máy chạy Docker.
 - Lỗi xác nhận email: kiểm tra cấu hình Auth của local/project phát triển và hộp thư kiểm thử; không tự tắt xác nhận trên project dùng chung.
 - Trong cloud Codex, dùng checkout hiện có. Có thể chạy CLI nếu môi trường đáp ứng yêu cầu; kiểm tra Docker/SDK/mạng trước. Cloud Linux không build iOS.
-- Nếu home directory của cloud chỉ đọc, cấu hình các thư mục ghi được ngoài checkout bằng `SUPABASE_HOME`, `PUB_CACHE` và `XDG_CONFIG_HOME`. Ví dụ `SUPABASE_HOME=/workspace/.cache/supabase npm run supabase -- --version`; không đổi biến `HOME` và không đưa cache vào Git.
+- Nếu home directory của cloud chỉ đọc, cấu hình các thư mục ghi được ngoài checkout bằng `SUPABASE_HOME`, `PUB_CACHE`, `XDG_CONFIG_HOME` và `ANALYZER_STATE_LOCATION_OVERRIDE`. Ví dụ `SUPABASE_HOME=/workspace/.cache/supabase npm run supabase -- --version`; không đổi biến `HOME` và không đưa cache vào Git.
 - Cấu hình không được commit: `config/*.local.json`, `.env*` (trừ example), token CLI và khóa quản trị. Khi chia sẻ lỗi, chỉ ghi tên biến và trạng thái hiện diện.
+
+Xem [kiến trúc hiện tại và kết quả kiểm chứng](ARCHITECTURE.md) để phân biệt chức năng của base với mục tiêu M2. Ghi chú connected hiện lưu local và xếp outbox; worker đồng bộ, hồ sơ, lưu mẫu và tiến độ còn phải triển khai.

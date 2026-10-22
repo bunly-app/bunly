@@ -6,6 +6,8 @@
 **Ngày lập:** 22/10/2026<br>
 **Trạng thái:** PRD để rà soát trước khi triển khai; chưa phải kết quả nghiệm thu M2.
 
+**Cập nhật triển khai:** Nền Flutter và Supabase đã được tạo trên nhánh `feat/m2-architecture-base`. Hiện trạng ở mục 2 là snapshot lúc lập PRD; xem [kiến trúc hiện có và việc tiếp theo](../development/ARCHITECTURE.md) và [báo cáo xem trước](../reports/Capstone-Report-2-Architecture-Preview.md) để biết tiến độ đã kiểm chứng.
+
 ## 1. Mục tiêu và căn cứ
 
 Hoàn thiện báo cáo M2 bằng bằng chứng từ một ứng dụng Flutter có nền kiến trúc ba lớp, dữ liệu Supabase/Drift và luồng chức năng lõi chạy thật. PRD này là cơ sở để nhóm chỉnh thiết kế, chia việc và nghiệm thu trước khi chốt báo cáo.
