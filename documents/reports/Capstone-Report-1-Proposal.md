@@ -58,9 +58,9 @@ MVP tập trung vào **biến câu tiếng Nhật người học bắt gặp th�
 | 4 | AI trên thiết bị | Chụp/chọn ảnh, OCR tiếng Nhật, xem và sửa văn bản | Bắt buộc | Google ML Kit Text Recognition; nếu OCR sai, người dùng sửa hoặc dán câu thủ công. |
 | 5 | Phát hiện ngữ pháp | Phân tích câu và gợi ý cấu trúc | Bắt buộc | LLM qua Supabase Edge Function khi online; chỉ hiển thị mẫu có trong kho. Khi offline, cho tìm thủ công. |
 | 6 | Luyện tập & ôn tập | Trắc nghiệm, điền chỗ trống, lịch ôn theo kết quả | Bắt buộc | Bài cơ bản dựa trên nội dung đã biên tập; trả lời sai được ôn sớm hơn. |
-| 7 | Lộ trình & thống kê | Chọn mục tiêu N5/N4, bài học hôm nay, số mẫu đã học và độ chính xác | Nên có | Gợi ý dựa trên tiến độ và hạn ôn; chưa cần mô hình gợi ý riêng. |
-| 8 | Nhắc nhở | Thông báo học/ôn trên thiết bị | Nên có | Người dùng bật/tắt và chọn giờ. |
-| 9 | Mô hình Free/Pro | Hiển thị hạn mức AI và mô phỏng quyền sử dụng | Nên có | Backend kiểm tra lượt dùng; bản học phần chưa xử lý thanh toán thật. |
+| 7 | Lộ trình & thống kê | Chọn mục tiêu N5/N4, bài học hôm nay, số mẫu đã học và độ chính xác | Bắt buộc | Gợi ý dựa trên tiến độ và hạn ôn; chưa cần mô hình gợi ý riêng. |
+| 8 | Nhắc nhở | Thông báo học/ôn trên thiết bị | Bắt buộc | Người dùng bật/tắt và chọn giờ. |
+| 9 | Mô hình Free/Pro | Hiển thị hạn mức AI và mô phỏng quyền sử dụng | Bắt buộc | Backend kiểm tra lượt dùng; bản học phần chưa xử lý thanh toán thật. |
 
 **Ngoài phạm vi MVP:** nhận diện giọng nói, chấm phát âm, tạo toàn bộ giáo trình bằng AI, phân tích tài liệu dài, thanh toán thật và phát hành thương mại. Bài dịch Việt → Nhật có nhận xét bằng AI là hướng mở rộng sau khi luồng chính ổn định.
 
