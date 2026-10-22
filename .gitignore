@@ -1,0 +1,19 @@
+# Dart / Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+coverage/
+
+# Local tools and credentials
+node_modules/
+.env
+.env.*
+!.env.example
+config/*.local.json
+supabase/.temp/
+supabase/.branches/
+.idea/
+*.iml
+.DS_Store
