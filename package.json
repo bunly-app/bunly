@@ -1,0 +1,19 @@
+{
+  "name": "bunly-tooling",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "supabase": "supabase",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset --local",
+    "db:lint": "supabase db lint --local --level warning --fail-on warning",
+    "db:test": "supabase test db",
+    "doctor": "bash scripts/doctor.sh"
+  },
+  "devDependencies": {
+    "supabase": "2.121.0"
+  }
+}

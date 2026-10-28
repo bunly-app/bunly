@@ -1,0 +1,5 @@
+[
+  {"id":"10000000-0000-0000-0000-000000000001","pattern":"〜たことがある","level":"N4","category":"experience","meaning_vi":"Đã từng làm việc gì","formula":"Động từ thể た + ことがある","usage_vi":"Diễn tả trải nghiệm đã xảy ra trước thời điểm nói.","grammar_examples":[{"sentence_ja":"日本へ行ったことがあります。","translation_vi":"Tôi đã từng đến Nhật Bản."}]},
+  {"id":"10000000-0000-0000-0000-000000000002","pattern":"〜たい","level":"N5","category":"desire","meaning_vi":"Muốn làm việc gì","formula":"Động từ thể ます bỏ ます + たい","usage_vi":"Diễn tả mong muốn thực hiện một hành động của người nói.","grammar_examples":[{"sentence_ja":"日本語を勉強したいです。","translation_vi":"Tôi muốn học tiếng Nhật."}]},
+  {"id":"10000000-0000-0000-0000-000000000003","pattern":"〜ている","level":"N5","category":"aspect","meaning_vi":"Đang thực hiện hành động","formula":"Động từ thể て + いる","usage_vi":"Trong ví dụ này, diễn tả một hành động đang diễn ra.","grammar_examples":[{"sentence_ja":"本を読んでいます。","translation_vi":"Tôi đang đọc sách."}]}
+]
