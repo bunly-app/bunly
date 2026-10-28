@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:bunly/app/bunly_app.dart';
 import 'package:bunly/app/providers.dart';
 import 'package:bunly/features/auth/domain/auth_repository.dart';
@@ -6,6 +7,7 @@ import 'package:bunly/features/grammar/domain/grammar_point.dart';
 import 'package:bunly/features/grammar/domain/grammar_repository.dart';
 import 'package:bunly/features/learning/domain/learning_repository.dart';
 import 'package:bunly/features/learning/domain/note.dart';
+import 'package:bunly/features/learning/domain/personal_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,11 +56,29 @@ class WidgetGrammar implements GrammarRepository {
   ];
 }
 
-class WidgetLearning implements LearningRepository {
+class WidgetLearning implements LearningRepository, PersonalRepository {
+  @override
+  Stream<UserProfile> watchProfile() => Stream.value(const UserProfile());
+  @override
+  Future<void> saveProfile(UserProfile profile) async {}
+  @override
+  Stream<LearningSummary> watchSummary() =>
+      Stream.value(const LearningSummary({}, {}));
+  @override
+  Future<void> setSaved(String id, bool saved) async {}
+  @override
+  Future<void> setStatus(String id, LearningStatus status) async {}
+  @override
+  Future<void> deleteNote(String id) async {
+    notes.removeWhere((n) => n.id == id);
+    changes.add(List.of(notes));
+  }
+
   final changes = StreamController<List<Note>>.broadcast();
   final notes = <Note>[];
   @override
   Future<void> saveNote(Note note) async {
+    notes.removeWhere((existing) => existing.id == note.id);
     notes.add(note);
     changes.add(List.of(notes));
   }
@@ -74,7 +94,7 @@ class WidgetLearning implements LearningRepository {
 
 void main() {
   testWidgets(
-    'demo filters, opens detail, saves note and shows it after returning',
+    'demo filters, opens detail, creates/edits/deletes notes and returns safely',
     (tester) async {
       final learning = WidgetLearning();
       await tester.pumpWidget(
@@ -102,11 +122,26 @@ void main() {
       await tester.tap(find.text('Lưu ghi chú'));
       await tester.pumpAndSettle();
       expect(learning.notes.single.content, 'Ghi nhớ trải nghiệm');
+      await tester.ensureVisible(find.byTooltip('Sửa ghi chú'));
+      await tester.tap(find.byTooltip('Sửa ghi chú'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).last, 'Ghi chú đã sửa');
+      await tester.ensureVisible(find.text('Lưu chỉnh sửa'));
+      await tester.tap(find.text('Lưu chỉnh sửa'));
+      await tester.pumpAndSettle();
+      expect(learning.notes, hasLength(1));
+      expect(learning.notes.single.content, 'Ghi chú đã sửa');
       await tester.pageBack();
       await tester.pumpAndSettle();
       await tester.tap(find.text('N4 · 〜たことがある'));
       await tester.pumpAndSettle();
-      expect(find.text('Ghi nhớ trải nghiệm'), findsOneWidget);
+      expect(find.text('Ghi chú đã sửa'), findsOneWidget);
+      await tester.ensureVisible(find.byTooltip('Xóa ghi chú'));
+      await tester.tap(find.byTooltip('Xóa ghi chú'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Xóa').last);
+      await tester.pumpAndSettle();
+      expect(learning.notes, isEmpty);
       await tester.pumpWidget(const SizedBox());
       await learning.changes.close();
     },

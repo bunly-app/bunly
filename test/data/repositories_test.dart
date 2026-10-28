@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:bunly/core/database/app_database.dart';
 import 'package:bunly/features/grammar/data/cached_grammar_repository.dart';
 import 'package:bunly/features/grammar/data/grammar_sources.dart';
@@ -6,9 +7,11 @@ import 'package:bunly/features/learning/data/local_learning_repository.dart';
 import 'package:bunly/features/learning/domain/note.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ControlledSource implements GrammarSource {
   bool offline = false;
+  Object? failure;
   List<Map<String, dynamic>> rows = [
     {
       'id': 'g',
@@ -23,6 +26,7 @@ class ControlledSource implements GrammarSource {
   ];
   @override
   Future<List<Map<String, dynamic>>> fetch() async {
+    if (failure != null) throw failure!;
     if (offline) throw const SocketException('offline');
     return rows;
   }
@@ -136,4 +140,22 @@ void main() {
       database = AppDatabase(NativeDatabase.memory());
     }
   });
+  test(
+    'permission errors never masquerade as a successful cached refresh',
+    () async {
+      final source = ControlledSource();
+      final repository = CachedGrammarRepository(database, source, 'backend');
+      await repository.load();
+      source.failure = const PostgrestException(
+        message: 'denied',
+        code: '42501',
+      );
+      await expectLater(repository.load(), throwsA(isA<PostgrestException>()));
+      expect(repository.lastLoadFromCache, isFalse);
+      source.failure = null;
+      source.offline = true;
+      expect(await repository.load(), hasLength(1));
+      expect(repository.lastLoadFromCache, isTrue);
+    },
+  );
 }

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:drift/drift.dart' show BooleanExpressionOperators;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -17,6 +19,9 @@ import '../features/learning/domain/learning_repository.dart';
 import '../features/learning/domain/note.dart';
 import '../features/learning/domain/save_note.dart';
 import '../features/learning/presentation/note_controller.dart';
+import '../features/learning/domain/personal_repository.dart';
+import '../features/learning/data/learning_sync.dart';
+import '../features/learning/presentation/learning_controller.dart';
 import 'config.dart';
 
 final configProvider = Provider<AppConfig>((ref) => const AppConfig());
@@ -101,3 +106,51 @@ final noteControllerProvider =
     StateNotifierProvider.autoDispose<NoteController, AsyncValue<void>>(
       (ref) => NoteController(SaveNote(ref.watch(learningRepositoryProvider))),
     );
+
+final personalRepositoryProvider = Provider.autoDispose<PersonalRepository>(
+  (ref) => ref.watch(learningRepositoryProvider) as PersonalRepository,
+);
+final profileProvider = StreamProvider.autoDispose<UserProfile>(
+  (ref) => ref.watch(personalRepositoryProvider).watchProfile(),
+);
+final learningSummaryProvider = StreamProvider.autoDispose<LearningSummary>(
+  (ref) => ref.watch(personalRepositoryProvider).watchSummary(),
+);
+final learningControllerProvider =
+    StateNotifierProvider.autoDispose<LearningController, AsyncValue<void>>(
+      (ref) => LearningController(
+        UpdateLearning(ref.watch(personalRepositoryProvider)),
+      ),
+    );
+
+final learningSyncProvider = Provider.autoDispose<LearningSync?>((ref) {
+  final config = ref.watch(configProvider);
+  final user = ref.watch(userProvider).valueOrNull;
+  if (!config.connected || user == null) return null;
+  final remote = SupabaseLearningRemote(
+    Supabase.instance.client,
+    url: config.supabaseUrl,
+    key: config.supabaseAnonKey,
+    ownerId: user.id,
+  );
+  ref.onDispose(() => unawaited(remote.dispose()));
+  final sync = LearningSync(
+    ref.watch(databaseProvider),
+    remote,
+    namespace: config.namespace,
+    ownerId: user.id,
+  );
+  ref.onDispose(sync.stop);
+  return sync;
+});
+final pendingSyncProvider = StreamProvider.autoDispose<int>((ref) {
+  final config = ref.watch(configProvider);
+  final user = ref.watch(userProvider).valueOrNull;
+  if (!config.connected || user == null) return Stream.value(0);
+  final db = ref.watch(databaseProvider);
+  return (db.select(db.syncOutbox)..where(
+        (r) => r.namespace.equals(config.namespace) & r.ownerId.equals(user.id),
+      ))
+      .watch()
+      .map((rows) => rows.length);
+});

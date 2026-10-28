@@ -1,4 +1,7 @@
 import 'dart:convert';
+
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../../core/database/app_database.dart';
 import '../domain/grammar_point.dart';
 import '../domain/grammar_repository.dart';
@@ -10,17 +13,26 @@ class CachedGrammarRepository implements GrammarRepository {
   final AppDatabase database;
   final GrammarSource source;
   final String namespace;
+  bool lastLoadFromCache = false;
 
   @override
   Future<List<GrammarPoint>> load() async {
+    lastLoadFromCache = false;
     List<Map<String, dynamic>> rows;
     try {
       rows = await source.fetch();
-    } catch (_) {
+    } catch (error) {
+      if (error is AuthException ||
+          (error is PostgrestException &&
+              (error.code == '42501' ||
+                  error.code?.startsWith('PGRST3') == true))) {
+        rethrow;
+      }
       final cached = await (database.select(
         database.cachedGrammar,
       )..where((t) => t.namespace.equals(namespace))).get();
       if (cached.isEmpty) rethrow;
+      lastLoadFromCache = true;
       return cached
           .map(
             (row) => grammarFromJson(

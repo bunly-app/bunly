@@ -2,7 +2,7 @@ name: Base checks
 
 on:
   push:
-    branches: [main, 'feat/**']
+    branches: [main, 'feat/**', 'codex/**']
   pull_request:
 
 permissions:
@@ -25,7 +25,7 @@ jobs:
       - run: flutter pub get --enforce-lockfile
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: git diff --exit-code -- lib/core/database/app_database.g.dart
-      - run: dart format --output=none --set-exit-if-changed lib test
+      - run: dart format --output=none --set-exit-if-changed lib test integration_test test_connected
       - run: flutter analyze --no-pub
       - run: flutter test --no-pub
       - uses: actions/setup-java@v4
@@ -36,7 +36,7 @@ jobs:
 
   database:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     env:
       # Official CLI images, selected by the pinned CLI and verified by digest.
       SUPABASE_USE_SLIM_IMAGES: 'true'
@@ -46,11 +46,23 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      - name: Read SDK pin
+        id: sdk
+        run: echo "version=$(cat .flutter-version)" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.sdk.outputs.version }}
+          channel: stable
+          cache: true
       - run: npm ci
       - name: Start local services
         run: npm run db:start > /tmp/bunly-db-start.log 2>&1
       - run: npm run db:lint
       - run: npm run db:test
+      - run: flutter pub get --enforce-lockfile
+      - run: python3 scripts/prepare_m2_local.py
+      - name: Connected Auth and sync SDK tests (local backend)
+        run: flutter test test_connected/m2_connected_test.dart --dart-define-from-file=config/m2-test.local.json
       - name: Stop local services
         if: always()
         run: npm run db:stop

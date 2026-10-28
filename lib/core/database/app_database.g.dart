@@ -343,6 +343,17 @@ class $LocalNotesTable extends LocalNotes
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     namespace,
@@ -351,6 +362,7 @@ class $LocalNotesTable extends LocalNotes
     grammarId,
     content,
     updatedAt,
+    deletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -412,6 +424,12 @@ class $LocalNotesTable extends LocalNotes
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -445,6 +463,10 @@ class $LocalNotesTable extends LocalNotes
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -461,6 +483,7 @@ class LocalNote extends DataClass implements Insertable<LocalNote> {
   final String grammarId;
   final String content;
   final DateTime updatedAt;
+  final DateTime? deletedAt;
   const LocalNote({
     required this.namespace,
     required this.ownerId,
@@ -468,6 +491,7 @@ class LocalNote extends DataClass implements Insertable<LocalNote> {
     required this.grammarId,
     required this.content,
     required this.updatedAt,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -478,6 +502,9 @@ class LocalNote extends DataClass implements Insertable<LocalNote> {
     map['grammar_id'] = Variable<String>(grammarId);
     map['content'] = Variable<String>(content);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -489,6 +516,9 @@ class LocalNote extends DataClass implements Insertable<LocalNote> {
       grammarId: Value(grammarId),
       content: Value(content),
       updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -504,6 +534,7 @@ class LocalNote extends DataClass implements Insertable<LocalNote> {
       grammarId: serializer.fromJson<String>(json['grammarId']),
       content: serializer.fromJson<String>(json['content']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -516,6 +547,7 @@ class LocalNote extends DataClass implements Insertable<LocalNote> {
       'grammarId': serializer.toJson<String>(grammarId),
       'content': serializer.toJson<String>(content),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -526,6 +558,7 @@ class LocalNote extends DataClass implements Insertable<LocalNote> {
     String? grammarId,
     String? content,
     DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => LocalNote(
     namespace: namespace ?? this.namespace,
     ownerId: ownerId ?? this.ownerId,
@@ -533,6 +566,7 @@ class LocalNote extends DataClass implements Insertable<LocalNote> {
     grammarId: grammarId ?? this.grammarId,
     content: content ?? this.content,
     updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   LocalNote copyWithCompanion(LocalNotesCompanion data) {
     return LocalNote(
@@ -542,6 +576,7 @@ class LocalNote extends DataClass implements Insertable<LocalNote> {
       grammarId: data.grammarId.present ? data.grammarId.value : this.grammarId,
       content: data.content.present ? data.content.value : this.content,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -553,14 +588,22 @@ class LocalNote extends DataClass implements Insertable<LocalNote> {
           ..write('noteId: $noteId, ')
           ..write('grammarId: $grammarId, ')
           ..write('content: $content, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(namespace, ownerId, noteId, grammarId, content, updatedAt);
+  int get hashCode => Object.hash(
+    namespace,
+    ownerId,
+    noteId,
+    grammarId,
+    content,
+    updatedAt,
+    deletedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -570,7 +613,8 @@ class LocalNote extends DataClass implements Insertable<LocalNote> {
           other.noteId == this.noteId &&
           other.grammarId == this.grammarId &&
           other.content == this.content &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
 }
 
 class LocalNotesCompanion extends UpdateCompanion<LocalNote> {
@@ -580,6 +624,7 @@ class LocalNotesCompanion extends UpdateCompanion<LocalNote> {
   final Value<String> grammarId;
   final Value<String> content;
   final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
   final Value<int> rowid;
   const LocalNotesCompanion({
     this.namespace = const Value.absent(),
@@ -588,6 +633,7 @@ class LocalNotesCompanion extends UpdateCompanion<LocalNote> {
     this.grammarId = const Value.absent(),
     this.content = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LocalNotesCompanion.insert({
@@ -597,6 +643,7 @@ class LocalNotesCompanion extends UpdateCompanion<LocalNote> {
     required String grammarId,
     required String content,
     required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : namespace = Value(namespace),
        ownerId = Value(ownerId),
@@ -611,6 +658,7 @@ class LocalNotesCompanion extends UpdateCompanion<LocalNote> {
     Expression<String>? grammarId,
     Expression<String>? content,
     Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -620,6 +668,7 @@ class LocalNotesCompanion extends UpdateCompanion<LocalNote> {
       if (grammarId != null) 'grammar_id': grammarId,
       if (content != null) 'content': content,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -631,6 +680,7 @@ class LocalNotesCompanion extends UpdateCompanion<LocalNote> {
     Value<String>? grammarId,
     Value<String>? content,
     Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
     Value<int>? rowid,
   }) {
     return LocalNotesCompanion(
@@ -640,6 +690,7 @@ class LocalNotesCompanion extends UpdateCompanion<LocalNote> {
       grammarId: grammarId ?? this.grammarId,
       content: content ?? this.content,
       updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -665,6 +716,9 @@ class LocalNotesCompanion extends UpdateCompanion<LocalNote> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -680,6 +734,7 @@ class LocalNotesCompanion extends UpdateCompanion<LocalNote> {
           ..write('grammarId: $grammarId, ')
           ..write('content: $content, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -751,6 +806,18 @@ class $SyncOutboxTable extends SyncOutbox
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _entityTableMeta = const VerificationMeta(
+    'entityTable',
+  );
+  @override
+  late final GeneratedColumn<String> entityTable = GeneratedColumn<String>(
+    'entity_table',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('notes'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     sequence,
@@ -758,6 +825,7 @@ class $SyncOutboxTable extends SyncOutbox
     ownerId,
     recordId,
     payload,
+    entityTable,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -809,6 +877,15 @@ class $SyncOutboxTable extends SyncOutbox
     } else if (isInserting) {
       context.missing(_payloadMeta);
     }
+    if (data.containsKey('entity_table')) {
+      context.handle(
+        _entityTableMeta,
+        entityTable.isAcceptableOrUnknown(
+          data['entity_table']!,
+          _entityTableMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -838,6 +915,10 @@ class $SyncOutboxTable extends SyncOutbox
         DriftSqlType.string,
         data['${effectivePrefix}payload'],
       )!,
+      entityTable: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_table'],
+      )!,
     );
   }
 
@@ -853,12 +934,14 @@ class SyncOutboxData extends DataClass implements Insertable<SyncOutboxData> {
   final String ownerId;
   final String recordId;
   final String payload;
+  final String entityTable;
   const SyncOutboxData({
     required this.sequence,
     required this.namespace,
     required this.ownerId,
     required this.recordId,
     required this.payload,
+    required this.entityTable,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -868,6 +951,7 @@ class SyncOutboxData extends DataClass implements Insertable<SyncOutboxData> {
     map['owner_id'] = Variable<String>(ownerId);
     map['record_id'] = Variable<String>(recordId);
     map['payload'] = Variable<String>(payload);
+    map['entity_table'] = Variable<String>(entityTable);
     return map;
   }
 
@@ -878,6 +962,7 @@ class SyncOutboxData extends DataClass implements Insertable<SyncOutboxData> {
       ownerId: Value(ownerId),
       recordId: Value(recordId),
       payload: Value(payload),
+      entityTable: Value(entityTable),
     );
   }
 
@@ -892,6 +977,7 @@ class SyncOutboxData extends DataClass implements Insertable<SyncOutboxData> {
       ownerId: serializer.fromJson<String>(json['ownerId']),
       recordId: serializer.fromJson<String>(json['recordId']),
       payload: serializer.fromJson<String>(json['payload']),
+      entityTable: serializer.fromJson<String>(json['entityTable']),
     );
   }
   @override
@@ -903,6 +989,7 @@ class SyncOutboxData extends DataClass implements Insertable<SyncOutboxData> {
       'ownerId': serializer.toJson<String>(ownerId),
       'recordId': serializer.toJson<String>(recordId),
       'payload': serializer.toJson<String>(payload),
+      'entityTable': serializer.toJson<String>(entityTable),
     };
   }
 
@@ -912,12 +999,14 @@ class SyncOutboxData extends DataClass implements Insertable<SyncOutboxData> {
     String? ownerId,
     String? recordId,
     String? payload,
+    String? entityTable,
   }) => SyncOutboxData(
     sequence: sequence ?? this.sequence,
     namespace: namespace ?? this.namespace,
     ownerId: ownerId ?? this.ownerId,
     recordId: recordId ?? this.recordId,
     payload: payload ?? this.payload,
+    entityTable: entityTable ?? this.entityTable,
   );
   SyncOutboxData copyWithCompanion(SyncOutboxCompanion data) {
     return SyncOutboxData(
@@ -926,6 +1015,9 @@ class SyncOutboxData extends DataClass implements Insertable<SyncOutboxData> {
       ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
       recordId: data.recordId.present ? data.recordId.value : this.recordId,
       payload: data.payload.present ? data.payload.value : this.payload,
+      entityTable: data.entityTable.present
+          ? data.entityTable.value
+          : this.entityTable,
     );
   }
 
@@ -936,14 +1028,15 @@ class SyncOutboxData extends DataClass implements Insertable<SyncOutboxData> {
           ..write('namespace: $namespace, ')
           ..write('ownerId: $ownerId, ')
           ..write('recordId: $recordId, ')
-          ..write('payload: $payload')
+          ..write('payload: $payload, ')
+          ..write('entityTable: $entityTable')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(sequence, namespace, ownerId, recordId, payload);
+      Object.hash(sequence, namespace, ownerId, recordId, payload, entityTable);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -952,7 +1045,8 @@ class SyncOutboxData extends DataClass implements Insertable<SyncOutboxData> {
           other.namespace == this.namespace &&
           other.ownerId == this.ownerId &&
           other.recordId == this.recordId &&
-          other.payload == this.payload);
+          other.payload == this.payload &&
+          other.entityTable == this.entityTable);
 }
 
 class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxData> {
@@ -961,12 +1055,14 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxData> {
   final Value<String> ownerId;
   final Value<String> recordId;
   final Value<String> payload;
+  final Value<String> entityTable;
   const SyncOutboxCompanion({
     this.sequence = const Value.absent(),
     this.namespace = const Value.absent(),
     this.ownerId = const Value.absent(),
     this.recordId = const Value.absent(),
     this.payload = const Value.absent(),
+    this.entityTable = const Value.absent(),
   });
   SyncOutboxCompanion.insert({
     this.sequence = const Value.absent(),
@@ -974,6 +1070,7 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxData> {
     required String ownerId,
     required String recordId,
     required String payload,
+    this.entityTable = const Value.absent(),
   }) : namespace = Value(namespace),
        ownerId = Value(ownerId),
        recordId = Value(recordId),
@@ -984,6 +1081,7 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxData> {
     Expression<String>? ownerId,
     Expression<String>? recordId,
     Expression<String>? payload,
+    Expression<String>? entityTable,
   }) {
     return RawValuesInsertable({
       if (sequence != null) 'sequence': sequence,
@@ -991,6 +1089,7 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxData> {
       if (ownerId != null) 'owner_id': ownerId,
       if (recordId != null) 'record_id': recordId,
       if (payload != null) 'payload': payload,
+      if (entityTable != null) 'entity_table': entityTable,
     });
   }
 
@@ -1000,6 +1099,7 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxData> {
     Value<String>? ownerId,
     Value<String>? recordId,
     Value<String>? payload,
+    Value<String>? entityTable,
   }) {
     return SyncOutboxCompanion(
       sequence: sequence ?? this.sequence,
@@ -1007,6 +1107,7 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxData> {
       ownerId: ownerId ?? this.ownerId,
       recordId: recordId ?? this.recordId,
       payload: payload ?? this.payload,
+      entityTable: entityTable ?? this.entityTable,
     );
   }
 
@@ -1028,6 +1129,9 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxData> {
     if (payload.present) {
       map['payload'] = Variable<String>(payload.value);
     }
+    if (entityTable.present) {
+      map['entity_table'] = Variable<String>(entityTable.value);
+    }
     return map;
   }
 
@@ -1038,7 +1142,386 @@ class SyncOutboxCompanion extends UpdateCompanion<SyncOutboxData> {
           ..write('namespace: $namespace, ')
           ..write('ownerId: $ownerId, ')
           ..write('recordId: $recordId, ')
+          ..write('payload: $payload, ')
+          ..write('entityTable: $entityTable')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PersonalRecordsTable extends PersonalRecords
+    with TableInfo<$PersonalRecordsTable, PersonalRecord> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PersonalRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _namespaceMeta = const VerificationMeta(
+    'namespace',
+  );
+  @override
+  late final GeneratedColumn<String> namespace = GeneratedColumn<String>(
+    'namespace',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityTableMeta = const VerificationMeta(
+    'entityTable',
+  );
+  @override
+  late final GeneratedColumn<String> entityTable = GeneratedColumn<String>(
+    'entity_table',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recordIdMeta = const VerificationMeta(
+    'recordId',
+  );
+  @override
+  late final GeneratedColumn<String> recordId = GeneratedColumn<String>(
+    'record_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _payloadMeta = const VerificationMeta(
+    'payload',
+  );
+  @override
+  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
+    'payload',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    namespace,
+    ownerId,
+    entityTable,
+    recordId,
+    payload,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'personal_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PersonalRecord> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('namespace')) {
+      context.handle(
+        _namespaceMeta,
+        namespace.isAcceptableOrUnknown(data['namespace']!, _namespaceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_namespaceMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerIdMeta);
+    }
+    if (data.containsKey('entity_table')) {
+      context.handle(
+        _entityTableMeta,
+        entityTable.isAcceptableOrUnknown(
+          data['entity_table']!,
+          _entityTableMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_entityTableMeta);
+    }
+    if (data.containsKey('record_id')) {
+      context.handle(
+        _recordIdMeta,
+        recordId.isAcceptableOrUnknown(data['record_id']!, _recordIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_recordIdMeta);
+    }
+    if (data.containsKey('payload')) {
+      context.handle(
+        _payloadMeta,
+        payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_payloadMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {
+    namespace,
+    ownerId,
+    entityTable,
+    recordId,
+  };
+  @override
+  PersonalRecord map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PersonalRecord(
+      namespace: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}namespace'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      entityTable: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_table'],
+      )!,
+      recordId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}record_id'],
+      )!,
+      payload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload'],
+      )!,
+    );
+  }
+
+  @override
+  $PersonalRecordsTable createAlias(String alias) {
+    return $PersonalRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class PersonalRecord extends DataClass implements Insertable<PersonalRecord> {
+  final String namespace;
+  final String ownerId;
+  final String entityTable;
+  final String recordId;
+  final String payload;
+  const PersonalRecord({
+    required this.namespace,
+    required this.ownerId,
+    required this.entityTable,
+    required this.recordId,
+    required this.payload,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['namespace'] = Variable<String>(namespace);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['entity_table'] = Variable<String>(entityTable);
+    map['record_id'] = Variable<String>(recordId);
+    map['payload'] = Variable<String>(payload);
+    return map;
+  }
+
+  PersonalRecordsCompanion toCompanion(bool nullToAbsent) {
+    return PersonalRecordsCompanion(
+      namespace: Value(namespace),
+      ownerId: Value(ownerId),
+      entityTable: Value(entityTable),
+      recordId: Value(recordId),
+      payload: Value(payload),
+    );
+  }
+
+  factory PersonalRecord.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PersonalRecord(
+      namespace: serializer.fromJson<String>(json['namespace']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      entityTable: serializer.fromJson<String>(json['entityTable']),
+      recordId: serializer.fromJson<String>(json['recordId']),
+      payload: serializer.fromJson<String>(json['payload']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'namespace': serializer.toJson<String>(namespace),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'entityTable': serializer.toJson<String>(entityTable),
+      'recordId': serializer.toJson<String>(recordId),
+      'payload': serializer.toJson<String>(payload),
+    };
+  }
+
+  PersonalRecord copyWith({
+    String? namespace,
+    String? ownerId,
+    String? entityTable,
+    String? recordId,
+    String? payload,
+  }) => PersonalRecord(
+    namespace: namespace ?? this.namespace,
+    ownerId: ownerId ?? this.ownerId,
+    entityTable: entityTable ?? this.entityTable,
+    recordId: recordId ?? this.recordId,
+    payload: payload ?? this.payload,
+  );
+  PersonalRecord copyWithCompanion(PersonalRecordsCompanion data) {
+    return PersonalRecord(
+      namespace: data.namespace.present ? data.namespace.value : this.namespace,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      entityTable: data.entityTable.present
+          ? data.entityTable.value
+          : this.entityTable,
+      recordId: data.recordId.present ? data.recordId.value : this.recordId,
+      payload: data.payload.present ? data.payload.value : this.payload,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PersonalRecord(')
+          ..write('namespace: $namespace, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('entityTable: $entityTable, ')
+          ..write('recordId: $recordId, ')
           ..write('payload: $payload')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(namespace, ownerId, entityTable, recordId, payload);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PersonalRecord &&
+          other.namespace == this.namespace &&
+          other.ownerId == this.ownerId &&
+          other.entityTable == this.entityTable &&
+          other.recordId == this.recordId &&
+          other.payload == this.payload);
+}
+
+class PersonalRecordsCompanion extends UpdateCompanion<PersonalRecord> {
+  final Value<String> namespace;
+  final Value<String> ownerId;
+  final Value<String> entityTable;
+  final Value<String> recordId;
+  final Value<String> payload;
+  final Value<int> rowid;
+  const PersonalRecordsCompanion({
+    this.namespace = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.entityTable = const Value.absent(),
+    this.recordId = const Value.absent(),
+    this.payload = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PersonalRecordsCompanion.insert({
+    required String namespace,
+    required String ownerId,
+    required String entityTable,
+    required String recordId,
+    required String payload,
+    this.rowid = const Value.absent(),
+  }) : namespace = Value(namespace),
+       ownerId = Value(ownerId),
+       entityTable = Value(entityTable),
+       recordId = Value(recordId),
+       payload = Value(payload);
+  static Insertable<PersonalRecord> custom({
+    Expression<String>? namespace,
+    Expression<String>? ownerId,
+    Expression<String>? entityTable,
+    Expression<String>? recordId,
+    Expression<String>? payload,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (namespace != null) 'namespace': namespace,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (entityTable != null) 'entity_table': entityTable,
+      if (recordId != null) 'record_id': recordId,
+      if (payload != null) 'payload': payload,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PersonalRecordsCompanion copyWith({
+    Value<String>? namespace,
+    Value<String>? ownerId,
+    Value<String>? entityTable,
+    Value<String>? recordId,
+    Value<String>? payload,
+    Value<int>? rowid,
+  }) {
+    return PersonalRecordsCompanion(
+      namespace: namespace ?? this.namespace,
+      ownerId: ownerId ?? this.ownerId,
+      entityTable: entityTable ?? this.entityTable,
+      recordId: recordId ?? this.recordId,
+      payload: payload ?? this.payload,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (namespace.present) {
+      map['namespace'] = Variable<String>(namespace.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (entityTable.present) {
+      map['entity_table'] = Variable<String>(entityTable.value);
+    }
+    if (recordId.present) {
+      map['record_id'] = Variable<String>(recordId.value);
+    }
+    if (payload.present) {
+      map['payload'] = Variable<String>(payload.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PersonalRecordsCompanion(')
+          ..write('namespace: $namespace, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('entityTable: $entityTable, ')
+          ..write('recordId: $recordId, ')
+          ..write('payload: $payload, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1050,6 +1533,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CachedGrammarTable cachedGrammar = $CachedGrammarTable(this);
   late final $LocalNotesTable localNotes = $LocalNotesTable(this);
   late final $SyncOutboxTable syncOutbox = $SyncOutboxTable(this);
+  late final $PersonalRecordsTable personalRecords = $PersonalRecordsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1058,6 +1544,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     cachedGrammar,
     localNotes,
     syncOutbox,
+    personalRecords,
   ];
 }
 
@@ -1235,6 +1722,7 @@ typedef $$LocalNotesTableCreateCompanionBuilder =
       required String grammarId,
       required String content,
       required DateTime updatedAt,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 typedef $$LocalNotesTableUpdateCompanionBuilder =
@@ -1245,6 +1733,7 @@ typedef $$LocalNotesTableUpdateCompanionBuilder =
       Value<String> grammarId,
       Value<String> content,
       Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 
@@ -1284,6 +1773,11 @@ class $$LocalNotesTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1326,6 +1820,11 @@ class $$LocalNotesTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LocalNotesTableAnnotationComposer
@@ -1354,6 +1853,9 @@ class $$LocalNotesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
 class $$LocalNotesTableTableManager
@@ -1393,6 +1895,7 @@ class $$LocalNotesTableTableManager
                 Value<String> grammarId = const Value.absent(),
                 Value<String> content = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalNotesCompanion(
                 namespace: namespace,
@@ -1401,6 +1904,7 @@ class $$LocalNotesTableTableManager
                 grammarId: grammarId,
                 content: content,
                 updatedAt: updatedAt,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1411,6 +1915,7 @@ class $$LocalNotesTableTableManager
                 required String grammarId,
                 required String content,
                 required DateTime updatedAt,
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalNotesCompanion.insert(
                 namespace: namespace,
@@ -1419,6 +1924,7 @@ class $$LocalNotesTableTableManager
                 grammarId: grammarId,
                 content: content,
                 updatedAt: updatedAt,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -1450,6 +1956,7 @@ typedef $$SyncOutboxTableCreateCompanionBuilder =
       required String ownerId,
       required String recordId,
       required String payload,
+      Value<String> entityTable,
     });
 typedef $$SyncOutboxTableUpdateCompanionBuilder =
     SyncOutboxCompanion Function({
@@ -1458,6 +1965,7 @@ typedef $$SyncOutboxTableUpdateCompanionBuilder =
       Value<String> ownerId,
       Value<String> recordId,
       Value<String> payload,
+      Value<String> entityTable,
     });
 
 class $$SyncOutboxTableFilterComposer
@@ -1491,6 +1999,11 @@ class $$SyncOutboxTableFilterComposer
 
   ColumnFilters<String> get payload => $composableBuilder(
     column: $table.payload,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityTable => $composableBuilder(
+    column: $table.entityTable,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1528,6 +2041,11 @@ class $$SyncOutboxTableOrderingComposer
     column: $table.payload,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get entityTable => $composableBuilder(
+    column: $table.entityTable,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SyncOutboxTableAnnotationComposer
@@ -1553,6 +2071,11 @@ class $$SyncOutboxTableAnnotationComposer
 
   GeneratedColumn<String> get payload =>
       $composableBuilder(column: $table.payload, builder: (column) => column);
+
+  GeneratedColumn<String> get entityTable => $composableBuilder(
+    column: $table.entityTable,
+    builder: (column) => column,
+  );
 }
 
 class $$SyncOutboxTableTableManager
@@ -1591,12 +2114,14 @@ class $$SyncOutboxTableTableManager
                 Value<String> ownerId = const Value.absent(),
                 Value<String> recordId = const Value.absent(),
                 Value<String> payload = const Value.absent(),
+                Value<String> entityTable = const Value.absent(),
               }) => SyncOutboxCompanion(
                 sequence: sequence,
                 namespace: namespace,
                 ownerId: ownerId,
                 recordId: recordId,
                 payload: payload,
+                entityTable: entityTable,
               ),
           createCompanionCallback:
               ({
@@ -1605,12 +2130,14 @@ class $$SyncOutboxTableTableManager
                 required String ownerId,
                 required String recordId,
                 required String payload,
+                Value<String> entityTable = const Value.absent(),
               }) => SyncOutboxCompanion.insert(
                 sequence: sequence,
                 namespace: namespace,
                 ownerId: ownerId,
                 recordId: recordId,
                 payload: payload,
+                entityTable: entityTable,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -1637,6 +2164,214 @@ typedef $$SyncOutboxTableProcessedTableManager =
       SyncOutboxData,
       PrefetchHooks Function()
     >;
+typedef $$PersonalRecordsTableCreateCompanionBuilder =
+    PersonalRecordsCompanion Function({
+      required String namespace,
+      required String ownerId,
+      required String entityTable,
+      required String recordId,
+      required String payload,
+      Value<int> rowid,
+    });
+typedef $$PersonalRecordsTableUpdateCompanionBuilder =
+    PersonalRecordsCompanion Function({
+      Value<String> namespace,
+      Value<String> ownerId,
+      Value<String> entityTable,
+      Value<String> recordId,
+      Value<String> payload,
+      Value<int> rowid,
+    });
+
+class $$PersonalRecordsTableFilterComposer
+    extends Composer<_$AppDatabase, $PersonalRecordsTable> {
+  $$PersonalRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get namespace => $composableBuilder(
+    column: $table.namespace,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityTable => $composableBuilder(
+    column: $table.entityTable,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recordId => $composableBuilder(
+    column: $table.recordId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PersonalRecordsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PersonalRecordsTable> {
+  $$PersonalRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get namespace => $composableBuilder(
+    column: $table.namespace,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityTable => $composableBuilder(
+    column: $table.entityTable,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recordId => $composableBuilder(
+    column: $table.recordId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PersonalRecordsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PersonalRecordsTable> {
+  $$PersonalRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get namespace =>
+      $composableBuilder(column: $table.namespace, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<String> get entityTable => $composableBuilder(
+    column: $table.entityTable,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get recordId =>
+      $composableBuilder(column: $table.recordId, builder: (column) => column);
+
+  GeneratedColumn<String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
+}
+
+class $$PersonalRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PersonalRecordsTable,
+          PersonalRecord,
+          $$PersonalRecordsTableFilterComposer,
+          $$PersonalRecordsTableOrderingComposer,
+          $$PersonalRecordsTableAnnotationComposer,
+          $$PersonalRecordsTableCreateCompanionBuilder,
+          $$PersonalRecordsTableUpdateCompanionBuilder,
+          (
+            PersonalRecord,
+            BaseReferences<
+              _$AppDatabase,
+              $PersonalRecordsTable,
+              PersonalRecord
+            >,
+          ),
+          PersonalRecord,
+          PrefetchHooks Function()
+        > {
+  $$PersonalRecordsTableTableManager(
+    _$AppDatabase db,
+    $PersonalRecordsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PersonalRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PersonalRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PersonalRecordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> namespace = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<String> entityTable = const Value.absent(),
+                Value<String> recordId = const Value.absent(),
+                Value<String> payload = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PersonalRecordsCompanion(
+                namespace: namespace,
+                ownerId: ownerId,
+                entityTable: entityTable,
+                recordId: recordId,
+                payload: payload,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String namespace,
+                required String ownerId,
+                required String entityTable,
+                required String recordId,
+                required String payload,
+                Value<int> rowid = const Value.absent(),
+              }) => PersonalRecordsCompanion.insert(
+                namespace: namespace,
+                ownerId: ownerId,
+                entityTable: entityTable,
+                recordId: recordId,
+                payload: payload,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PersonalRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PersonalRecordsTable,
+      PersonalRecord,
+      $$PersonalRecordsTableFilterComposer,
+      $$PersonalRecordsTableOrderingComposer,
+      $$PersonalRecordsTableAnnotationComposer,
+      $$PersonalRecordsTableCreateCompanionBuilder,
+      $$PersonalRecordsTableUpdateCompanionBuilder,
+      (
+        PersonalRecord,
+        BaseReferences<_$AppDatabase, $PersonalRecordsTable, PersonalRecord>,
+      ),
+      PersonalRecord,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1647,4 +2382,6 @@ class $AppDatabaseManager {
       $$LocalNotesTableTableManager(_db, _db.localNotes);
   $$SyncOutboxTableTableManager get syncOutbox =>
       $$SyncOutboxTableTableManager(_db, _db.syncOutbox);
+  $$PersonalRecordsTableTableManager get personalRecords =>
+      $$PersonalRecordsTableTableManager(_db, _db.personalRecords);
 }
