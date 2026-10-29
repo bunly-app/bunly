@@ -198,7 +198,7 @@ Lệnh chính: build_runner, dart format, flutter analyze, flutter test; SQL dù
 ### 3.3. Mã nguồn, video và cổng nghiệm thu
 
 - Baseline trước đợt hoàn thiện: `d15909dec97da282c2643bbac93bac9babfc2b5b`.
-- Nhánh triển khai: `codex/complete-m2`. Cần đối chiếu SHA/PR và kết quả CI trong biên bản kiểm chứng kèm theo.
+- Nhánh triển khai: `codex/complete-m2`; commit kiểm chứng local `ea1f4f993a9567b02b68a76f458170ddc6a23879`. PR/CI remote hiện chưa chứa commit này; đối chiếu riêng kết quả CI trong biên bản.
 - Tag milestone-2: chưa tạo khi còn tiêu chí chưa được kiểm chứng.
 - Video 2–3 phút: chưa quay/chưa có URL. Kịch bản: Auth → hồ sơ → tra cứu → lưu/ghi chú/tiến độ → mở lại/offline → reconnect → đổi user.
 - Android thật: hai bài integration tự động đã đạt trên Samsung A11 với backend local; bản connected Cloud đã cài/mở nhưng chưa kiểm thử đăng ký/đăng nhập bằng email thật. Không ghi nhận iOS đã kiểm thử.

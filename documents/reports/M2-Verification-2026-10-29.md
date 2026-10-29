@@ -60,7 +60,7 @@ Kho hiện có 3 mẫu minh họa; mục tiêu nội dung MVP 80–120 mẫu ch�
 
 ## Kiểm chứng bổ sung trên checkout hiện tại — 29/10/2026
 
-Checkout tại commit `b2533fd` cùng các thay đổi tài liệu chưa commit. Docker Desktop hoạt động trong lần chạy này; nhận xét Docker không khởi động ở trên là tình trạng của phiên kiểm thử trước.
+Mã nguồn cùng bản sửa test và tài liệu được lưu tại commit `ea1f4f993a9567b02b68a76f458170ddc6a23879` (sau `b2533fd`). Docker Desktop hoạt động trong lần chạy này; nhận xét Docker không khởi động ở trên là tình trạng của phiên kiểm thử trước.
 
 | Lệnh | Kết quả vừa chạy |
 |---|---|
