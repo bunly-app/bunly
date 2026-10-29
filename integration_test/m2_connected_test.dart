@@ -1,3 +1,4 @@
+// Automated M2 checks; manual follow-up and known limits: documents/development/M2-TEST-HANDOFF.md.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -17,7 +18,6 @@ void main() {
   const emailA = String.fromEnvironment('TEST_EMAIL_A');
   const emailB = String.fromEnvironment('TEST_EMAIL_B');
   const password = String.fromEnvironment('TEST_PASSWORD');
-  const pace = int.fromEnvironment('DEMO_PACE_SECONDS');
   const signupFirst = bool.fromEnvironment('TEST_SIGNUP_FIRST');
   const offlineCycle = bool.fromEnvironment('TEST_OFFLINE_CYCLE');
   testWidgets(
@@ -31,14 +31,6 @@ void main() {
           await tester.pump(const Duration(milliseconds: 100));
         }
         expect(finder, findsWidgets);
-      }
-
-      Future<void> pause() async {
-        if (pace > 0) {
-          await tester.runAsync(
-            () => Future<void>.delayed(const Duration(seconds: pace)),
-          );
-        }
       }
 
       Future<void> reveal(Finder finder) async {
@@ -113,7 +105,9 @@ void main() {
       Future<void> waitNetwork(bool online) async {
         for (var i = 0; i < 100; i++) {
           final available = await tester.runAsync(reachable);
-          if (available == online) return;
+          if (available == online) {
+            return;
+          }
           await tester.pump(const Duration(milliseconds: 500));
         }
         fail('Emulator network did not reach the expected test state');
@@ -141,7 +135,6 @@ void main() {
             'Kiểm tra hộp thư để xác nhận tài khoản, sau đó đăng nhập.',
           ),
         );
-        await pause();
         final probe = SupabaseClient(
           config.supabaseUrl,
           config.supabaseAnonKey,
@@ -177,7 +170,6 @@ void main() {
         await tester.pumpAndSettle();
       }
       await login(emailA);
-      await pause();
       await tester.tap(find.byTooltip('Hồ sơ học tập'));
       await tester.pumpAndSettle();
       await waitFor(find.byType(TextField));
@@ -187,11 +179,9 @@ void main() {
       await tester.tap(find.text('Lưu hồ sơ'));
       await tester.pump();
       await waitFor(find.text('Đã lưu trên thiết bị.'));
-      await pause();
       await tester.pageBack();
       await tester.pumpAndSettle();
       await syncNow();
-      await pause();
       await tester.enterText(find.byType(TextField).first, 'たい');
       await tester.pumpAndSettle();
       await tester.tap(find.textContaining('N5 ·').last);
@@ -200,7 +190,6 @@ void main() {
       await tester.tap(find.text('Lưu mẫu'));
       await tester.pump();
       await waitFor(find.text('Bỏ lưu mẫu'));
-      await pause();
       if (offlineCycle) {
         final http = HttpClient()
           ..connectionTimeout = const Duration(seconds: 3);
@@ -243,7 +232,6 @@ void main() {
       await tester.pump();
       await waitFor(find.text('Đã lưu trên thiết bị.'));
       await reveal(find.text(text));
-      await pause();
       await tester.pageBack();
       await tester.pumpAndSettle();
       if (offlineCycle) {
@@ -270,11 +258,9 @@ void main() {
           isTrue,
           reason: 'Offline note must remain queued on Android',
         );
-        await pause();
         await waitNetwork(true);
       }
       await syncNow();
-      await pause();
       final client = Supabase.instance.client;
       final rows = await tester.runAsync(
         () => client.from('notes').select().eq('content', text),
@@ -284,7 +270,6 @@ void main() {
       await tester.tap(find.byTooltip('Đăng xuất'));
       await tester.pumpAndSettle();
       await waitFor(find.text('Tạo tài khoản mới'));
-      await pause();
       await login(emailB);
       await syncNow();
       await tester.enterText(find.byType(TextField).first, 'たい');
@@ -312,7 +297,6 @@ void main() {
       } finally {
         await restored.dispose();
       }
-      await pause();
       await tester.pageBack();
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Hồ sơ học tập'));
@@ -322,7 +306,6 @@ void main() {
         tester.widget<TextField>(find.byType(TextField).first).controller!.text,
         isEmpty,
       );
-      await pause();
     },
   );
 }

@@ -16,6 +16,8 @@ class GrammarDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _GrammarDetailScreenState extends ConsumerState<GrammarDetailScreen> {
+  // Manual QA: M2-MANUAL-05/10 in documents/development/M2-TEST-HANDOFF.md
+  // covers real Japanese IME, long notes, keyboard resize and large text.
   final content = TextEditingController();
   String? editingId;
   String? noteMessage;
