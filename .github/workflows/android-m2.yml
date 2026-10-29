@@ -1,0 +1,84 @@
+name: M2 connected Android
+
+on:
+  push:
+    branches: [main, 'codex/**']
+    paths:
+      - 'lib/**'
+      - 'integration_test/**'
+      - 'pubspec.*'
+      - 'scripts/prepare_m2_local.py'
+      - 'scripts/run_m2_android.sh'
+      - 'supabase/**'
+      - '.github/workflows/android-m2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m2-android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  connected-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      SUPABASE_USE_SLIM_IMAGES: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - id: sdk
+        run: echo "version=$(cat .flutter-version)" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.sdk.outputs.version }}
+          channel: stable
+          cache: true
+      - run: npm ci
+      - run: npm run db:start > /tmp/bunly-m2-start.log 2>&1
+      - run: python3 scripts/prepare_m2_local.py
+      - run: flutter pub get --enforce-lockfile
+      - name: Configure Android test endpoint and video pacing
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('config/m2-test.local.json')
+          config = json.loads(p.read_text())
+          config['SUPABASE_URL'] = 'http://10.0.2.2:54321'
+          config['DEMO_PACE_SECONDS'] = '12'
+          p.write_text(json.dumps(config))
+          PY
+      - name: Build test app before recording
+        run: flutter build apk --debug --target=integration_test/m2_connected_test.dart --dart-define-from-file=config/m2-test.local.json
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Android connected UI test and recording
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: bash scripts/run_m2_android.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: m2-connected-android-evidence
+          path: build/m2-evidence/
+      - name: Stop test backend
+        if: always()
+        run: npm run db:stop
