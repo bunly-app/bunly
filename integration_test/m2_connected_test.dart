@@ -1,6 +1,14 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'package:bunly/app/config.dart';
+import 'package:bunly/app/providers.dart';
+import 'package:bunly/features/grammar/presentation/grammar_screen.dart';
+import 'package:bunly/features/grammar/presentation/grammar_detail_screen.dart';
 import 'package:bunly/main.dart' as app;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -10,9 +18,14 @@ void main() {
   const emailB = String.fromEnvironment('TEST_EMAIL_B');
   const password = String.fromEnvironment('TEST_PASSWORD');
   const pace = int.fromEnvironment('DEMO_PACE_SECONDS');
+  const signupFirst = bool.fromEnvironment('TEST_SIGNUP_FIRST');
+  const offlineCycle = bool.fromEnvironment('TEST_OFFLINE_CYCLE');
   testWidgets(
     'connected Android: login, profile, notes, sync and account isolation',
     (tester) async {
+      // Flutter text input is deterministic; SQLite and platform/backend adapters stay real.
+      tester.testTextInput.register();
+      addTearDown(tester.testTextInput.unregister);
       Future<void> waitFor(Finder finder) async {
         for (var i = 0; i < 200 && finder.evaluate().isEmpty; i++) {
           await tester.pump(const Duration(milliseconds: 100));
@@ -29,7 +42,17 @@ void main() {
       }
 
       Future<void> reveal(Finder finder) async {
-        final scrolling = find.byType(Scrollable).last;
+        FocusManager.instance.primaryFocus?.unfocus();
+        for (var i = 0; i < 50 && tester.view.viewInsets.bottom != 0; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        await tester.pumpAndSettle();
+        final scrolling = find
+            .descendant(
+              of: find.byType(ListView).first,
+              matching: find.byType(Scrollable),
+            )
+            .first;
         final state = tester.state<ScrollableState>(scrolling);
         state.position.jumpTo(state.position.minScrollExtent);
         await tester.pumpAndSettle();
@@ -65,6 +88,37 @@ void main() {
         await waitFor(find.text('Đã đồng bộ lần gần nhất.'));
       }
 
+      final config = AppConfig.fromEnvironment();
+      Future<bool> reachable() async {
+        final http = HttpClient()
+          ..connectionTimeout = const Duration(seconds: 1);
+        try {
+          final request = await http.getUrl(
+            Uri.parse('${config.supabaseUrl}/auth/v1/health'),
+          );
+          request.headers.set('apikey', config.supabaseAnonKey);
+          final response = await request.close().timeout(
+            const Duration(seconds: 2),
+          );
+          return response.statusCode == 200;
+        } on SocketException {
+          return false;
+        } on TimeoutException {
+          return false;
+        } finally {
+          http.close(force: true);
+        }
+      }
+
+      Future<void> waitNetwork(bool online) async {
+        for (var i = 0; i < 100; i++) {
+          final available = await tester.runAsync(reachable);
+          if (available == online) return;
+          await tester.pump(const Duration(milliseconds: 500));
+        }
+        fail('Emulator network did not reach the expected test state');
+      }
+
       expect(
         emailA.isNotEmpty && emailB.isNotEmpty && password.isNotEmpty,
         isTrue,
@@ -73,6 +127,55 @@ void main() {
       );
       await app.main();
       await tester.pumpAndSettle();
+      if (signupFirst) {
+        await waitFor(find.text('Tạo tài khoản mới'));
+        await tester.tap(find.text('Tạo tài khoản mới'));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField).at(0), emailA);
+        await tester.enterText(find.byType(TextField).at(1), password);
+        await reveal(find.text('Đăng ký'));
+        await tester.tap(find.text('Đăng ký'));
+        await tester.pump();
+        await waitFor(
+          find.text(
+            'Kiểm tra hộp thư để xác nhận tài khoản, sau đó đăng nhập.',
+          ),
+        );
+        await pause();
+        final probe = SupabaseClient(
+          config.supabaseUrl,
+          config.supabaseAnonKey,
+        );
+        var confirmed = false;
+        try {
+          for (var i = 0; i < 40 && !confirmed; i++) {
+            final valid = await tester.runAsync(() async {
+              try {
+                await probe.auth.signInWithPassword(
+                  email: emailA,
+                  password: password,
+                );
+                return true;
+              } on AuthException {
+                return false;
+              }
+            });
+            confirmed = valid == true;
+            if (!confirmed) {
+              await tester.pump(const Duration(seconds: 1));
+            }
+          }
+          expect(
+            confirmed,
+            isTrue,
+            reason: 'Local signup email must be verified',
+          );
+        } finally {
+          await probe.dispose();
+        }
+        await tester.tap(find.text('Đã có tài khoản? Đăng nhập'));
+        await tester.pumpAndSettle();
+      }
       await login(emailA);
       await pause();
       await tester.tap(find.byTooltip('Hồ sơ học tập'));
@@ -98,11 +201,44 @@ void main() {
       await tester.pump();
       await waitFor(find.text('Bỏ lưu mẫu'));
       await pause();
+      if (offlineCycle) {
+        final http = HttpClient()
+          ..connectionTimeout = const Duration(seconds: 3);
+        try {
+          await tester.runAsync(() async {
+            final request = await http.postUrl(
+              Uri.parse(
+                '${const String.fromEnvironment('TEST_CONTROL_URL')}/offline',
+              ),
+            );
+            request.headers.set(
+              'X-M2-Test',
+              const String.fromEnvironment('TEST_CONTROL_TOKEN'),
+            );
+            await request.close().timeout(const Duration(seconds: 5));
+          });
+        } finally {
+          http.close(force: true);
+        }
+        await waitNetwork(false);
+        final scope = ProviderScope.containerOf(
+          tester.element(find.byType(GrammarDetailScreen)),
+        );
+        scope.invalidate(catalogProvider);
+        final cached = await tester.runAsync(
+          () => scope.read(catalogProvider.future),
+        );
+        expect(
+          cached,
+          isNotEmpty,
+          reason: 'Android must reload cached grammar while API is unreachable',
+        );
+      }
       final text =
           'Ghi chú từ Android M2 ${DateTime.now().millisecondsSinceEpoch}';
       await reveal(find.text('Lưu ghi chú'));
       await tester.enterText(find.byType(TextField).last, text);
-      await tester.ensureVisible(find.text('Lưu ghi chú'));
+      await reveal(find.text('Lưu ghi chú'));
       await tester.tap(find.text('Lưu ghi chú'));
       await tester.pump();
       await waitFor(find.text('Đã lưu trên thiết bị.'));
@@ -110,6 +246,33 @@ void main() {
       await pause();
       await tester.pageBack();
       await tester.pumpAndSettle();
+      if (offlineCycle) {
+        final scope = ProviderScope.containerOf(
+          tester.element(find.byType(GrammarScreen)),
+        );
+        expect(
+          find.text(
+            'Đang đọc nội dung đã tải trên thiết bị; chưa cập nhật từ máy chủ.',
+          ),
+          findsOneWidget,
+        );
+        final db = scope.read(databaseProvider);
+        final queued = await tester.runAsync(
+          () => db.select(db.syncOutbox).get(),
+        );
+        expect(
+          queued!.any(
+            (row) =>
+                row.entityTable == 'notes' &&
+                (jsonDecode(row.payload) as Map<String, dynamic>)['content'] ==
+                    text,
+          ),
+          isTrue,
+          reason: 'Offline note must remain queued on Android',
+        );
+        await pause();
+        await waitNetwork(true);
+      }
       await syncNow();
       await pause();
       final client = Supabase.instance.client;
@@ -135,6 +298,20 @@ void main() {
         () => client.from('notes').select().eq('content', text),
       );
       expect(inaccessible, isEmpty);
+      final restored = SupabaseClient(
+        config.supabaseUrl,
+        config.supabaseAnonKey,
+      );
+      try {
+        await tester.runAsync(
+          () => restored.auth.recoverSession(
+            jsonEncode(client.auth.currentSession!.toJson()),
+          ),
+        );
+        expect(restored.auth.currentUser!.id, client.auth.currentUser!.id);
+      } finally {
+        await restored.dispose();
+      }
       await pause();
       await tester.pageBack();
       await tester.pumpAndSettle();

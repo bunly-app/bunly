@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import secrets
 import subprocess
+import sys
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 import uuid
@@ -22,9 +23,13 @@ def main():
     if uri.scheme != 'http' or uri.hostname not in ('localhost', '127.0.0.1') or uri.port != 54321:
         raise RuntimeError('Only local Supabase port 54321 is allowed')
     password = 'M2-' + secrets.token_hex(20) + '!a9'
+    signup_first = '--signup-first' in sys.argv
     emails = []
     for label in ('a', 'b'):
         email = f'm2-{label}-{uuid.uuid4().hex}@example.test'
+        if signup_first and label == 'a':
+            emails.append(email)
+            continue
         data = json.dumps({'email': email, 'password': password, 'email_confirm': True}).encode()
         request = Request(url + '/auth/v1/admin/users', data=data, method='POST', headers={
             'Content-Type': 'application/json', 'apikey': status['SERVICE_ROLE_KEY'],
@@ -36,9 +41,10 @@ def main():
         emails.append(email)
     config = {'APP_MODE': 'connected', 'SUPABASE_URL': url,
               'SUPABASE_ANON_KEY': status['ANON_KEY'],
-              'TEST_EMAIL_A': emails[0], 'TEST_EMAIL_B': emails[1], 'TEST_PASSWORD': password}
+              'TEST_EMAIL_A': emails[0], 'TEST_EMAIL_B': emails[1], 'TEST_PASSWORD': password,
+              'TEST_SIGNUP_FIRST': str(signup_first).lower()}
     Path('config/m2-test.local.json').write_text(json.dumps(config, indent=2), encoding='utf-8')
-    print('Prepared two confirmed disposable local test users. No admin key written to config.')
+    print('Prepared disposable local test identities. No admin key written to config.')
 
 
 if __name__ == '__main__':
