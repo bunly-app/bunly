@@ -95,6 +95,8 @@ void main() {
           return response.statusCode == 200;
         } on SocketException {
           return false;
+        } on HttpException {
+          return false;
         } on TimeoutException {
           return false;
         } finally {
@@ -121,6 +123,13 @@ void main() {
       );
       await app.main();
       await tester.pumpAndSettle();
+      if (Supabase.instance.client.auth.currentSession != null) {
+        await tester.runAsync(
+          () =>
+              Supabase.instance.client.auth.signOut(scope: SignOutScope.local),
+        );
+        await tester.pumpAndSettle();
+      }
       if (signupFirst) {
         await waitFor(find.text('Tạo tài khoản mới'));
         await tester.tap(find.text('Tạo tài khoản mới'));

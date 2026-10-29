@@ -9,8 +9,8 @@ Ngày: 29/10/2026. Video do Hoàng tự quay; ghi hình không phải điều ki
 | Unit/repository/widget | `flutter test`; validation, SQLite transaction/rollback, migration v1→v2, CRUD, owner/session, retry và stale ack/pull | 24 test đạt; xem biên bản kiểm chứng và Actions của SHA đang review |
 | SQL/RLS | `npm run db:lint`, `npm run db:test` trên local stack | 39 SQL test đạt ở các run đã ghi nhận |
 | SDK connected | `flutter test test_connected/m2_connected_test.dart --dart-define-from-file=config/m2-test.local.json` | Auth/API thật, DB reopen, push/pull, sửa/xóa, hai tài khoản; chạy riêng với user thử |
-| Android demo | `flutter test integration_test/m2_demo_test.dart -d <device-id> --dart-define-from-file=config/demo.example.json` | Assets/SQLite thật; hồ sơ, lưu mẫu, trạng thái, tạo/sửa note; đã đạt trên emulator Android 15 |
-| Android connected | Workflow `M2 connected Android` | Bản mở rộng có đăng ký/email local, cache khi API ngắt, ghi local/outbox, kết nối lại và A/B; đọc kết quả run mới trước khi nhận đạt |
+| Android demo | `flutter test integration_test/m2_demo_test.dart -d <device-id> --dart-define-from-file=config/demo.example.json` | Assets/SQLite thật; hồ sơ, lưu mẫu, trạng thái, tạo/sửa note; đạt 1/1 trên Samsung A11 ngày 29/10/2026 |
+| Android connected | `flutter test integration_test/m2_connected_test.dart -d <device-id> --dart-define-from-file=config/m2-test.local.json` | Đăng ký/email Mailpit local, cache khi API ngắt, outbox, kết nối lại và A/B; đạt 1/1 trên Samsung A11 ngày 29/10/2026 |
 
 Ghi rõ SHA/run URL. Bộ 24 test mặc định không tự chạy suite SDK/Android. Test nhập văn bản dùng Flutter test input để tránh IME ghi đè thao tác tự động; SQLite, plugin Android và Supabase adapter vẫn chạy thật. Vì vậy bàn phím thật còn thuộc kiểm thử thủ công.
 
