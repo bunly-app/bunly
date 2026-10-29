@@ -33,6 +33,10 @@ jobs:
           distribution: temurin
           java-version: '17'
       - run: flutter build apk --debug --dart-define-from-file=config/demo.example.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bunly-m2-demo-debug
+          path: build/app/outputs/flutter-apk/app-debug.apk
 
   database:
     runs-on: ubuntu-latest
