@@ -1,0 +1,28 @@
+{
+  "role": "flutter",
+  "thread_id": "01a1bee6-35e2-7c30-b3e4-fd216f413be3",
+  "status": "waiting_dependency",
+  "baseline_head": "3ae5be9625edaa3a761253a4e578daa416a97322",
+  "baseline_includes_uncommitted_changes": true,
+  "last_completed": "Completed Figma image-to-code native UI updates for 15 screens (39hHCJ2CmxZNbe5NAUd6sA: S00a/S00b, S01/S02, S13, S20, S37/S38, S27, S28/S17, S29, S18, S33/S34/S35), fixed 320x640@2.0x overflows and ExpansionTile PageStorageKey crash in PracticeHistoryScreen, verified 52/52 Flutter tests, built Demo Debug APK (SHA256 879DCA056E786A4236387A0EDF09F2E04B90239E3A253E1DF3C20405398D6D45), installed in-place (-r) on real Samsung Galaxy A11 SM-A115F preserving user data (1 saved + 'DEMO: Ghi chu luu tren dien thoai that.'), and spot-checked Figma flows interactively on PID 10131 with 0 crashes/overflows in logcat.",
+  "next_task": "Verify Light Mode and Auth S01/S02 on a non-production test session when needed, and proceed with PRD functional wiring (OCR/ASR/AI, durable quiz history/SRS, connected Supabase sync/UAT).",
+  "evidence": "documents/reports/A03-Stitch-Native-UI-2026-11-09.md",
+  "not_verified": [
+    "Light Mode, multiple system font-scale checks, and Auth S01/S02 / S00b on real Android device A11 (preserved active user note/bookmark)",
+    "Full pixel/font parity beyond the 5 user-supplied Figma screenshots and 28 Stitch HTML variants",
+    "Real OCR/ASR/AI, durable quiz attempts/history/SRS/reminders, password reset",
+    "Connected Supabase Cloud UAT, RLS/Docker checks, and profile/release startup timing"
+  ],
+  "updated_at": "2026-11-09T13:26:00Z",
+  "ready_for_build": true,
+  "device_evidence": "documents/reports/A03-Stitch-Device-2026-11-09.md",
+  "ui_source": "documents/design/stitch-reference-2026-11-09/manifest.json",
+  "figma_reference": "https://www.figma.com/design/39hHCJ2CmxZNbe5NAUd6sA/Bunly?node-id=0-1",
+  "checks": [
+    "Pinned dart.bat format lib test integration_test: exit 0, 68 files (0 changed)",
+    "Pinned flutter.bat analyze: exit 0, No issues found",
+    "Pinned flutter.bat test --reporter expanded: exit 0, 52 passed (46 existing/updated + 6 stitch_ui_test tests covering S00a/S00b, S07 scroll-to-top, L03/L06, S13 filters/skeleton, and 320x640@2.0 Light + 1024x768@1.4 Dark across S00a/S00b, Auth S01/S02, S13, S20, Detail, Profile, Analysis, Practice S27/S28/S29/S18, Writing S33/S34/S35, History S37/S38)",
+    "A01 BuildDemo (app-debug.apk, 172458614 bytes, SHA256 879DCA056E786A4236387A0EDF09F2E04B90239E3A253E1DF3C20405398D6D45): BUILD SUCCESSFUL in 39s",
+    "Samsung Galaxy A11 SM-A115F (Android 12/API 31, 720x1560, Night Mode): adb install -r preserved 1 saved + existing note; verified S13/S20/S37/S38/S27/S28/S29/S18/S33/S34/S35 interactively on PID 10131 with 0 crashes/E/flutter/RenderFlex overflows across 231 UTF-8 logcat lines"
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "stitch_project": "https://stitch.google.com/projects/6411575233905174817",
+  "requested_output": "Flutter UI inside Bunly; UI-first demo",
+  "files": [
+    {
+      "file": "source-01.txt",
+      "source_attachment": "C:\\Users\\LENOVO\\.codex\\attachments\\9b494db9-fc1f-47f4-8659-c5059e1f7630\\Pasted text.txt",
+      "sha256": "25a3cfd944befcc5a5d365f4f4293dc9679de440e3fc4481368037d9f9a18bf6",
+      "html_documents": 7,
+      "screen_comments": [
+        "S07 — Tra cứu ngữ pháp",
+        "S08 — Chi tiết ngữ pháp",
+        "S34/S35 — Voice sửa ngữ pháp",
+        "S31 — Dịch Việt-Nhật & Góp ý AI",
+        "S06 — Hôm nay",
+        "S12 — Kết quả phân tích câu",
+        "S37 — Sổ lỗi cần ôn"
+      ],
+      "documents": [
+        {
+          "file": "frames/source01-frame01.html",
+          "source_doctype_index": 1
+        },
+        {
+          "file": "frames/source01-frame02.html",
+          "source_doctype_index": 2
+        },
+        {
+          "file": "frames/source01-frame03.html",
+          "source_doctype_index": 3
+        },
+        {
+          "file": "frames/source01-frame04.html",
+          "source_doctype_index": 4
+        },
+        {
+          "file": "frames/source01-frame05.html",
+          "source_doctype_index": 5
+        },
+        {
+          "file": "frames/source01-frame06.html",
+          "source_doctype_index": 6
+        },
+        {
+          "file": "frames/source01-frame07.html",
+          "source_doctype_index": 7
+        }
+      ]
+    },
+    {
+      "file": "source-02.txt",
+      "source_attachment": "C:\\Users\\LENOVO\\.codex\\attachments\\eee998d3-83ff-42c0-82e2-1e113b58f4c7\\Pasted text.txt",
+      "sha256": "a45d5e64534f5fa3fadb53a8749763e096048fc207308075f6fdb63878782461",
+      "html_documents": 7,
+      "screen_comments": [
+        "S33 — Nói một câu",
+        "S31 — Dịch Việt → Nhật",
+        "S34 — Kiểm tra lời nói",
+        "S27 — Chọn phiên luyện tập",
+        "S28/S17 — Trắc nghiệm & Phản hồi",
+        "S18 — Kết thúc phiên luyện tập",
+        "S29 — Điền khuyết cấu trúc"
+      ],
+      "documents": [
+        {
+          "file": "frames/source02-frame01.html",
+          "source_doctype_index": 1
+        },
+        {
+          "file": "frames/source02-frame02.html",
+          "source_doctype_index": 2
+        },
+        {
+          "file": "frames/source02-frame03.html",
+          "source_doctype_index": 3
+        },
+        {
+          "file": "frames/source02-frame04.html",
+          "source_doctype_index": 4
+        },
+        {
+          "file": "frames/source02-frame05.html",
+          "source_doctype_index": 5
+        },
+        {
+          "file": "frames/source02-frame06.html",
+          "source_doctype_index": 6
+        },
+        {
+          "file": "frames/source02-frame07.html",
+          "source_doctype_index": 7
+        }
+      ]
+    },
+    {
+      "file": "source-03.txt",
+      "source_attachment": "C:\\Users\\LENOVO\\.codex\\attachments\\209ab9ac-bbf7-47a1-9cc8-437bf4c42ecb\\Pasted text.txt",
+      "sha256": "58055ea2690e9c976f5f7e049f3c9cf76aea58f625113c3ff769077f9c96204a",
+      "html_documents": 6,
+      "screen_comments": [
+        "S38 — Lịch sử bài làm",
+        "S11 — Xác nhận văn bản OCR",
+        "S13 — Sổ học ngữ pháp",
+        "S20 — Tiến độ & Lộ trình N5",
+        "S02 — Đăng ký (Mobile)",
+        "S01 — Đăng nhập (Mobile)"
+      ],
+      "documents": [
+        {
+          "file": "frames/source03-frame01.html",
+          "source_doctype_index": 1
+        },
+        {
+          "file": "frames/source03-frame02.html",
+          "source_doctype_index": 2
+        },
+        {
+          "file": "frames/source03-frame03.html",
+          "source_doctype_index": 3
+        },
+        {
+          "file": "frames/source03-frame04.html",
+          "source_doctype_index": 4
+        },
+        {
+          "file": "frames/source03-frame05.html",
+          "source_doctype_index": 5
+        },
+        {
+          "file": "frames/source03-frame06.html",
+          "source_doctype_index": 6
+        }
+      ]
+    },
+    {
+      "file": "source-04.txt",
+      "source_attachment": "C:\\Users\\LENOVO\\.codex\\attachments\\1ab335d4-eb49-46ae-b27b-16f0c3a7b1c2\\Pasted text.txt",
+      "sha256": "108a5480e0427e5c60b986d5ed41a56fb4cb8ab58a028a785313dd5ecb16a1de",
+      "html_documents": 8,
+      "screen_comments": [
+        "S00b — Kiểm tra phiên lâu / Lỗi mạng",
+        "S13 Exact Dimension Skeleton Cards (Zero Layout Shift)",
+        "S00a — Khởi tạo & Khôi phục phiên"
+      ],
+      "documents": [
+        {
+          "file": "frames/source04-frame01.html",
+          "source_doctype_index": 1
+        },
+        {
+          "file": "frames/source04-frame02.html",
+          "source_doctype_index": 2
+        },
+        {
+          "file": "frames/source04-frame03.html",
+          "source_doctype_index": 3
+        },
+        {
+          "file": "frames/source04-frame04.html",
+          "source_doctype_index": 4
+        },
+        {
+          "file": "frames/source04-frame05.html",
+          "source_doctype_index": 5
+        },
+        {
+          "file": "frames/source04-frame06.html",
+          "source_doctype_index": 6
+        },
+        {
+          "file": "frames/source04-frame07.html",
+          "source_doctype_index": 7
+        },
+        {
+          "file": "frames/source04-frame08.html",
+          "source_doctype_index": 8
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "secondary-container": "#cfe5d3", "on-primary-fixed-variant": "#00522d", "surface-tint": "#236b43", "error": "#ba1a1a", "on-secondary": "#ffffff", "tertiary-fixed-dim": "#b4ccba", "on-background": "#111e16", "primary-container": "#1f6840", "on-tertiary-fixed": "#0b2014", "inverse-surface": "#25342a", "inverse-primary": "#8ed6a5", "error-container": "#ffdad6", "on-error-container": "#93000a", "on-secondary-fixed": "#0d1f14", "on-primary-container": "#9be4b2", "tertiary": "#34493c", "on-primary-fixed": "#00210f", "on-tertiary-fixed-variant": "#364c3e", "on-surface": "#111e16", "on-tertiary-container": "#c2dbc8", "outline-variant": "#bfc9bf", "surface-container-low": "#e7f8e9", "on-error": "#ffffff", "tertiary-container": "#4b6152", "primary-fixed-dim": "#8ed6a5", "on-primary": "#ffffff", "on-secondary-fixed-variant": "#384b3e", "on-surface-variant": "#404941", "surface-container-high": "#dcecde", "on-secondary-container": "#536759", "surface": "#edfeef", "secondary-fixed-dim": "#b6ccbb", "tertiary-fixed": "#d0e9d6", "background": "#edfeef", "secondary-fixed": "#d2e8d6", "surface-container": "#e1f2e4", "inverse-on-surface": "#e4f5e6", "primary": "#004f2b", "surface-dim": "#cdded0", "surface-container-lowest": "#ffffff", "secondary": "#4f6355", "surface-bright": "#edfeef", "primary-fixed": "#a9f3c0", "surface-container-highest": "#d6e7d8", "outline": "#707a71", "on-tertiary": "#ffffff", "surface-variant": "#d6e7d8" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "margin": "1.25rem", "gutter": "1rem", "space-lg": "1rem", "space-md": "0.75rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-xl": "1.5rem" }, fontFamily: { "headline-lg": ["Noto Sans"], "ruby-furigana": ["Noto Sans"], "label-sm": ["Noto Sans"], "title-japanese": ["Noto Sans"], "headline-md": ["Noto Sans"], "body-md": ["Noto Sans"], "label-md": ["Noto Sans"], "body-lg": ["Noto Sans"], "body-japanese": ["Noto Sans"] }, fontSize: { "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "ruby-furigana": ["11px", { "lineHeight": "14px", "fontWeight": "500" }], "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }], "title-japanese": ["22px", { "lineHeight": "34px", "fontWeight": "700" }], "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "body-md": ["15px", { "lineHeight": "22px", "fontWeight": "400" }], "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "body-japanese": ["18px", { "lineHeight": "30px", "fontWeight": "500" }] } } } };</script><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; } body { overscroll-behavior-y: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface min-h-screen flex flex-col antialiased selection:bg-secondary-container selection:text-on-secondary-container"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-14 px-margin flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-xs min-w-0"><button aria-label="Quay lại" class="w-11 h-11 -ml-2 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container active:bg-surface-container-high transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><h1 class="font-headline-md text-headline-md font-semibold text-on-surface truncate">Chi Tiết Ngữ Pháp</h1></div><div class="flex items-center gap-space-xs flex-shrink-0"><button aria-label="Tác vụ" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container active:bg-surface-container-high transition-colors" id="header-action-btn"><span class="material-symbols-outlined text-[22px]">bookmark_border</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 w-full pt-14 pb-safe bg-surface px-margin flex flex-col"><div class="flex flex-col w-full pb-24">
+<!-- Status & Context Pill -->
+<div class="flex items-center justify-between py-space-sm mb-space-sm">
+<div class="flex items-center gap-space-xs bg-surface-container px-3 py-1.5 rounded-full">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-secondary">OCR hoàn tất ngoại tuyến (Offline)</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">Bước 2 / 3</span>
+</div>
+<!-- Section 1: Cropped Source Photo & Quality Assessment -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm mb-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs text-on-surface">
+<span class="material-symbols-outlined text-[18px] text-primary">crop_original</span>
+<span class="font-label-md text-label-md font-semibold">Ảnh nguồn đã chụp từ sách</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary bg-secondary-container px-2 py-0.5 rounded-full">Độ nét cao • 99% khớp</span>
+</div>
+<!-- Thumbnail Preview Card -->
+<div class="relative w-full h-24 rounded-lg overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover brightness-95 contrast-105" data-alt="Close up photograph of a clean, printed Japanese textbook page with crisp horizontal Mincho typography showing sentence fragments in natural warm daylight, macro lens focus on Japanese characters on cream paper texture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_krGazfd_VtO-eV3PJ77gQmwapDHw7kw9lY3zu90HqVqASIC40VaLldBmlSCZR3rkU2r38wEkTXMKRAfI-1D5ZtWqljrsgBdrNm2uCshvHFamK0JgXyi9_RRAbBWFKlyEj-Dz5PtwWtL_iyTgX-mqgKG2dJfnJpoNulBSbFyNPfZ8oBDDHvuyJnnMnEXyW33zHQ2j9V8l2Q4E5NnFx_C_M_k9wXKCOdJ51blUuQU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/60 via-transparent to-transparent"></div>
+<div class="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between text-surface">
+<span class="font-ruby-furigana text-ruby-furigana opacity-90 truncate max-w-[200px]">Trang 48 • Minna no Nihongo Bài 19</span>
+<button class="flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface/20 backdrop-blur-md hover:bg-surface/30 active:scale-95 transition-all text-surface" type="button">
+<span class="material-symbols-outlined text-[14px]">zoom_in</span>
+<span>Xem gốc</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Section 2: Editable Recognized Japanese Sentence -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm mb-space-lg flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-primary">edit_note</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">Văn bản nhận dạng</span>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container text-on-surface-variant px-2.5 py-1 rounded-full font-medium" id="char-count-badge">14 ký tự</span>
+</div>
+<!-- Active Textarea for Corrections -->
+<div class="relative rounded-lg bg-surface-container-low p-space-md">
+<textarea class="w-full bg-transparent font-title-japanese text-title-japanese text-on-surface focus:outline-none resize-none tracking-wide leading-relaxed selection:bg-secondary-container selection:text-on-secondary-container" id="japanese-text-input" placeholder="Nhập hoặc dán câu tiếng Nhật..." rows="3" spellcheck="false">日本へ行ったことがあります。</textarea>
+<div class="flex justify-end pt-space-xs">
+<button class="hidden items-center gap-1 font-label-sm text-label-sm text-primary hover:underline py-0.5" id="revert-btn" type="button">
+<span class="material-symbols-outlined text-[15px]">undo</span> Khôi phục gốc
+        </button>
+</div>
+</div>
+<!-- Quick Diacritics & Punctuation Utility Row -->
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-outline">Chèn nhanh:</span>
+<button class="h-8 px-2.5 rounded-lg bg-surface-container text-on-surface font-title-japanese text-sm hover:bg-secondary-container active:scale-95 transition-all" onclick="insertCharacter('。')" type="button">。</button>
+<button class="h-8 px-2.5 rounded-lg bg-surface-container text-on-surface font-title-japanese text-sm hover:bg-secondary-container active:scale-95 transition-all" onclick="insertCharacter('、')" type="button">、</button>
+<button class="h-8 px-2.5 rounded-lg bg-surface-container text-on-surface font-title-japanese text-sm hover:bg-secondary-container active:scale-95 transition-all" onclick="insertCharacter('は')" type="button">は</button>
+<button class="h-8 px-2.5 rounded-lg bg-surface-container text-on-surface font-title-japanese text-sm hover:bg-secondary-container active:scale-95 transition-all" onclick="insertCharacter('が')" type="button">が</button>
+<button class="h-8 px-2.5 rounded-lg bg-surface-container text-on-surface font-title-japanese text-sm hover:bg-secondary-container active:scale-95 transition-all" onclick="insertCharacter('へ')" type="button">へ</button>
+</div>
+<!-- Helper Note -->
+<div class="flex items-start gap-space-xs text-on-surface-variant bg-surface-container/50 p-2.5 rounded-lg">
+<span class="material-symbols-outlined text-[18px] text-secondary flex-shrink-0 mt-0.5">touch_app</span>
+<p class="font-label-sm text-label-sm leading-tight text-secondary">Chạm trực tiếp để chỉnh sửa Kanji, trợ từ hoặc bỏ dấu thừa nếu nhận dạng thiếu trước khi sang bước bóc tách ngữ pháp.</p>
+</div>
+</div>
+<!-- Section 3: Grammar Target Focus & Phrase Extraction Mode -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm mb-space-lg flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-primary">rule</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">Đoạn cần bóc tách ngữ pháp</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-tertiary-container bg-tertiary-container/30 px-2 py-0.5 rounded-full font-medium">Tự động nhận diện</span>
+</div>
+<!-- Visual Interactive Token Selector -->
+<div class="p-space-md rounded-lg bg-surface-container-low flex flex-col gap-space-sm">
+<span class="font-label-sm text-label-sm text-outline">Bấm chọn cụm muốn tập trung (hoặc để phân tích cả câu):</span>
+<div class="flex flex-wrap items-center gap-2 pt-1 font-body-japanese text-body-japanese" id="token-container">
+<button class="token-btn px-2.5 py-1 rounded bg-surface-container text-on-surface hover:bg-secondary-container transition-colors" data-active="false" type="button">日本へ</button>
+<button class="token-btn px-2.5 py-1 rounded bg-secondary-container text-on-primary-fixed-variant font-semibold transition-colors shadow-xs" data-active="true" type="button">
+<ruby>行<rt class="font-ruby-furigana text-ruby-furigana">い</rt></ruby>ったことがあります
+        </button>
+<button class="token-btn px-2.5 py-1 rounded bg-surface-container text-on-surface hover:bg-secondary-container transition-colors" data-active="false" type="button">。</button>
+</div>
+</div>
+<!-- Discovered Pattern Hint -->
+<div class="flex items-center justify-between bg-surface-container-low px-3 py-2.5 rounded-lg">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-on-primary font-label-sm text-[11px] font-bold">N4</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">V-た ＋ ことがある</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary">Đã từng (kinh nghiệm)</span>
+</div>
+</div>
+<!-- Section 4: Privacy & Storage Assurance -->
+<div class="bg-surface-container-low rounded-xl p-space-md flex items-start gap-space-sm mb-space-xl">
+<span class="material-symbols-outlined text-[20px] text-primary flex-shrink-0 mt-0.5">verified_user</span>
+<div class="flex flex-col gap-0.5">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Bảo mật thiết bị học tập</span>
+<p class="font-label-sm text-label-sm text-secondary leading-snug">Chỉ câu tiếng Nhật bạn xác nhận mới được chuyển vào bộ bóc tách cấu trúc ngữ pháp. Mọi ảnh chụp và bản nháp đều được xử lý cục bộ trên thiết bị.</p>
+</div>
+</div>
+<!-- Section 5: Sticky Bottom Actions Bar -->
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-surface/90 backdrop-blur-xl px-margin py-3 shadow-[0_-4px_16px_rgba(23,37,28,0.06)] flex flex-col gap-2 max-w-xl mx-auto">
+<a class="w-full h-12 rounded-xl bg-primary text-on-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-2 active:bg-on-primary-fixed-variant transition-colors shadow-sm" href="#analyze-sentence" id="primary-action-btn">
+<span>Phân tích ngữ pháp câu này</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+<div class="grid grid-cols-2 gap-space-sm w-full">
+<button class="h-10 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm font-medium flex items-center justify-center gap-1.5 hover:bg-surface-container-high active:scale-98 transition-all" onclick="history.back()" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">photo_camera</span>
+<span>Chụp lại ảnh (S10)</span>
+</button>
+<button class="h-10 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm font-medium flex items-center justify-center gap-1.5 hover:bg-surface-container-high active:scale-98 transition-all" onclick="clearForManualInput()" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">keyboard</span>
+<span>Nhập tay toàn bộ</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+  // Dynamic Character Counter & Edit Tracker
+  const textarea = document.getElementById('japanese-text-input');
+  const counter = document.getElementById('char-count-badge');
+  const revertBtn = document.getElementById('revert-btn');
+  const originalText = '日本へ行ったことがあります。';
+
+  function updateCharCount() {
+    if (!textarea) return;
+    const count = textarea.value.trim().length;
+    counter.textContent = `${count} ký tự`;
+    
+    if (textarea.value !== originalText) {
+      revertBtn.classList.remove('hidden');
+      revertBtn.classList.add('inline-flex');
+    } else {
+      revertBtn.classList.add('hidden');
+      revertBtn.classList.remove('inline-flex');
+    }
+  }
+
+  textarea.addEventListener('input', updateCharCount);
+
+  if (revertBtn) {
+    revertBtn.addEventListener('click', () => {
+      textarea.value = originalText;
+      updateCharCount();
+    });
+  }
+
+  // Japanese punctuation insert helper
+  function insertCharacter(char) {
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    textarea.value = text.substring(0, start) + char + text.substring(end);
+    textarea.selectionStart = textarea.selectionEnd = start + char.length;
+    textarea.focus();
+    updateCharCount();
+  }
+
+  // Clear for manual input mode
+  function clearForManualInput() {
+    if (!textarea) return;
+    textarea.value = '';
+    textarea.focus();
+    updateCharCount();
+  }
+
+  // Interactive Token Selector Toggle
+  const tokenButtons = document.querySelectorAll('.token-btn');
+  tokenButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const isActive = btn.getAttribute('data-active') === 'true';
+      if (isActive) {
+        btn.setAttribute('data-active', 'false');
+        btn.classList.remove('bg-secondary-container', 'text-on-primary-fixed-variant', 'font-semibold', 'shadow-xs');
+        btn.classList.add('bg-surface-container', 'text-on-surface');
+      } else {
+        btn.setAttribute('data-active', 'true');
+        btn.classList.remove('bg-surface-container', 'text-on-surface');
+        btn.classList.add('bg-secondary-container', 'text-on-primary-fixed-variant', 'font-semibold', 'shadow-xs');
+      }
+    });
+  });
+</script></main></body></html>
