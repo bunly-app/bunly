@@ -1,0 +1,334 @@
+{
+  "fixture_version": 1,
+  "status": "pending_review",
+  "reviewed_by": null,
+  "reviewed_at": null,
+  "purpose": "B0 integration fixtures; not loaded by the app or deployed",
+  "source": "AI-authored draft questions; distractors intentionally simple for integration, require pedagogical review.",
+  "questions": [
+    {
+      "id": "20000000-0000-0000-0000-000000000001",
+      "grammar_id": "10000000-0000-0000-0000-000000000001",
+      "content_version": 1,
+      "type": "mcq",
+      "prompt": "Chọn nghĩa phù hợp với câu: 日本へ行ったことがあります。",
+      "options": [
+        "Tôi đã từng đến Nhật Bản.",
+        "Một câu hỏi về tên người.",
+        "Một lời cảm ơn.",
+        "Một lời chào khi gặp mặt."
+      ],
+      "correct_option_index": 0,
+      "explanation_vi": "Diễn tả trải nghiệm đã xảy ra trước thời điểm nói."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000002",
+      "grammar_id": "10000000-0000-0000-0000-000000000001",
+      "content_version": 1,
+      "type": "cloze",
+      "prompt": "日本へ（　）ことがあります。",
+      "accepted_answers": [
+        "行った"
+      ],
+      "normalization": "trim_only",
+      "explanation_vi": "Trước ことがある dùng động từ thể た."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000003",
+      "grammar_id": "10000000-0000-0000-0000-000000000002",
+      "content_version": 1,
+      "type": "mcq",
+      "prompt": "Chọn nghĩa phù hợp với câu: 日本語を勉強したいです。",
+      "options": [
+        "Một câu hỏi về tên người.",
+        "Tôi muốn học tiếng Nhật.",
+        "Một lời cảm ơn.",
+        "Một lời chào khi gặp mặt."
+      ],
+      "correct_option_index": 1,
+      "explanation_vi": "Diễn tả mong muốn thực hiện một hành động của người nói."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000004",
+      "grammar_id": "10000000-0000-0000-0000-000000000002",
+      "content_version": 1,
+      "type": "cloze",
+      "prompt": "日本語を勉強（　）です。",
+      "accepted_answers": [
+        "したい"
+      ],
+      "normalization": "trim_only",
+      "explanation_vi": "勉強します bỏ ます rồi thêm たい thành 勉強したい."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000005",
+      "grammar_id": "10000000-0000-0000-0000-000000000003",
+      "content_version": 1,
+      "type": "mcq",
+      "prompt": "Chọn nghĩa phù hợp với câu: 本を読んでいます。",
+      "options": [
+        "Một câu hỏi về tên người.",
+        "Một lời cảm ơn.",
+        "Tôi đang đọc sách.",
+        "Một lời chào khi gặp mặt."
+      ],
+      "correct_option_index": 2,
+      "explanation_vi": "Trong ví dụ này, diễn tả một hành động đang diễn ra."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000006",
+      "grammar_id": "10000000-0000-0000-0000-000000000003",
+      "content_version": 1,
+      "type": "cloze",
+      "prompt": "今、本を（　）います。",
+      "accepted_answers": [
+        "読んで"
+      ],
+      "normalization": "trim_only",
+      "explanation_vi": "読む đổi sang thể て là 読んで; tiếp theo là います."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000007",
+      "grammar_id": "10000000-0000-0000-0000-000000000004",
+      "content_version": 1,
+      "type": "mcq",
+      "prompt": "Chọn nghĩa phù hợp với câu: ここで写真を撮ってもいいですか。",
+      "options": [
+        "Một câu hỏi về tên người.",
+        "Một lời cảm ơn.",
+        "Một lời chào khi gặp mặt.",
+        "Tôi có thể chụp ảnh ở đây không?"
+      ],
+      "correct_option_index": 3,
+      "explanation_vi": "Hỏi hoặc cho phép một hành động; ví dụ dùng câu hỏi lịch sự."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000008",
+      "grammar_id": "10000000-0000-0000-0000-000000000004",
+      "content_version": 1,
+      "type": "cloze",
+      "prompt": "ここで写真を（　）もいいですか。",
+      "accepted_answers": [
+        "撮って"
+      ],
+      "normalization": "trim_only",
+      "explanation_vi": "撮る đổi sang thể て là 撮って."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000009",
+      "grammar_id": "10000000-0000-0000-0000-000000000005",
+      "content_version": 1,
+      "type": "mcq",
+      "prompt": "Chọn nghĩa phù hợp với câu: ここでタバコを吸ってはいけません。",
+      "options": [
+        "Không được hút thuốc ở đây.",
+        "Một câu hỏi về tên người.",
+        "Một lời cảm ơn.",
+        "Một lời chào khi gặp mặt."
+      ],
+      "correct_option_index": 0,
+      "explanation_vi": "Nêu điều cấm; cách nói có thể mạnh tùy quan hệ và tình huống."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000010",
+      "grammar_id": "10000000-0000-0000-0000-000000000005",
+      "content_version": 1,
+      "type": "cloze",
+      "prompt": "ここでタバコを（　）はいけません。",
+      "accepted_answers": [
+        "吸って"
+      ],
+      "normalization": "trim_only",
+      "explanation_vi": "吸う đổi sang thể て là 吸って."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000011",
+      "grammar_id": "10000000-0000-0000-0000-000000000006",
+      "content_version": 1,
+      "type": "mcq",
+      "prompt": "Chọn nghĩa phù hợp với câu: 明日までに宿題をしなければなりません。",
+      "options": [
+        "Một câu hỏi về tên người.",
+        "Tôi phải làm bài tập trước hạn ngày mai.",
+        "Một lời cảm ơn.",
+        "Một lời chào khi gặp mặt."
+      ],
+      "correct_option_index": 1,
+      "explanation_vi": "Nêu nghĩa vụ; ví dụ しない chuyển thành しなければならない."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000012",
+      "grammar_id": "10000000-0000-0000-0000-000000000006",
+      "content_version": 1,
+      "type": "cloze",
+      "prompt": "明日までに宿題をし（　）なりません。",
+      "accepted_answers": [
+        "なければ"
+      ],
+      "normalization": "trim_only",
+      "explanation_vi": "しない chuyển thành しなければなりません."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000013",
+      "grammar_id": "10000000-0000-0000-0000-000000000007",
+      "content_version": 1,
+      "type": "mcq",
+      "prompt": "Chọn nghĩa phù hợp với câu: 今日は学校へ行かなくてもいいです。",
+      "options": [
+        "Một câu hỏi về tên người.",
+        "Một lời cảm ơn.",
+        "Hôm nay không cần đến trường.",
+        "Một lời chào khi gặp mặt."
+      ],
+      "correct_option_index": 2,
+      "explanation_vi": "Diễn tả không bắt buộc làm, không phải lệnh cấm làm."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000014",
+      "grammar_id": "10000000-0000-0000-0000-000000000007",
+      "content_version": 1,
+      "type": "cloze",
+      "prompt": "今日は学校へ（　）なくてもいいです。",
+      "accepted_answers": [
+        "行か"
+      ],
+      "normalization": "trim_only",
+      "explanation_vi": "行かない bỏ い rồi thêm くてもいい."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000015",
+      "grammar_id": "10000000-0000-0000-0000-000000000008",
+      "content_version": 1,
+      "type": "mcq",
+      "prompt": "Chọn nghĩa phù hợp với câu: 来年、日本へ行くつもりです。",
+      "options": [
+        "Một câu hỏi về tên người.",
+        "Một lời cảm ơn.",
+        "Một lời chào khi gặp mặt.",
+        "Tôi dự định đến Nhật Bản vào năm sau."
+      ],
+      "correct_option_index": 3,
+      "explanation_vi": "Diễn tả dự định của người nói; ví dụ dùng dạng lịch sự つもりです."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000016",
+      "grammar_id": "10000000-0000-0000-0000-000000000008",
+      "content_version": 1,
+      "type": "cloze",
+      "prompt": "来年、日本へ行く（　）です。",
+      "accepted_answers": [
+        "つもり"
+      ],
+      "normalization": "trim_only",
+      "explanation_vi": "Thể từ điển 行く kết hợp つもりです để nêu dự định."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000017",
+      "grammar_id": "10000000-0000-0000-0000-000000000009",
+      "content_version": 1,
+      "type": "mcq",
+      "prompt": "Chọn nghĩa phù hợp với câu: 音楽を聞きながら勉強します。",
+      "options": [
+        "Tôi vừa nghe nhạc vừa học.",
+        "Một câu hỏi về tên người.",
+        "Một lời cảm ơn.",
+        "Một lời chào khi gặp mặt."
+      ],
+      "correct_option_index": 0,
+      "explanation_vi": "Hai hành động cùng chủ thể; mệnh đề sau là hành động chính trong ví dụ."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000018",
+      "grammar_id": "10000000-0000-0000-0000-000000000009",
+      "content_version": 1,
+      "type": "cloze",
+      "prompt": "音楽を（　）ながら勉強します。",
+      "accepted_answers": [
+        "聞き"
+      ],
+      "normalization": "trim_only",
+      "explanation_vi": "聞きます bỏ ます, thêm ながら."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000019",
+      "grammar_id": "10000000-0000-0000-0000-000000000010",
+      "content_version": 1,
+      "type": "mcq",
+      "prompt": "Chọn nghĩa phù hợp với câu: バスより電車のほうが速いです。",
+      "options": [
+        "Một câu hỏi về tên người.",
+        "So với xe buýt, tàu điện nhanh hơn.",
+        "Một lời cảm ơn.",
+        "Một lời chào khi gặp mặt."
+      ],
+      "correct_option_index": 1,
+      "explanation_vi": "So sánh hai đối tượng theo đặc điểm được nêu, không khái quát mọi mặt."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000020",
+      "grammar_id": "10000000-0000-0000-0000-000000000010",
+      "content_version": 1,
+      "type": "cloze",
+      "prompt": "バスより電車の（　）が速いです。",
+      "accepted_answers": [
+        "ほう"
+      ],
+      "normalization": "trim_only",
+      "explanation_vi": "Cấu trúc AよりBのほうが so sánh hai đối tượng."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000021",
+      "grammar_id": "10000000-0000-0000-0000-000000000011",
+      "content_version": 1,
+      "type": "mcq",
+      "prompt": "Chọn nghĩa phù hợp với câu: 私は日本語を話すことができます。",
+      "options": [
+        "Một câu hỏi về tên người.",
+        "Một lời cảm ơn.",
+        "Tôi có thể nói tiếng Nhật.",
+        "Một lời chào khi gặp mặt."
+      ],
+      "correct_option_index": 2,
+      "explanation_vi": "Trong ví dụ, diễn tả năng lực thực hiện một hành động."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000022",
+      "grammar_id": "10000000-0000-0000-0000-000000000011",
+      "content_version": 1,
+      "type": "cloze",
+      "prompt": "私は日本語を話すことが（　）。",
+      "accepted_answers": [
+        "できます"
+      ],
+      "normalization": "trim_only",
+      "explanation_vi": "話すことができます diễn tả có thể nói."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000023",
+      "grammar_id": "10000000-0000-0000-0000-000000000012",
+      "content_version": 1,
+      "type": "mcq",
+      "prompt": "Chọn nghĩa phù hợp với câu: 手を洗ってから、ご飯を食べます。",
+      "options": [
+        "Một câu hỏi về tên người.",
+        "Một lời cảm ơn.",
+        "Một lời chào khi gặp mặt.",
+        "Tôi rửa tay rồi mới ăn cơm."
+      ],
+      "correct_option_index": 3,
+      "explanation_vi": "Diễn tả thứ tự hành động A rồi B."
+    },
+    {
+      "id": "20000000-0000-0000-0000-000000000024",
+      "grammar_id": "10000000-0000-0000-0000-000000000012",
+      "content_version": 1,
+      "type": "cloze",
+      "prompt": "手を（　）から、ご飯を食べます。",
+      "accepted_answers": [
+        "洗って"
+      ],
+      "normalization": "trim_only",
+      "explanation_vi": "洗う đổi thành 洗って, tiếp theo から nêu thứ tự."
+    }
+  ]
+}

@@ -14,6 +14,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Validate B0 draft fixture structure
+        run: python3 scripts/validate_b0_fixtures.py
       - name: Read SDK pin
         id: sdk
         run: echo "version=$(cat .flutter-version)" >> "$GITHUB_OUTPUT"
