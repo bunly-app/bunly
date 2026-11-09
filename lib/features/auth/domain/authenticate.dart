@@ -1,4 +1,5 @@
 import 'auth_repository.dart';
+import 'auth_validation.dart';
 
 class Authenticate {
   const Authenticate(this.repository);
@@ -9,13 +10,8 @@ class Authenticate {
     String password, {
     bool register = false,
   }) async {
-    final normalized = email.trim();
-    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(normalized)) {
-      throw const FormatException('Nhập địa chỉ email hợp lệ.');
-    }
-    if (password.length < 8) {
-      throw const FormatException('Mật khẩu cần ít nhất 8 ký tự.');
-    }
+    final normalized = normalizeAndValidateEmail(email);
+    validatePassword(password);
     if (register) return repository.signUp(normalized, password);
     await repository.signIn(normalized, password);
     return true;

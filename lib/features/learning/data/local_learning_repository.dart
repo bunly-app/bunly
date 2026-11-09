@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/database/app_database.dart';
 import '../domain/learning_repository.dart';
@@ -15,19 +16,27 @@ class LocalLearningRepository
     required this.ownerId,
     required this.queueRemote,
   });
+  static const Uuid _uuid = Uuid();
   final AppDatabase database;
   final String namespace;
   final String ownerId;
   final bool queueRemote;
 
   @override
-  Stream<List<Note>> watchNotes(String grammarId) =>
+  Stream<List<Note>> watchNotes(String grammarId) => _watchNotes(grammarId);
+
+  @override
+  Stream<List<Note>> watchAllNotes() => _watchNotes(null);
+
+  Stream<List<Note>> _watchNotes(String? grammarId) =>
       (database.select(database.localNotes)
             ..where(
               (t) =>
                   t.namespace.equals(namespace) &
                   t.ownerId.equals(ownerId) &
-                  t.grammarId.equals(grammarId) &
+                  (grammarId == null
+                      ? const Constant(true)
+                      : t.grammarId.equals(grammarId)) &
                   t.deletedAt.isNull(),
             )
             ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
@@ -47,6 +56,16 @@ class LocalLearningRepository
 
   @override
   Future<void> saveNote(Note note) => database.transaction(() async {
+    final existing =
+        await (database.select(database.localNotes)..where(
+              (t) =>
+                  t.namespace.equals(namespace) &
+                  t.ownerId.equals(ownerId) &
+                  t.noteId.equals(note.id),
+            ))
+            .getSingleOrNull();
+    final baseRevision = existing?.serverRevision ?? 0;
+
     await database
         .into(database.localNotes)
         .insertOnConflictUpdate(
@@ -58,9 +77,11 @@ class LocalLearningRepository
             content: note.content,
             updatedAt: note.updatedAt,
             deletedAt: const Value(null),
+            serverRevision: Value(baseRevision),
           ),
         );
     if (queueRemote) {
+      final now = DateTime.now().toUtc();
       await database
           .into(database.syncOutbox)
           .insert(
@@ -68,6 +89,10 @@ class LocalLearningRepository
               namespace: namespace,
               ownerId: ownerId,
               recordId: note.id,
+              operationId: Value(_uuid.v4()),
+              baseRevision: Value(baseRevision),
+              operationType: const Value('upsert'),
+              createdAt: Value(now),
               payload: jsonEncode({
                 'id': note.id,
                 'user_id': ownerId,
@@ -81,27 +106,51 @@ class LocalLearningRepository
     }
   });
 
-  Future<void> _write(String table, String id, Map<String, dynamic> payload) =>
-      database.transaction(() async {
-        await database
-            .into(database.personalRecords)
-            .insertOnConflictUpdate(
-              PersonalRecordsCompanion.insert(
-                namespace: namespace,
-                ownerId: ownerId,
-                entityTable: table,
-                recordId: id,
-                payload: jsonEncode(payload),
-              ),
-            );
-        await _enqueue(table, id, payload);
-      });
+  Future<void> _write(
+    String table,
+    String id,
+    Map<String, dynamic> payload, {
+    String operationType = 'upsert',
+  }) => database.transaction(() async {
+    final existing =
+        await (database.select(database.personalRecords)..where(
+              (t) =>
+                  t.namespace.equals(namespace) &
+                  t.ownerId.equals(ownerId) &
+                  t.entityTable.equals(table) &
+                  t.recordId.equals(id),
+            ))
+            .getSingleOrNull();
+    final baseRevision = existing?.serverRevision ?? 0;
+
+    await database
+        .into(database.personalRecords)
+        .insertOnConflictUpdate(
+          PersonalRecordsCompanion.insert(
+            namespace: namespace,
+            ownerId: ownerId,
+            entityTable: table,
+            recordId: id,
+            payload: jsonEncode(payload),
+            serverRevision: Value(baseRevision),
+          ),
+        );
+    await _enqueue(
+      table,
+      id,
+      payload,
+      baseRevision: baseRevision,
+      operationType: operationType,
+    );
+  });
 
   Future<void> _enqueue(
     String table,
     String id,
-    Map<String, dynamic> payload,
-  ) async {
+    Map<String, dynamic> payload, {
+    int? baseRevision,
+    String operationType = 'upsert',
+  }) async {
     if (!queueRemote) return;
     await database
         .into(database.syncOutbox)
@@ -111,6 +160,10 @@ class LocalLearningRepository
             ownerId: ownerId,
             recordId: id,
             entityTable: Value(table),
+            operationId: Value(_uuid.v4()),
+            baseRevision: Value(baseRevision),
+            operationType: Value(operationType),
+            createdAt: Value(DateTime.now().toUtc()),
             payload: jsonEncode(payload),
           ),
         );
@@ -178,7 +231,7 @@ class LocalLearningRepository
         'grammar_id': grammarId,
         'deleted_at': saved ? null : DateTime.now().toUtc().toIso8601String(),
         'updated_at': DateTime.now().toUtc().toIso8601String(),
-      });
+      }, operationType: saved ? 'upsert' : 'delete');
 
   @override
   Future<void> setStatus(String grammarId, LearningStatus status) =>
@@ -210,13 +263,19 @@ class LocalLearningRepository
         .write(
           LocalNotesCompanion(deletedAt: Value(now), updatedAt: Value(now)),
         );
-    await _enqueue('notes', noteId, {
-      'id': noteId,
-      'user_id': ownerId,
-      'grammar_id': note.grammarId,
-      'content': note.content,
-      'updated_at': now.toIso8601String(),
-      'deleted_at': now.toIso8601String(),
-    });
+    await _enqueue(
+      'notes',
+      noteId,
+      {
+        'id': noteId,
+        'user_id': ownerId,
+        'grammar_id': note.grammarId,
+        'content': note.content,
+        'updated_at': now.toIso8601String(),
+        'deleted_at': now.toIso8601String(),
+      },
+      baseRevision: note.serverRevision,
+      operationType: 'delete',
+    );
   });
 }

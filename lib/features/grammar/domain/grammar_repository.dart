@@ -1,5 +1,5 @@
-import 'grammar_point.dart';
+import 'grammar_catalog.dart';
 
 abstract interface class GrammarRepository {
-  Future<List<GrammarPoint>> load();
+  Future<GrammarCatalog> load();
 }
