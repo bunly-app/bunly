@@ -1,5 +1,7 @@
 # Kiến trúc M2 và trạng thái kiểm chứng
 
+**Bổ sung 09/11/2026 — A03-01:** catalog hiện trả domain `GrammarCatalog(points, origin)` thay danh sách đơn thuần; screen đọc origin từ state, không cast cache implementation. Logout đi qua `SignOutController` → `SignOut`. Xem [contract v1](BASELINE-INTEGRATION-CONTRACTS.md) và [bàn giao/kiểm chứng](../reports/A02-A03-01-Delivery-2026-11-09.md). Schema/worker M2 không đổi; quy tắc attempt/review/quota mới vẫn là thiết kế A02, chưa triển khai.
+
 Cập nhật ngày 29/10/2026. Xem [báo cáo M2](../reports/Capstone-Report-2-Architecture.md) và [biên bản kiểm chứng](../reports/M2-Verification-2026-10-29.md) để biết phần đã chạy/chưa chạy. Không xem code đã bổ sung là nghiệm thu toàn bộ M2.
 
 ## Các thành phần hiện có
