@@ -63,6 +63,9 @@ void main() {
         await tester.enterText(find.byType(TextField).at(1), password);
         await tester.tap(find.text('Đăng nhập').last);
         await tester.pumpAndSettle();
+        await waitFor(find.text('Một mẫu ngữ pháp, một bước học tiếp.'));
+        await tester.tap(find.text('Tra cứu'));
+        await tester.pumpAndSettle();
         await waitFor(find.text('Kho ngữ pháp'));
       }
 
@@ -227,7 +230,7 @@ void main() {
           () => scope.read(catalogProvider.future),
         );
         expect(
-          cached,
+          cached?.points,
           isNotEmpty,
           reason: 'Android must reload cached grammar while API is unreachable',
         );

@@ -1,15 +1,27 @@
 import 'package:bunly/app/config.dart';
+import 'package:bunly/core/database/app_database.dart';
 import 'package:bunly/features/auth/domain/auth_repository.dart';
 import 'package:bunly/features/auth/domain/authenticate.dart';
+import 'package:bunly/features/auth/domain/request_password_reset.dart';
+import 'package:bunly/features/auth/domain/resend_confirmation.dart';
+import 'package:bunly/features/auth/domain/update_password.dart';
 import 'package:bunly/features/grammar/domain/grammar_point.dart';
+import 'package:bunly/features/grammar/domain/grammar_catalog.dart';
 import 'package:bunly/features/grammar/domain/grammar_repository.dart';
 import 'package:bunly/features/grammar/domain/search_grammar.dart';
+import 'package:bunly/features/learning/data/local_learning_repository.dart';
 import 'package:bunly/features/learning/domain/learning_repository.dart';
 import 'package:bunly/features/learning/domain/note.dart';
 import 'package:bunly/features/learning/domain/save_note.dart';
+import 'package:bunly/features/settings/data/local_app_settings_repository.dart';
+import 'package:bunly/features/settings/domain/app_settings_repository.dart';
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class MemoryLearning implements LearningRepository {
+  @override
+  Stream<List<Note>> watchAllNotes() => Stream.value([]);
+
   Note? saved;
   @override
   Future<void> saveNote(Note note) async {
@@ -21,8 +33,10 @@ class MemoryLearning implements LearningRepository {
 }
 
 class MemoryGrammar implements GrammarRepository {
+  MemoryGrammar({this.origin = GrammarOrigin.source});
+  final GrammarOrigin origin;
   @override
-  Future<List<GrammarPoint>> load() async => [
+  Future<GrammarCatalog> load() async => GrammarCatalog([
     const GrammarPoint(
       id: '1',
       pattern: '〜たい',
@@ -43,25 +57,58 @@ class MemoryGrammar implements GrammarRepository {
       usage: 'x',
       examples: [],
     ),
-  ];
+  ], origin: origin);
 }
 
 class PendingConfirmationAuth implements AuthRepository {
   bool called = false;
+  String? lastEmail;
+  String? lastUpdatedPassword;
+  int resendCount = 0;
+  int resetCount = 0;
+
   @override
   AppUser? get currentUser => null;
   @override
   Stream<AppUser?> get changes => const Stream.empty();
   @override
+  Stream<bool> get recoveryEvents => Stream.value(false);
+
+  @override
   Future<void> signIn(String email, String password) async {
     called = true;
+    lastEmail = email;
   }
 
   @override
   Future<bool> signUp(String email, String password) async {
     called = true;
+    lastEmail = email;
     return false;
   }
+
+  @override
+  Future<void> resendConfirmation(String email) async {
+    called = true;
+    resendCount++;
+    lastEmail = email;
+  }
+
+  @override
+  Future<void> resetPassword(String email) async {
+    called = true;
+    resetCount++;
+    lastEmail = email;
+  }
+
+  @override
+  Future<void> updatePassword(String newPassword) async {
+    called = true;
+    lastUpdatedPassword = newPassword;
+  }
+
+  @override
+  Future<void> completeRecovery() async {}
 
   @override
   Future<void> signOut() async {}
@@ -87,12 +134,21 @@ void main() {
         query: ' MUỐN ',
         level: 'N5',
         category: 'desire',
-      )).single.id,
+      )).points.single.id,
       '1',
     );
-    expect(await search(query: 'muốn', level: 'N4'), isEmpty);
-    expect((await search(query: 'たこと')).single.id, '2');
+    expect((await search(query: 'muốn', level: 'N4')).points, isEmpty);
+    expect((await search(query: 'たこと')).points.single.id, '2');
   });
+  test(
+    'search retains cache origin even when filters return no matches',
+    () async {
+      final search = SearchGrammar(MemoryGrammar(origin: GrammarOrigin.cache));
+      final result = await search(query: 'không có trong kho');
+      expect(result.points, isEmpty);
+      expect(result.origin, GrammarOrigin.cache);
+    },
+  );
   test('blank and overlong notes never reach storage', () {
     final repository = MemoryLearning();
     final save = SaveNote(repository);
@@ -136,6 +192,56 @@ void main() {
         await authenticate('a@example.test', 'password123', register: true),
         isFalse,
       );
+    },
+  );
+  test(
+    'resend confirmation, password reset and update password validate inputs cleanly',
+    () async {
+      final repository = PendingConfirmationAuth();
+      final resend = ResendConfirmation(repository);
+      final reset = RequestPasswordReset(repository);
+      final update = UpdatePassword(repository);
+
+      await expectLater(resend('bad'), throwsFormatException);
+      await expectLater(reset('bad'), throwsFormatException);
+      await expectLater(update('short'), throwsFormatException);
+      expect(repository.called, isFalse);
+
+      await resend('  user@example.test ');
+      expect(repository.resendCount, 1);
+      expect(repository.lastEmail, 'user@example.test');
+
+      await reset(' reset@example.test  ');
+      expect(repository.resetCount, 1);
+      expect(repository.lastEmail, 'reset@example.test');
+
+      await update('Bunly2026!secure');
+      expect(repository.lastUpdatedPassword, 'Bunly2026!secure');
+    },
+  );
+  test(
+    'LocalAppSettingsRepository persists theme preference without polluting learning summary or sync outbox',
+    () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+      final settings = LocalAppSettingsRepository(db);
+      final learning = LocalLearningRepository(
+        db,
+        namespace: 'demo',
+        ownerId: 'demo-user',
+        queueRemote: false,
+      );
+
+      expect(await settings.loadThemePreference(), AppThemePreference.system);
+      await settings.saveThemePreference(AppThemePreference.dark);
+      expect(await settings.loadThemePreference(), AppThemePreference.dark);
+      await settings.saveThemePreference(AppThemePreference.light);
+      expect(await settings.loadThemePreference(), AppThemePreference.light);
+
+      final summary = await learning.watchSummary().first;
+      expect(summary.saved, isEmpty);
+      expect(summary.statuses, isEmpty);
+      expect(await db.select(db.syncOutbox).get(), isEmpty);
     },
   );
 }

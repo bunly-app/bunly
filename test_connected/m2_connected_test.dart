@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:uuid/uuid.dart';
 import 'package:bunly/app/config.dart';
 import 'package:bunly/core/database/app_database.dart';
+import 'package:bunly/features/analysis/data/supabase_grammar_analysis_repository.dart';
+import 'package:bunly/features/analysis/domain/grammar_analysis.dart';
 import 'package:bunly/features/auth/data/auth_repositories.dart';
 import 'package:bunly/features/auth/domain/authenticate.dart';
 import 'package:bunly/features/grammar/data/grammar_sources.dart';
@@ -10,6 +12,8 @@ import 'package:bunly/features/learning/data/local_learning_repository.dart';
 import 'package:bunly/features/learning/domain/note.dart';
 import 'package:bunly/features/learning/domain/personal_repository.dart';
 import 'package:bunly/features/learning/domain/save_note.dart';
+import 'package:bunly/features/practice/data/local_practice_storage_repository.dart';
+import 'package:bunly/features/practice/data/supabase_practice_sync.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -178,6 +182,256 @@ void main() {
         await a.dispose();
         await b.dispose();
         await directory.delete(recursive: true);
+      }
+    },
+  );
+
+  test('real Auth/API: baseline revision sync, quota RPC, and practice RLS', () async {
+    expect(
+      config.connected &&
+          emailA.isNotEmpty &&
+          emailB.isNotEmpty &&
+          password.isNotEmpty,
+      isTrue,
+      reason:
+          'Provide local connected test config; this test never silently skips.',
+    );
+    final anon = SupabaseClient(config.supabaseUrl, config.supabaseAnonKey);
+    final a = SupabaseClient(config.supabaseUrl, config.supabaseAnonKey);
+    final b = SupabaseClient(config.supabaseUrl, config.supabaseAnonKey);
+    try {
+      await Authenticate(SupabaseAuthRepository(a))(emailA, password);
+      await Authenticate(SupabaseAuthRepository(b))(emailB, password);
+      final ownerA = a.auth.currentUser!.id;
+      final grammar = await SupabaseGrammarSource(a).fetch();
+      expect(grammar, isNotEmpty);
+      final grammarId = grammar.first['id'] as String;
+
+      // Read-only question bank & server-derived review states reject client writes.
+      await expectLater(
+        a.from('practice_questions').insert({
+          'grammar_id': grammarId,
+          'question_type': 'cloze',
+          'prompt': 'test',
+          'accepted_answers': ['a'],
+          'explanation_vi': 'test',
+        }),
+        throwsA(isA<PostgrestException>()),
+      );
+      await expectLater(
+        a.from('review_states').insert({
+          'user_id': ownerA,
+          'grammar_id': grammarId,
+          'stage': 4,
+          'due_at': DateTime.now().toUtc().toIso8601String(),
+        }),
+        throwsA(isA<PostgrestException>()),
+      );
+      expect(await a.from('practice_questions').select(), isA<List<dynamic>>());
+      expect(await a.from('review_states').select(), isA<List<dynamic>>());
+
+      // Safe quota inspection works for authenticated users and fails closed for anon.
+      await expectLater(
+        anon.rpc('bunly_my_analysis_quota'),
+        throwsA(isA<PostgrestException>()),
+      );
+      final quota = Map<String, dynamic>.from(
+        await a.rpc('bunly_my_analysis_quota') as Map,
+      );
+      expect(quota['has_entitlement'], isA<bool>());
+      expect(quota['remaining_quota'], isA<int>());
+      expect(DateTime.parse(quota['reset_at_utc'] as String).isUtc, isTrue);
+
+      // Multi-device monotonic revision, idempotent replay, conflict detection, and cross-user isolation.
+      final noteId = const Uuid().v4();
+      final op1 = const Uuid().v4();
+      final created = Map<String, dynamic>.from(
+        await a.rpc(
+              'bunly_sync_personal_record',
+              params: {
+                'p_operation_id': op1,
+                'p_entity_table': 'notes',
+                'p_record_id': noteId,
+                'p_base_revision': 0,
+                'p_delete': false,
+                'p_payload': {'grammar_id': grammarId, 'content': 'Sync rev 1'},
+              },
+            )
+            as Map,
+      );
+      expect(created['status'], 'applied');
+      expect(created['revision'], 1);
+
+      final replay = Map<String, dynamic>.from(
+        await a.rpc(
+              'bunly_sync_personal_record',
+              params: {
+                'p_operation_id': op1,
+                'p_entity_table': 'notes',
+                'p_record_id': noteId,
+                'p_base_revision': 0,
+                'p_delete': false,
+                'p_payload': {'grammar_id': grammarId, 'content': 'Sync rev 1'},
+              },
+            )
+            as Map,
+      );
+      expect(replay['status'], 'duplicate_ack');
+      expect(replay['revision'], 1);
+
+      final conflict = Map<String, dynamic>.from(
+        await a.rpc(
+              'bunly_sync_personal_record',
+              params: {
+                'p_operation_id': const Uuid().v4(),
+                'p_entity_table': 'notes',
+                'p_record_id': noteId,
+                'p_base_revision': 0,
+                'p_delete': false,
+                'p_payload': {
+                  'grammar_id': grammarId,
+                  'content': 'Stale overwrite',
+                },
+              },
+            )
+            as Map,
+      );
+      expect(conflict['status'], 'conflict');
+      expect(conflict['current_revision'], 1);
+      expect((conflict['server_record'] as Map)['content'], 'Sync rev 1');
+
+      final updated = Map<String, dynamic>.from(
+        await a.rpc(
+              'bunly_sync_personal_record',
+              params: {
+                'p_operation_id': const Uuid().v4(),
+                'p_entity_table': 'notes',
+                'p_record_id': noteId,
+                'p_base_revision': 1,
+                'p_delete': false,
+                'p_payload': {'grammar_id': grammarId, 'content': 'Sync rev 2'},
+              },
+            )
+            as Map,
+      );
+      expect(updated['status'], 'applied');
+      expect(updated['revision'], 2);
+
+      await expectLater(
+        b.rpc(
+          'bunly_sync_personal_record',
+          params: {
+            'p_operation_id': const Uuid().v4(),
+            'p_entity_table': 'notes',
+            'p_record_id': noteId,
+            'p_base_revision': 0,
+            'p_delete': false,
+            'p_payload': {'grammar_id': grammarId, 'content': 'Hijacked note'},
+          },
+        ),
+        throwsA(isA<PostgrestException>()),
+      );
+
+      final deleted = Map<String, dynamic>.from(
+        await a.rpc(
+              'bunly_sync_personal_record',
+              params: {
+                'p_operation_id': const Uuid().v4(),
+                'p_entity_table': 'notes',
+                'p_record_id': noteId,
+                'p_base_revision': 2,
+                'p_delete': true,
+                'p_payload': <String, dynamic>{},
+              },
+            )
+            as Map,
+      );
+      expect(deleted['status'], 'applied');
+      expect(deleted['revision'], 3);
+      expect((deleted['record'] as Map)['deleted_at'], isNotNull);
+    } finally {
+      await anon.dispose();
+      await a.dispose();
+      await b.dispose();
+    }
+  });
+
+  test(
+    'real Auth/API: SupabaseGrammarAnalysisRepository & PracticeSync fail-closed & clean pull',
+    () async {
+      expect(
+        config.connected && emailA.isNotEmpty && password.isNotEmpty,
+        isTrue,
+        reason:
+            'Provide local connected test config; this test never silently skips.',
+      );
+      final anon = SupabaseClient(config.supabaseUrl, config.supabaseAnonKey);
+      final a = SupabaseClient(config.supabaseUrl, config.supabaseAnonKey);
+      final db = AppDatabase(NativeDatabase.memory());
+      SupabasePracticeRemote? remote;
+      try {
+        final anonAnalysis = SupabaseGrammarAnalysisRepository(anon);
+        await expectLater(
+          anonAnalysis.loadQuota(),
+          throwsA(
+            isA<AnalysisException>().having(
+              (e) => e.kind,
+              'kind',
+              AnalysisFailureKind.unauthenticated,
+            ),
+          ),
+        );
+
+        await Authenticate(SupabaseAuthRepository(a))(emailA, password);
+        final ownerA = a.auth.currentUser!.id;
+        final analysisRepo = SupabaseGrammarAnalysisRepository(a);
+        final quota = await analysisRepo.loadQuota();
+        expect(quota.hasEntitlement, isA<bool>());
+        expect(quota.dailyLimit, greaterThanOrEqualTo(0));
+        expect(quota.resetAtUtc.isUtc, isTrue);
+
+        // With GEMINI_FREE_TIER_CONFIRMED=false locally, analyze-grammar must fail closed (503 unavailable).
+        final reqId = const Uuid().v4();
+        await expectLater(
+          analysisRepo.analyze(
+            requestId: reqId,
+            normalizedText: '日本へ行ったことがある。',
+          ),
+          throwsA(
+            isA<AnalysisException>()
+                .having((e) => e.kind, 'kind', AnalysisFailureKind.unavailable)
+                .having((e) => e.retryable, 'retryable', isTrue),
+          ),
+        );
+
+        // PracticeSync pulls question bank, attempts, and review_states without failing on empty question bank.
+        final storage = LocalPracticeStorageRepository(
+          db,
+          namespace: config.namespace,
+          ownerId: ownerA,
+          queueRemote: true,
+        );
+        remote = SupabasePracticeRemote(
+          a,
+          url: config.supabaseUrl,
+          key: config.supabaseAnonKey,
+          ownerId: ownerA,
+        );
+        final practiceSync = PracticeSync(
+          db,
+          remote,
+          storage,
+          namespace: config.namespace,
+          ownerId: ownerA,
+        );
+        await practiceSync.run();
+        expect(await db.select(db.syncOutbox).get(), isEmpty);
+        expect(await storage.loadCachedQuestions(), isA<List<dynamic>>());
+      } finally {
+        await remote?.dispose();
+        await db.close();
+        await anon.dispose();
+        await a.dispose();
       }
     },
   );
