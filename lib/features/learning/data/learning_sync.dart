@@ -113,14 +113,94 @@ class LearningSync {
               )
               ..orderBy([(r) => OrderingTerm.asc(r.sequence)]))
             .get();
+    final hasPendingNotePush = operations.any(
+      (op) => op.entityTable == 'notes' && op.conflictPayload == null,
+    );
+    final preSyncRemoteNotes = <String, Map<String, dynamic>>{};
+    if (hasPendingNotePush) {
+      _requireSession();
+      final existingRemoteNotes = await remote.fetch('notes', ownerId);
+      for (final row in existingRemoteNotes) {
+        final id = row['id'];
+        if (id is String) {
+          preSyncRemoteNotes[id] = row;
+        }
+      }
+    }
+
+    final conflictedNoteIds = <String>{
+      for (final op in operations)
+        if (op.entityTable == 'notes' && op.conflictPayload != null)
+          op.recordId,
+    };
+
     for (final operation in operations) {
       _requireSession();
+      if (operation.conflictPayload != null) {
+        continue;
+      }
+      if (operation.entityTable == 'notes' &&
+          conflictedNoteIds.contains(operation.recordId)) {
+        continue;
+      }
       final payload = jsonDecode(operation.payload) as Map<String, dynamic>;
       if (payload['user_id'] != ownerId ||
           !m2Tables.contains(operation.entityTable)) {
         throw StateError('Thao tác đồng bộ không hợp lệ.');
       }
-      await remote.upsert(operation.entityTable, payload);
+
+      if (operation.entityTable == 'notes') {
+        final remoteRow = preSyncRemoteNotes[operation.recordId];
+        final forceResolve = payload['force_resolve'] == true;
+        final isDeleteTombstone = payload['deleted_at'] != null;
+        if (remoteRow != null && !forceResolve && !isDeleteTombstone) {
+          final localContent = payload['content'] as String? ?? '';
+          final remoteContent = remoteRow['content'] as String? ?? '';
+          final baseContent = payload['base_content'] as String?;
+          final localUpdatedAt = DateTime.tryParse(
+            payload['updated_at'] as String? ?? '',
+          )?.toUtc();
+          final remoteUpdatedAt = DateTime.tryParse(
+            remoteRow['updated_at'] as String? ?? '',
+          )?.toUtc();
+          final remoteRevision = (remoteRow['revision'] as num?)?.toInt() ?? 0;
+          final baseRevision = operation.baseRevision ?? 0;
+
+          final hasDivergentBase =
+              baseContent != null && remoteContent != baseContent;
+          final hasNewerRemoteRevision =
+              baseRevision > 0 && remoteRevision > baseRevision;
+          final hasNewerRemoteTimestamp =
+              localUpdatedAt != null &&
+              remoteUpdatedAt != null &&
+              remoteUpdatedAt.isAfter(localUpdatedAt);
+
+          if (remoteContent != localContent &&
+              (hasDivergentBase ||
+                  hasNewerRemoteRevision ||
+                  hasNewerRemoteTimestamp)) {
+            conflictedNoteIds.add(operation.recordId);
+            await (database.update(database.syncOutbox)..where(
+                  (r) =>
+                      r.sequence.equals(operation.sequence) &
+                      r.ownerId.equals(ownerId) &
+                      r.namespace.equals(namespace),
+                ))
+                .write(
+                  SyncOutboxCompanion(
+                    lastError: const Value('conflict'),
+                    conflictPayload: Value(jsonEncode(remoteRow)),
+                  ),
+                );
+            continue;
+          }
+        }
+      }
+
+      final remotePayload = Map<String, dynamic>.of(payload)
+        ..remove('base_content')
+        ..remove('force_resolve');
+      await remote.upsert(operation.entityTable, remotePayload);
       _requireSession();
       // Delete exactly this operation, never newer operations for the same record.
       await (database.delete(database.syncOutbox)..where(
@@ -174,6 +254,7 @@ class LearningSync {
                           ? null
                           : DateTime.parse(row['deleted_at'] as String),
                     ),
+                    serverRevision: const Value(1),
                   ),
                 );
           } else {

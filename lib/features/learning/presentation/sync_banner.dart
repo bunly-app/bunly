@@ -111,9 +111,11 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
       }
     });
     final pending = ref.watch(pendingSyncProvider);
+    final conflicts = ref.watch(noteConflictsProvider).valueOrNull ?? const [];
+    final hasConflict = conflicts.isNotEmpty;
     final count = pending.valueOrNull ?? 0;
     final hasError = pending.hasError || failed;
-    if (!loading && !hasError && count == 0) {
+    if (!loading && !hasError && !hasConflict && count == 0) {
       return const SizedBox.shrink();
     }
 
@@ -122,6 +124,8 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
         ? 'Chưa đọc được hàng đợi đồng bộ. Chạm để thử lại.'
         : failed
         ? 'Chưa đồng bộ được. Chạm để thử lại.'
+        : hasConflict
+        ? 'Có ${conflicts.length} xung đột ghi chú cần xử lý trong Sổ tay'
         : loading
         ? 'Đang tự đồng bộ…'
         : 'Đang tự đồng bộ $count mục…';
@@ -129,7 +133,11 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 6, 18, 0),
       child: Material(
-        color: hasError ? colors.errorContainer : colors.surfaceContainerLow,
+        color: hasError
+            ? colors.errorContainer
+            : hasConflict
+            ? colors.tertiaryContainer
+            : colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
@@ -151,9 +159,15 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
                   Icon(
                     hasError
                         ? Icons.cloud_off_outlined
+                        : hasConflict
+                        ? Icons.merge_type_rounded
                         : Icons.cloud_upload_outlined,
                     size: 16,
-                    color: hasError ? colors.onErrorContainer : colors.primary,
+                    color: hasError
+                        ? colors.onErrorContainer
+                        : hasConflict
+                        ? colors.onTertiaryContainer
+                        : colors.primary,
                   ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -162,7 +176,10 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: hasError
                           ? colors.onErrorContainer
+                          : hasConflict
+                          ? colors.onTertiaryContainer
                           : colors.onSurfaceVariant,
+                      fontWeight: hasConflict ? FontWeight.w700 : null,
                     ),
                   ),
                 ),

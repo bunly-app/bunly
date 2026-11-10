@@ -86,6 +86,7 @@ class SupabaseGrammarAnalysisRepository implements GrammarAnalysisRepository {
     required String requestId,
     required String normalizedText,
     String locale = 'vi',
+    List<String> candidateIds = const [],
   }) async {
     final session = client.auth.currentSession;
     if (session == null) {
@@ -96,16 +97,35 @@ class SupabaseGrammarAnalysisRepository implements GrammarAnalysisRepository {
       );
     }
     try {
-      final response = await client.functions
-          .invoke(
-            'analyze-grammar',
-            body: {
-              'request_id': requestId,
-              'text': normalizedText,
-              'locale': locale,
-            },
-          )
-          .timeout(timeout);
+      Future<FunctionResponse> invokeWithBody(Map<String, dynamic> body) {
+        return client.functions
+            .invoke('analyze-grammar', body: body)
+            .timeout(timeout);
+      }
+
+      FunctionResponse response;
+      final baseBody = <String, dynamic>{
+        'request_id': requestId,
+        'text': normalizedText,
+        'locale': locale,
+      };
+      if (candidateIds.isNotEmpty) {
+        try {
+          response = await invokeWithBody({
+            ...baseBody,
+            'candidate_ids': candidateIds,
+          });
+        } on FunctionException catch (e) {
+          final mapped = _mapFunctionException(e, requestId);
+          if (mapped.kind == AnalysisFailureKind.invalidInput) {
+            response = await invokeWithBody(baseBody);
+          } else {
+            throw mapped;
+          }
+        }
+      } else {
+        response = await invokeWithBody(baseBody);
+      }
 
       final map = _decodeObject(response.data);
       if (response.status == 202 || map['status'] == 'processing') {

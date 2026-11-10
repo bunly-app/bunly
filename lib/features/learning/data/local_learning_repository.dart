@@ -64,6 +64,29 @@ class LocalLearningRepository
                   t.noteId.equals(note.id),
             ))
             .getSingleOrNull();
+    final pendingRows =
+        await (database.select(database.syncOutbox)
+              ..where(
+                (t) =>
+                    t.namespace.equals(namespace) &
+                    t.ownerId.equals(ownerId) &
+                    t.entityTable.equals('notes') &
+                    t.recordId.equals(note.id),
+              )
+              ..orderBy([(t) => OrderingTerm.asc(t.sequence)]))
+            .get();
+
+    String? baseContent;
+    if (pendingRows.isNotEmpty) {
+      try {
+        final firstPayload =
+            jsonDecode(pendingRows.first.payload) as Map<String, dynamic>;
+        baseContent = firstPayload['base_content'] as String?;
+      } catch (_) {}
+    } else if (existing != null && existing.serverRevision > 0) {
+      baseContent = existing.content;
+    }
+
     final baseRevision = existing?.serverRevision ?? 0;
 
     await database
@@ -100,11 +123,241 @@ class LocalLearningRepository
                 'content': note.content,
                 'updated_at': note.updatedAt.toUtc().toIso8601String(),
                 'deleted_at': null,
+                if (baseContent != null) 'base_content': baseContent,
               }),
             ),
           );
     }
   });
+
+  Stream<List<NoteConflict>> watchNoteConflicts() {
+    final outboxStream =
+        (database.select(database.syncOutbox)
+              ..where(
+                (t) =>
+                    t.namespace.equals(namespace) &
+                    t.ownerId.equals(ownerId) &
+                    t.entityTable.equals('notes') &
+                    t.conflictPayload.isNotNull(),
+              )
+              ..orderBy([(t) => OrderingTerm.desc(t.sequence)]))
+            .watch();
+
+    return outboxStream.asyncMap((rows) async {
+      if (rows.isEmpty) return const <NoteConflict>[];
+      final localRows =
+          await (database.select(database.localNotes)..where(
+                (t) =>
+                    t.namespace.equals(namespace) & t.ownerId.equals(ownerId),
+              ))
+              .get();
+      final localById = {for (final r in localRows) r.noteId: r};
+      final seenNoteIds = <String>{};
+      final conflicts = <NoteConflict>[];
+
+      for (final row in rows) {
+        if (!seenNoteIds.add(row.recordId)) continue;
+        final rawConflict = row.conflictPayload;
+        if (rawConflict == null) continue;
+        try {
+          final remoteMap = jsonDecode(rawConflict) as Map<String, dynamic>;
+          final localPayload = jsonDecode(row.payload) as Map<String, dynamic>;
+          final localRow = localById[row.recordId];
+          final grammarId =
+              localRow?.grammarId ??
+              (remoteMap['grammar_id'] as String?) ??
+              (localPayload['grammar_id'] as String?) ??
+              '';
+          final localContent =
+              localRow?.content ?? (localPayload['content'] as String?) ?? '';
+          final localUpdatedAt =
+              localRow?.updatedAt.toUtc() ??
+              DateTime.tryParse(
+                localPayload['updated_at'] as String? ?? '',
+              )?.toUtc() ??
+              DateTime.now().toUtc();
+          final remoteContent = remoteMap['content'] as String? ?? '';
+          final remoteUpdatedAt =
+              DateTime.tryParse(
+                remoteMap['updated_at'] as String? ?? '',
+              )?.toUtc() ??
+              localUpdatedAt;
+
+          conflicts.add(
+            NoteConflict(
+              noteId: row.recordId,
+              grammarId: grammarId,
+              localContent: localContent,
+              localUpdatedAt: localUpdatedAt,
+              remoteContent: remoteContent,
+              remoteUpdatedAt: remoteUpdatedAt,
+            ),
+          );
+        } catch (_) {}
+      }
+      return List.unmodifiable(conflicts);
+    });
+  }
+
+  Future<void> resolveNoteConflict(String noteId, {required bool keepLocal}) =>
+      database.transaction(() async {
+        final outboxRows =
+            await (database.select(database.syncOutbox)
+                  ..where(
+                    (t) =>
+                        t.namespace.equals(namespace) &
+                        t.ownerId.equals(ownerId) &
+                        t.entityTable.equals('notes') &
+                        t.recordId.equals(noteId),
+                  )
+                  ..orderBy([(t) => OrderingTerm.desc(t.sequence)]))
+                .get();
+        final localRow =
+            await (database.select(database.localNotes)..where(
+                  (t) =>
+                      t.namespace.equals(namespace) &
+                      t.ownerId.equals(ownerId) &
+                      t.noteId.equals(noteId),
+                ))
+                .getSingleOrNull();
+
+        Map<String, dynamic>? conflictMap;
+        for (final row in outboxRows) {
+          if (row.conflictPayload != null) {
+            try {
+              conflictMap =
+                  jsonDecode(row.conflictPayload!) as Map<String, dynamic>;
+              break;
+            } catch (_) {}
+          }
+        }
+
+        await (database.delete(database.syncOutbox)..where(
+              (t) =>
+                  t.namespace.equals(namespace) &
+                  t.ownerId.equals(ownerId) &
+                  t.entityTable.equals('notes') &
+                  t.recordId.equals(noteId),
+            ))
+            .go();
+
+        final nowUtc = DateTime.now().toUtc();
+        if (keepLocal) {
+          if (localRow == null) return;
+          await database
+              .into(database.localNotes)
+              .insertOnConflictUpdate(
+                LocalNotesCompanion.insert(
+                  namespace: namespace,
+                  ownerId: ownerId,
+                  noteId: localRow.noteId,
+                  grammarId: localRow.grammarId,
+                  content: localRow.content,
+                  updatedAt: nowUtc,
+                  deletedAt: const Value(null),
+                  serverRevision: const Value(1),
+                ),
+              );
+          if (queueRemote) {
+            await database
+                .into(database.syncOutbox)
+                .insert(
+                  SyncOutboxCompanion.insert(
+                    namespace: namespace,
+                    ownerId: ownerId,
+                    recordId: localRow.noteId,
+                    operationId: Value(_uuid.v4()),
+                    baseRevision: const Value(1),
+                    operationType: const Value('upsert'),
+                    createdAt: Value(nowUtc),
+                    payload: jsonEncode({
+                      'id': localRow.noteId,
+                      'user_id': ownerId,
+                      'grammar_id': localRow.grammarId,
+                      'content': localRow.content,
+                      'updated_at': nowUtc.toIso8601String(),
+                      'deleted_at': null,
+                      'force_resolve': true,
+                    }),
+                  ),
+                );
+          }
+        } else if (conflictMap != null) {
+          final grammarId =
+              (conflictMap['grammar_id'] as String?) ??
+              localRow?.grammarId ??
+              '';
+          final remoteContent = conflictMap['content'] as String? ?? '';
+          final remoteUpdatedAt =
+              DateTime.tryParse(
+                conflictMap['updated_at'] as String? ?? '',
+              )?.toUtc() ??
+              nowUtc;
+          await database
+              .into(database.localNotes)
+              .insertOnConflictUpdate(
+                LocalNotesCompanion.insert(
+                  namespace: namespace,
+                  ownerId: ownerId,
+                  noteId: noteId,
+                  grammarId: grammarId,
+                  content: remoteContent,
+                  updatedAt: remoteUpdatedAt,
+                  deletedAt: const Value(null),
+                  serverRevision: const Value(1),
+                ),
+              );
+        }
+      });
+
+  Future<void> simulateNoteConflict(Note note, {String? remoteContent}) =>
+      database.transaction(() async {
+        final nowUtc = DateTime.now().toUtc();
+        final simulatedRemote = {
+          'id': note.id,
+          'user_id': ownerId,
+          'grammar_id': note.grammarId,
+          'content':
+              remoteContent ??
+              '${note.content}\n[Bản cập nhật từ thiết bị thứ 2 trên Cloud]',
+          'updated_at': nowUtc
+              .add(const Duration(minutes: 2))
+              .toIso8601String(),
+          'revision': 2,
+        };
+        await (database.delete(database.syncOutbox)..where(
+              (t) =>
+                  t.namespace.equals(namespace) &
+                  t.ownerId.equals(ownerId) &
+                  t.entityTable.equals('notes') &
+                  t.recordId.equals(note.id),
+            ))
+            .go();
+        await database
+            .into(database.syncOutbox)
+            .insert(
+              SyncOutboxCompanion.insert(
+                namespace: namespace,
+                ownerId: ownerId,
+                recordId: note.id,
+                operationId: Value(_uuid.v4()),
+                baseRevision: const Value(1),
+                operationType: const Value('upsert'),
+                lastError: const Value('conflict'),
+                conflictPayload: Value(jsonEncode(simulatedRemote)),
+                createdAt: Value(nowUtc),
+                payload: jsonEncode({
+                  'id': note.id,
+                  'user_id': ownerId,
+                  'grammar_id': note.grammarId,
+                  'content': note.content,
+                  'updated_at': note.updatedAt.toUtc().toIso8601String(),
+                  'deleted_at': null,
+                  'base_content': note.content,
+                }),
+              ),
+            );
+      });
 
   Future<void> _write(
     String table,

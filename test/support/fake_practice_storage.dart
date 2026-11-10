@@ -177,6 +177,7 @@ class FakeGrammarAnalysisRepository implements GrammarAnalysisRepository {
   Future<GrammarAnalysisResult> Function(String requestId, String text)?
   onAnalyze;
   final List<({String requestId, String text})> submittedRequests = [];
+  final List<List<String>> submittedCandidateIds = [];
 
   @override
   Future<AnalysisQuotaStatus> loadQuota() async {
@@ -189,8 +190,10 @@ class FakeGrammarAnalysisRepository implements GrammarAnalysisRepository {
     required String requestId,
     required String normalizedText,
     String locale = 'vi',
+    List<String> candidateIds = const [],
   }) async {
     submittedRequests.add((requestId: requestId, text: normalizedText));
+    submittedCandidateIds.add(List.unmodifiable(candidateIds));
     final fn = onAnalyze;
     if (fn != null) {
       return fn(requestId, normalizedText);

@@ -239,4 +239,75 @@ void main() {
     await migrated.setSaved('g', true);
     expect((await migrated.watchSummary().first).saved, {'g'});
   });
+
+  test(
+    'M3-05 multi-device note conflict is detected without data loss and resolves keepLocal or useRemote',
+    () async {
+      // 1. Initial note synced to server.
+      await repository.saveNote(note('Bản gốc ban đầu'));
+      await sync.run();
+      expect(remote.rows['notes']!['n']!['content'], 'Bản gốc ban đầu');
+
+      // 2. Another device modifies the note on the server while this device edits locally.
+      remote.rows['notes']!['n'] = {
+        'id': 'n',
+        'user_id': 'A',
+        'grammar_id': 'g',
+        'content': 'Bản sửa từ thiết bị thứ 2 (Cloud)',
+        'updated_at': DateTime.utc(2026, 5, 2).toIso8601String(),
+        'deleted_at': null,
+      };
+      await repository.saveNote(
+        Note(
+          id: 'n',
+          grammarId: 'g',
+          content: 'Bản sửa cục bộ trên máy này',
+          updatedAt: DateTime.utc(2026, 5, 1),
+        ),
+      );
+
+      // 3. Running sync detects divergence and records conflictPayload instead of overwriting.
+      await sync.run();
+      expect(
+        (await repository.watchNotes('g').first).single.content,
+        'Bản sửa cục bộ trên máy này',
+      );
+      expect(
+        remote.rows['notes']!['n']!['content'],
+        'Bản sửa từ thiết bị thứ 2 (Cloud)',
+      );
+
+      final conflicts = await repository.watchNoteConflicts().first;
+      expect(conflicts, hasLength(1));
+      expect(conflicts.single.noteId, 'n');
+      expect(conflicts.single.localContent, 'Bản sửa cục bộ trên máy này');
+      expect(
+        conflicts.single.remoteContent,
+        'Bản sửa từ thiết bị thứ 2 (Cloud)',
+      );
+
+      // 4. Resolve by keeping local version -> clears conflict and syncs to remote.
+      await repository.resolveNoteConflict('n', keepLocal: true);
+      expect(await repository.watchNoteConflicts().first, isEmpty);
+      await sync.run();
+      expect(
+        remote.rows['notes']!['n']!['content'],
+        'Bản sửa cục bộ trên máy này',
+      );
+
+      // 5. Simulate conflict and resolve by accepting remote version -> updates local note.
+      final currentNote = (await repository.watchNotes('g').first).single;
+      await repository.simulateNoteConflict(
+        currentNote,
+        remoteContent: 'Bản chuẩn từ máy chủ',
+      );
+      expect(await repository.watchNoteConflicts().first, hasLength(1));
+      await repository.resolveNoteConflict('n', keepLocal: false);
+      expect(await repository.watchNoteConflicts().first, isEmpty);
+      expect(
+        (await repository.watchNotes('g').first).single.content,
+        'Bản chuẩn từ máy chủ',
+      );
+    },
+  );
 }

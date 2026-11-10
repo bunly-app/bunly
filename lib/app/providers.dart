@@ -242,6 +242,17 @@ final notesProvider = StreamProvider.autoDispose.family<List<Note>, String>(
 final notebookNotesProvider = StreamProvider.autoDispose<List<Note>>(
   (ref) => WatchNotebookNotes(ref.watch(learningRepositoryProvider))(),
 );
+final noteConflictsProvider = StreamProvider.autoDispose<List<NoteConflict>>((
+  ref,
+) {
+  final user = ref.watch(userProvider).valueOrNull;
+  if (user == null) return Stream.value(const []);
+  final repo = ref.watch(learningRepositoryProvider);
+  if (repo is LocalLearningRepository) {
+    return repo.watchNoteConflicts();
+  }
+  return Stream.value(const []);
+});
 final noteControllerProvider =
     StateNotifierProvider.autoDispose<NoteController, AsyncValue<void>>(
       (ref) => NoteController(SaveNote(ref.watch(learningRepositoryProvider))),
@@ -397,7 +408,10 @@ final pendingSyncProvider = StreamProvider.autoDispose<int>((ref) {
   if (!config.connected || user == null) return Stream.value(0);
   final db = ref.watch(databaseProvider);
   return (db.select(db.syncOutbox)..where(
-        (r) => r.namespace.equals(config.namespace) & r.ownerId.equals(user.id),
+        (r) =>
+            r.namespace.equals(config.namespace) &
+            r.ownerId.equals(user.id) &
+            r.conflictPayload.isNull(),
       ))
       .watch()
       .map((rows) => rows.length);

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../../grammar/domain/grammar_point.dart';
 import '../../grammar/domain/grammar_repository.dart';
+import 'on_device_grammar_detector.dart';
 
 const int analysisMaxCodepoints = 1000;
 const int analysisMaxUtf8Bytes = 8192;
@@ -87,6 +88,8 @@ class GrammarAnalysisResult {
     required List<GrammarAnalysisMatch> matches,
     this.remainingQuota,
     required this.isLiveAi,
+    this.onDeviceCandidatesCount = 0,
+    this.latencyMs,
   }) : matches = List.unmodifiable(matches);
 
   final String requestId;
@@ -94,6 +97,10 @@ class GrammarAnalysisResult {
   final List<GrammarAnalysisMatch> matches;
   final int? remainingQuota;
   final bool isLiveAi;
+  final int onDeviceCandidatesCount;
+  final int? latencyMs;
+
+  bool get isHybridEdgeCloud => isLiveAi && onDeviceCandidatesCount > 0;
 }
 
 class AnalysisQuotaStatus {
@@ -151,21 +158,28 @@ abstract interface class GrammarAnalysisRepository {
     required String requestId,
     required String normalizedText,
     String locale = 'vi',
+    List<String> candidateIds = const [],
   });
 
   Future<AnalysisQuotaStatus> loadQuota();
 }
 
 class AnalyzeGrammarSentence {
-  const AnalyzeGrammarSentence(this.repository, this.grammarRepository);
+  const AnalyzeGrammarSentence(
+    this.repository,
+    this.grammarRepository, {
+    this.detector = const OnDeviceGrammarDetector(),
+  });
 
   final GrammarAnalysisRepository repository;
   final GrammarRepository grammarRepository;
+  final OnDeviceGrammarDetector detector;
 
   Future<GrammarAnalysisResult> call({
     required String requestId,
     required String draftText,
   }) async {
+    final stopwatch = Stopwatch()..start();
     final normalizedId = requestId.trim().toLowerCase();
     if (!_uuidPattern.hasMatch(normalizedId)) {
       throw const AnalysisException(
@@ -194,15 +208,26 @@ class AnalyzeGrammarSentence {
       );
     }
 
-    final rawResult = await repository.analyze(
-      requestId: normalizedId,
-      normalizedText: normalizedText,
-      locale: 'vi',
-    );
     final catalog = await grammarRepository.load();
     final byId = <String, GrammarPoint>{
       for (final point in catalog.points) point.id.toLowerCase(): point,
     };
+
+    // Stage 1: On-Device Grammar Detection (pre-filtering & UTF-16 span extraction).
+    final edgeResult = detector.detect(normalizedText, catalog.points);
+    final candidateIds = edgeResult.candidateGrammarIds;
+    final edgeSpanById = <String, AnalysisUtf16Span>{
+      for (final item in edgeResult.matches)
+        if (item.span != null) item.point.id.toLowerCase(): item.span!,
+    };
+
+    // Stage 2: Cloud AI confirmation with pre-filtered candidate hints.
+    final rawResult = await repository.analyze(
+      requestId: normalizedId,
+      normalizedText: normalizedText,
+      locale: 'vi',
+      candidateIds: candidateIds,
+    );
 
     final hydrated = <GrammarAnalysisMatch>[];
     for (final match in rawResult.matches) {
@@ -232,6 +257,16 @@ class AnalyzeGrammarSentence {
                 'Vị trí trích dẫn ngữ pháp không khớp với câu đã xác nhận.',
           );
         }
+      } else {
+        final edgeSpan = edgeSpanById[point.id.toLowerCase()];
+        if (edgeSpan != null) {
+          validatedSpan = validateSpanOnText(
+            normalizedText,
+            startUtf16: edgeSpan.startUtf16,
+            endUtf16: edgeSpan.endUtf16,
+            spanText: edgeSpan.text,
+          );
+        }
       }
       hydrated.add(
         GrammarAnalysisMatch(
@@ -241,6 +276,7 @@ class AnalyzeGrammarSentence {
         ),
       );
     }
+    stopwatch.stop();
 
     return GrammarAnalysisResult(
       requestId: rawResult.requestId,
@@ -248,6 +284,8 @@ class AnalyzeGrammarSentence {
       matches: hydrated,
       remainingQuota: rawResult.remainingQuota,
       isLiveAi: rawResult.isLiveAi,
+      onDeviceCandidatesCount: candidateIds.length,
+      latencyMs: stopwatch.elapsedMilliseconds,
     );
   }
 }

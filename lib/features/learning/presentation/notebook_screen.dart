@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,6 +7,7 @@ import '../../../app/bunly_theme.dart';
 import '../../../app/providers.dart';
 import '../../grammar/domain/grammar_point.dart';
 import '../../practice/presentation/practice_screen.dart';
+import '../data/local_learning_repository.dart';
 import '../domain/note.dart';
 import '../domain/personal_repository.dart';
 import 'learning_widgets.dart';
@@ -31,6 +34,10 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
   Widget build(BuildContext context) {
     final overview = ref.watch(learningOverviewProvider);
     final notes = ref.watch(notebookNotesProvider);
+    final conflicts =
+        ref.watch(noteConflictsProvider).valueOrNull ?? const <NoteConflict>[];
+    final pendingSyncCount = ref.watch(pendingSyncProvider).valueOrNull ?? 0;
+    final isConnected = ref.watch(configProvider).connected;
     final colors = Theme.of(context).colorScheme;
     final tones = BunlyTones.of(context);
 
@@ -91,25 +98,46 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: colors.surfaceContainerLowest.withValues(
-                          alpha: 0.85,
-                        ),
+                        color: conflicts.isNotEmpty
+                            ? colors.tertiaryContainer
+                            : colors.surfaceContainerLowest.withValues(
+                                alpha: 0.85,
+                              ),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.cloud_done_outlined,
+                            conflicts.isNotEmpty
+                                ? Icons.merge_type_rounded
+                                : pendingSyncCount > 0
+                                ? Icons.cloud_upload_outlined
+                                : Icons.cloud_done_outlined,
                             size: 13,
-                            color: colors.primary,
+                            color: conflicts.isNotEmpty
+                                ? colors.onTertiaryContainer
+                                : colors.primary,
                           ),
                           const SizedBox(width: 4),
                           Flexible(
                             child: Text(
-                              'Lưu trên máy',
+                              conflicts.isNotEmpty
+                                  ? 'Có ${conflicts.length} xung đột cần xử lý'
+                                  : pendingSyncCount > 0
+                                  ? 'Chờ đồng bộ ($pendingSyncCount mục)'
+                                  : isConnected
+                                  ? 'Đã đồng bộ · Lưu trên máy'
+                                  : 'Lưu trên máy',
                               style: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(color: colors.onSurfaceVariant),
+                                  ?.copyWith(
+                                    color: conflicts.isNotEmpty
+                                        ? colors.onTertiaryContainer
+                                        : colors.onSurfaceVariant,
+                                    fontWeight: conflicts.isNotEmpty
+                                        ? FontWeight.w700
+                                        : null,
+                                  ),
                             ),
                           ),
                         ],
@@ -145,6 +173,17 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
               ],
             ),
           ),
+          if (conflicts.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            for (final conflict in conflicts)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _ConflictResolutionCard(
+                  conflict: conflict,
+                  point: pointById[conflict.grammarId],
+                ),
+              ),
+          ],
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
@@ -465,14 +504,18 @@ class _NotebookScreenState extends ConsumerState<NotebookScreen> {
   }
 }
 
-class NotebookNote extends StatelessWidget {
+class NotebookNote extends ConsumerWidget {
   const NotebookNote({super.key, required this.note, required this.points});
   final Note note;
   final List<GrammarPoint> points;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
+    final repo = ref.watch(learningRepositoryProvider);
+    final conflicts =
+        ref.watch(noteConflictsProvider).valueOrNull ?? const <NoteConflict>[];
+    final isConflicted = conflicts.any((c) => c.noteId == note.id);
     GrammarPoint? point;
     for (final item in points) {
       if (item.id == note.grammarId) {
@@ -509,6 +552,21 @@ class NotebookNote extends StatelessWidget {
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
+            if (isConflicted)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: colors.tertiaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Đang xung đột',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: colors.onTertiaryContainer,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
           ],
         ),
         const SizedBox(height: 10),
@@ -521,21 +579,158 @@ class NotebookNote extends StatelessWidget {
           child: Text(note.content),
         ),
         const SizedBox(height: 10),
-        if (grammar != null)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: () => openGrammar(context, grammar),
-              icon: const Icon(Icons.edit_note_outlined),
-              label: const Text('Mở mẫu và chỉnh ghi chú'),
-            ),
-          )
-        else
-          Text(
-            'Ghi chú vẫn được giữ trên máy. Tải lại kho để mở mẫu liên quan.',
-            style: TextStyle(color: colors.onSurfaceVariant),
-          ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 6,
+          children: [
+            if (grammar != null)
+              TextButton.icon(
+                onPressed: () => openGrammar(context, grammar),
+                icon: const Icon(Icons.edit_note_outlined),
+                label: const Text('Mở mẫu và chỉnh ghi chú'),
+              )
+            else
+              Text(
+                'Ghi chú vẫn được giữ trên máy. Tải lại kho để mở mẫu liên quan.',
+                style: TextStyle(color: colors.onSurfaceVariant),
+              ),
+            if (repo is LocalLearningRepository && !isConflicted)
+              TextButton.icon(
+                key: ValueKey('simulate-conflict-${note.id}'),
+                onPressed: () async {
+                  await repo.simulateNoteConflict(note);
+                },
+                icon: const Icon(Icons.merge_type_rounded, size: 18),
+                label: const Text('Mô phỏng xung đột đồng bộ'),
+              ),
+          ],
+        ),
       ],
+    );
+  }
+}
+
+class _ConflictResolutionCard extends ConsumerWidget {
+  const _ConflictResolutionCard({required this.conflict, required this.point});
+
+  final NoteConflict conflict;
+  final GrammarPoint? point;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).colorScheme;
+    final repo = ref.watch(learningRepositoryProvider);
+
+    Future<void> resolve(bool keepLocal) async {
+      if (repo is! LocalLearningRepository) return;
+      await repo.resolveNoteConflict(conflict.noteId, keepLocal: keepLocal);
+      if (keepLocal) {
+        final sync = ref.read(learningSyncProvider);
+        if (sync != null) {
+          unawaited(sync.run().catchError((_) {}));
+        }
+      }
+    }
+
+    return Container(
+      key: ValueKey('conflict-card-${conflict.noteId}'),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colors.tertiaryContainer.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.tertiary, width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.merge_type_rounded, size: 20, color: colors.tertiary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Xung đột đồng bộ đa thiết bị · ${point?.pattern ?? conflict.grammarId}',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: colors.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Ghi chú này vừa được sửa trên cả thiết bị này lẫn máy chủ. Hãy chọn phiên bản bạn muốn giữ:',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'BẢN TRÊN MÁY NÀY',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(conflict.localContent),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'BẢN TRÊN MÁY CHỦ (THIẾT BỊ KHÁC)',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: colors.secondary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(conflict.remoteContent),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.end,
+            children: [
+              OutlinedButton.icon(
+                key: ValueKey('conflict-use-remote-${conflict.noteId}'),
+                onPressed: () => resolve(false),
+                icon: const Icon(Icons.cloud_download_outlined, size: 18),
+                label: const Text('Dùng bản trên máy chủ'),
+              ),
+              FilledButton.icon(
+                key: ValueKey('conflict-keep-local-${conflict.noteId}'),
+                onPressed: () => resolve(true),
+                icon: const Icon(Icons.smartphone_outlined, size: 18),
+                label: const Text('Giữ bản trên máy'),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -40,17 +40,30 @@ function validUnicode(text) {
 }
 
 export function validateAnalysisInput(payload) {
-  if (!keysAre(payload, ['request_id', 'text', 'locale'])
+  if (!keysAre(payload, ['request_id', 'text', 'locale'], ['candidate_ids'])
     || typeof payload.request_id !== 'string' || !uuid.test(payload.request_id)
     || payload.locale !== 'vi' || typeof payload.text !== 'string'
     || !validUnicode(payload.text)) reject('invalid_input');
+
+  let candidateIds;
+  if (Object.hasOwn(payload, 'candidate_ids') && payload.candidate_ids !== undefined && payload.candidate_ids !== null) {
+    if (!Array.isArray(payload.candidate_ids) || payload.candidate_ids.length > 50
+      || payload.candidate_ids.some((id) => typeof id !== 'string' || !uuid.test(id))) {
+      reject('invalid_input');
+    }
+    candidateIds = Object.freeze([...new Set(payload.candidate_ids.map((id) => id.toLowerCase()))]);
+  }
 
   const text = payload.text.replaceAll('\r\n', '\n').trim();
   const size = [...text].length;
   if (size < 1 || size > MAX_TEXT_CODEPOINTS || encoder.encode(text).byteLength > MAX_REQUEST_BYTES) {
     reject('invalid_input');
   }
-  return Object.freeze({ request_id: payload.request_id.toLowerCase(), text, locale: 'vi' });
+  return Object.freeze(
+    candidateIds
+      ? { request_id: payload.request_id.toLowerCase(), text, locale: 'vi', candidate_ids: candidateIds }
+      : { request_id: payload.request_id.toLowerCase(), text, locale: 'vi' },
+  );
 }
 
 // Apply only after authentication in a real endpoint. Bounds memory even without Content-Length.

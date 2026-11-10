@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bunly/features/analysis/data/catalog_sentence_preview.dart';
+import 'package:bunly/features/analysis/domain/grammar_analysis.dart';
 import 'package:bunly/features/analysis/domain/sentence_preview.dart';
 import 'package:bunly/features/grammar/data/grammar_mapper.dart';
 import 'package:bunly/features/grammar/domain/grammar_catalog.dart';
@@ -9,6 +10,8 @@ import 'package:bunly/features/grammar/domain/grammar_point.dart';
 import 'package:bunly/features/grammar/domain/grammar_repository.dart';
 import 'package:bunly/features/ocr/domain/ocr_draft.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/fake_practice_storage.dart';
 
 class _FullAssetGrammarCatalog implements GrammarRepository {
   _FullAssetGrammarCatalog() {
@@ -218,6 +221,39 @@ void main() {
           preview.onDeviceMatches.first.confidencePercent,
           greaterThan(85),
         );
+      },
+    );
+
+    test(
+      'AnalyzeGrammarSentence (M3-04) pre-filters candidates on device and fuses UTF-16 spans into Cloud AI matches',
+      () async {
+        const validId = '11111111-1111-4111-8111-111111111111';
+        final targetPoint = catalog.points.firstWhere(
+          (p) => p.pattern == '〜たことがある',
+        );
+        final repo = FakeGrammarAnalysisRepository(
+          onAnalyze: (reqId, text) async => GrammarAnalysisResult(
+            requestId: reqId,
+            text: text,
+            // Simulate Gemini Flash-Lite returning grammar_id without span:
+            matches: [GrammarAnalysisMatch(grammarId: targetPoint.id)],
+            remainingQuota: 19,
+            isLiveAi: true,
+          ),
+        );
+        final useCase = AnalyzeGrammarSentence(repo, catalog);
+        final result = await useCase(
+          requestId: validId,
+          draftText: '北海道でスキーをしたことがあります。',
+        );
+
+        expect(repo.submittedCandidateIds.single, contains(targetPoint.id));
+        expect(result.isHybridEdgeCloud, isTrue);
+        expect(result.onDeviceCandidatesCount, greaterThanOrEqualTo(1));
+        expect(result.matches.single.point?.pattern, '〜たことがある');
+        // Span was fused from Stage 1 OnDeviceGrammarDetector!
+        expect(result.matches.single.span, isNotNull);
+        expect(result.matches.single.span!.text, contains('したことがあります'));
       },
     );
   });

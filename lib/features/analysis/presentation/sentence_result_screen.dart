@@ -183,7 +183,9 @@ class _SentenceResultScreenState extends ConsumerState<SentenceResultScreen> {
         : 'Chưa qua AI/OCR';
 
     final sourceText = ai != null
-        ? (widget.sourceIsOcr
+        ? (ai.isHybridEdgeCloud
+              ? 'Nguồn: Hybrid AI — Lọc ${ai.onDeviceCandidatesCount} ứng viên trên thiết bị + xác nhận Gemini Cloud${ai.latencyMs != null ? ' (${ai.latencyMs}ms)' : ''}.'
+              : widget.sourceIsOcr
               ? 'Nguồn: OCR trên máy + văn bản bạn đã sửa và xác nhận gửi AI.'
               : 'Nguồn: văn bản bạn đã nhập/sửa và xác nhận gửi AI.')
         : (widget.sourceIsOcr

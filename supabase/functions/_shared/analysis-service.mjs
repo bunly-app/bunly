@@ -49,7 +49,17 @@ export function createAnalysisHandler({ authenticate, catalog, ledger, provider 
     let output;
     let providerError = null;
     try {
-      output = validateAnalysisOutput(await provider.analyze(input, candidates), input, new Set(candidates.map((item) => item.id)));
+      const candidateSet = new Set(candidates.map((item) => item.id));
+      const hintedIds = Array.isArray(input.candidate_ids)
+        ? new Set(input.candidate_ids.filter((id) => candidateSet.has(id)))
+        : new Set();
+      const providerCandidates = hintedIds.size >= 1
+        ? [
+            ...candidates.filter((item) => hintedIds.has(item.id)),
+            ...candidates.filter((item) => !hintedIds.has(item.id)).slice(0, Math.max(0, 18 - hintedIds.size)),
+          ]
+        : candidates;
+      output = validateAnalysisOutput(await provider.analyze(input, providerCandidates), input, candidateSet);
     } catch (error) {
       providerError = error instanceof AnalysisContractError && ['invalid_output', 'timeout', 'unavailable'].includes(error.code)
         ? error.code : 'unavailable';
