@@ -1,0 +1,67 @@
+name: Build and Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate B0 draft fixture structure
+        run: python3 scripts/validate_b0_fixtures.py
+      - name: Read SDK pin
+        id: sdk
+        run: echo "version=$(cat .flutter-version)" >> "$GITHUB_OUTPUT"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.sdk.outputs.version }}
+          channel: stable
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: git diff --exit-code -- lib/core/database/app_database.g.dart
+      - run: dart format --output=none --set-exit-if-changed lib test integration_test test_connected
+      - run: flutter analyze --no-pub
+      - run: flutter test --no-pub
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Build Demo offline release APK (debug-signed preview)
+        run: flutter build apk --release --dart-define-from-file=config/demo.example.json
+      - name: Prepare release asset and SHA-256 checksum
+        id: asset
+        run: |
+          mkdir -p release-assets
+          TAG_LABEL="${GITHUB_REF_NAME:-preview}"
+          APK_NAME="bunly-${TAG_LABEL}-demo-offline.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "release-assets/${APK_NAME}"
+          (cd release-assets && sha256sum "${APK_NAME}" > "${APK_NAME}.sha256")
+          echo "apk_name=${APK_NAME}" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.asset.outputs.apk_name }}
+          path: release-assets/*
+      - name: Publish GitHub Pre-release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          files: |
+            release-assets/${{ steps.asset.outputs.apk_name }}
+            release-assets/${{ steps.asset.outputs.apk_name }}.sha256
+          body: |
+            ## Bunly ${{ github.ref_name }} — Demo Offline Preview APK
+
+            - **Chế độ build**: Demo ngoại tuyến (`config/demo.example.json`, dữ liệu lưu cục bộ bằng SQLite/Drift).
+            - **Ký APK**: Debug signing key (dành cho cài đặt thử nghiệm / QA trên Android; chưa dùng keystore phát hành Play Store).
+            - **Nội dung**: 90 điểm ngữ pháp N5/N4 (45 N5, 45 N4) và 180 câu luyện tập (`AI-authored draft` chờ nhóm duyệt nội dung trước khi phát hành chính thức).
+            - **Lưu ý kết nối**: Không trỏ tới Supabase Cloud trong bản preview này; chế độ kết nối (`BUNLY_CONNECTED=true`) sẽ dùng sau khi kích hoạt lại backend Supabase HTTPS.
