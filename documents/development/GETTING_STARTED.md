@@ -20,7 +20,7 @@ Node/Supabase/Docker không cần cho việc chạy demo Flutter. Trên Windows,
 ```sh
 git clone https://github.com/bunly-app/bunly.git
 cd bunly
-git switch feat/m2-architecture-base
+git switch codex/complete-m2
 flutter pub get
 flutter run --dart-define-from-file=config/demo.example.json
 ```
@@ -77,7 +77,7 @@ Người phụ trách backend phải xác nhận project đích trước khi ch�
 
 ```sh
 dart run build_runner build --delete-conflicting-outputs
-dart format --output=none --set-exit-if-changed lib test
+dart format --output=none --set-exit-if-changed lib test integration_test test_connected
 flutter analyze
 flutter test
 flutter build apk --debug --dart-define-from-file=config/demo.example.json
@@ -95,4 +95,39 @@ Commit file Drift `*.g.dart` đã sinh để thành viên mới mở dự án th
 - Nếu home directory của cloud chỉ đọc, cấu hình các thư mục ghi được ngoài checkout bằng `SUPABASE_HOME`, `PUB_CACHE`, `XDG_CONFIG_HOME` và `ANALYZER_STATE_LOCATION_OVERRIDE`. Ví dụ `SUPABASE_HOME=/workspace/.cache/supabase npm run supabase -- --version`; không đổi biến `HOME` và không đưa cache vào Git.
 - Cấu hình không được commit: `config/*.local.json`, `.env*` (trừ example), token CLI và khóa quản trị. Khi chia sẻ lỗi, chỉ ghi tên biến và trạng thái hiện diện.
 
-Xem [kiến trúc hiện tại và kết quả kiểm chứng](ARCHITECTURE.md) để phân biệt chức năng của base với mục tiêu M2. Ghi chú connected hiện lưu local và xếp outbox; worker đồng bộ, hồ sơ, lưu mẫu và tiến độ còn phải triển khai.
+Xem [kiến trúc hiện tại và kết quả kiểm chứng](ARCHITECTURE.md) để phân biệt chức năng của base với mục tiêu M2. Bản hoàn thiện M2 đã có hồ sơ, lưu mẫu, tiến độ và worker push/pull. Xem biên bản kiểm chứng để biết phần còn chưa chạy thật; không suy nghiệm thu connected từ demo.
+
+
+## 7. Kiểm thử connected và Android M2
+
+Sau khi local stack đầy đủ Auth đã sẵn sàng, tạo hai tài khoản test dùng một lần:
+
+```sh
+python scripts/prepare_m2_local.py
+flutter test test_connected/m2_connected_test.dart --dart-define-from-file=config/m2-test.local.json
+```
+
+Trên Windows có thể chạy `./scripts/prepare-m2-local.ps1`. Helper chỉ cho phép backend HTTP localhost/127.0.0.1:54321; tạo user đã xác nhận bằng admin local để setup test. Admin key chỉ ở tiến trình helper, không được ghi vào app. File test local chứa client key và mật khẩu test, đã được ignore; không chia sẻ/commit. Tài khoản thử ở DB local vẫn tồn tại sau test; dọn trên môi trường thử khi không còn cần. Việc setup này không chứng minh thao tác mở email xác nhận của người dùng.
+
+Suite connected chạy Auth SDK, ghi local, mở lại DB, push/pull, sửa/xóa và thử RLS bằng hai user. Đây là test SDK/backend trên máy, chưa phải UI E2E Android. Nó không thuộc lệnh `flutter test` mặc định.
+
+Trên Android, suite demo dùng asset và SQLite thật:
+
+```sh
+flutter test integration_test/m2_demo_test.dart -d <device-id> --dart-define-from-file=config/demo.example.json
+```
+
+Phải thử connected trên Android riêng: Auth/email → hồ sơ → tìm/lọc → lưu/ghi chú/trạng thái → restart → offline → reconnect → đổi A/B. Banner đồng bộ chạy khi mở kho/foreground, mỗi 30 giây và khi bấm Đồng bộ; tác vụ pending có thể chờ lượt kế tiếp. Ghi rõ model/OS, mode, SHA và kết quả.
+
+### Windows: JDK và Gradle cache
+
+Flutter có thể tự chọn JDK của Android Studio thay vì JAVA_HOME. Nếu JDK đó quá mới so với Gradle 8.12, dùng JDK 17 tương thích để chạy Gradle wrapper của project; không đổi pin SDK/Gradle chỉ để vượt lỗi máy. Không commit đường dẫn JDK riêng. Có thể đặt GRADLE_USER_HOME cho riêng tiến trình nếu cache mặc định trỏ tới đường dẫn hỏng. Các lệnh native có đối số chứa dấu chấm/đường dẫn nên được quote trên PowerShell.
+
+Sau `flutter pub get` và khi local.properties đã trỏ đúng Flutter SDK, có thể chạy wrapper từ thư mục android bằng JDK 17:
+
+```powershell
+# JAVA_HOME và GRADLE_USER_HOME dùng đường dẫn thật trên máy; không ghi vào Git.
+./gradlew.bat assembleDebug --console=plain
+```
+
+Build wrapper mặc định dùng lib/main.dart và demo khi không có dart-define connected. Không dùng APK demo để chứng minh backend đã hoạt động.

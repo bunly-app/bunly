@@ -1,46 +1,41 @@
-# Nền kiến trúc đang có và cách tiếp tục M2
+# Kiến trúc M2 và trạng thái kiểm chứng
 
-Đọc [thiết lập chạy app](GETTING_STARTED.md) trước. Tài liệu này mô tả base trên nhánh `feat/m2-architecture-base`, không phải tuyên bố M2 hoàn thành.
+Cập nhật ngày 29/10/2026. Xem [báo cáo M2](../reports/Capstone-Report-2-Architecture.md) và [biên bản kiểm chứng](../reports/M2-Verification-2026-10-29.md) để biết phần đã chạy/chưa chạy. Không xem code đã bổ sung là nghiệm thu toàn bộ M2.
 
-## Mã nguồn hiện tại
+## Các thành phần hiện có
 
-| Thành phần | Vị trí | Trách nhiệm |
-|---|---|---|
-| Bootstrap và cấu hình | `lib/main.dart`, `lib/app/config.dart` | Phân biệt demo/connected; cấu hình connected thiếu thì báo lỗi; release yêu cầu HTTPS |
-| Composition root | `lib/app/providers.dart` | Riverpod lắp ghép repository, use case, controllers và session |
-| Auth | `lib/features/auth/` | Interface và use case validate; adapter Supabase; form đăng nhập/đăng ký/xác nhận email |
-| Grammar | `lib/features/grammar/` | Tìm/lọc trong domain; data lấy asset hoặc API và cache Drift; UI danh sách/chi tiết |
-| Learning | `lib/features/learning/` | `SaveNote` kiểm tra nội dung; repository lưu local + outbox trong một transaction |
-| Cơ sở dữ liệu local | `lib/core/database/` | Cache phân vùng theo backend; ghi chú/outbox theo backend và tài khoản; schema version 1 |
-| Backend | `supabase/` | Sáu bảng, RLS, trigger hồ sơ/timestamp, ba mẫu seed và 18 kiểm tra pgTAP |
+| Thành phần | Trách nhiệm |
+|---|---|
+| `lib/app/` | Cấu hình demo/connected, navigator theo tài khoản, Riverpod composition root |
+| `features/auth/` | Validate thông tin đăng nhập/đăng ký, Supabase adapter và form |
+| `features/grammar/` | Kho, tìm/lọc, chi tiết, API/asset và cache; lỗi quyền không bị che bằng cache |
+| `features/learning/domain/` | Note, UserProfile, LearningSummary, LearningStatus; SaveNote và UpdateLearning; repository interfaces |
+| `features/learning/data/` | Ghi local + outbox transaction, CRUD cá nhân, push/pull với session owner và pending protection |
+| `features/learning/presentation/` | Hồ sơ, lưu mẫu/trạng thái, controller và banner đồng bộ |
+| `core/database/` | Drift schema version 2, migration v1 → v2 giữ dữ liệu cũ và code sinh |
+| `supabase/` | Schema/RLS backend, seed 3 mẫu và pgTAP; SQL test mới phải chạy lại |
 
-UI gọi use case hoặc repository interface qua DI; domain không import Flutter, Riverpod, Drift hay Supabase. `SearchGrammar` tải danh sách; `filterGrammar` xử lý truy vấn/cấp độ/nhóm trên danh sách đã tải, không gọi API mỗi lần gõ. Tài khoản thay đổi làm thay navigator để đóng trang ghi chú cũ.
+Domain chỉ phụ thuộc Dart. UI/controller gọi use case; data triển khai interface; app wire implementation. Demo dùng namespace riêng và không gửi outbox lên Supabase. Test widget dùng fake; repository/migration test dùng SQLite thật. Remote giả lập chỉ chứng minh thuật toán lỗi/race, không chứng minh Auth/API thật.
 
-Ghi chú connected hiện lưu trên thiết bị và tạo outbox. **Chưa có worker gửi/nhận ghi chú**; UI thông báo đúng giới hạn này. Demo không tạo outbox từ xa. Các bảng `saved_grammar`, `progress`, `profiles` đã có ở backend; chưa có đầy đủ use case/UI cho các chức năng đó.
+## Đồng bộ M2
 
-## Cách thêm tính năng
+- Bốn entity từ xa: profiles, notes, saved_grammar, progress. Local notes có tombstone; personal_records giữ payload cho ba loại còn lại.
+- Outbox là các snapshot thao tác bất biến với sequence tăng dần. Push theo thứ tự, giữ thao tác nếu thất bại; upsert theo khóa ổn định. Ack chỉ xóa đúng sequence đã gửi.
+- Worker lấy token của owner tại thời điểm tạo request; không lấy token của user khác. Kiểm tra session trước/sau await và dừng khi provider bị dispose.
+- Pull theo owner, có phân trang; không đè entity/key còn pending local. Không dùng timestamp client để kết luận thứ tự xung đột đa thiết bị.
+- Trigger khi mở kho, foreground, mỗi 30 giây khi banner còn được giữ và nút Đồng bộ. Không hứa tác vụ nền khi app bị đóng.
+- Hard-delete từ admin và hợp nhất đa thiết bị chưa nghiệm thu. M3 chốt chính sách conflict/tombstone đầy đủ.
 
-1. Chốt entity, quy tắc nghiệp vụ và interface trong `domain`. Viết test cho quy tắc có thể sai trước khi ghép dịch vụ.
-2. Thêm model/mapper, data source và implementation trong `data`; không để model Supabase/Drift đi lên UI.
-3. Wire implementation ở `lib/app/providers.dart`. Dùng fake tại vị trí interface để kiểm thử widget.
-4. Thêm controller/screen trong `presentation`; xử lý tải/rỗng/lỗi, lỗi lưu và vòng đời session.
-5. Nếu đổi dữ liệu: migration Supabase + policy/test; migration Drift + code generation; chạy các kiểm tra liên quan.
-6. Cập nhật tiến độ báo cáo bằng bằng chứng thật tại commit triển khai. Việc thêm folder hoặc interface chưa được tính là hoàn thành chức năng.
+## Kiểm thử và tiếp tục
 
-## Công việc tiếp theo theo thứ tự
+- `test/`: domain, SQLite, migration, retry/ack/session race, cache và widget.
+- `test_connected/`: Auth/API/RLS qua SDK với Supabase local thật; chạy riêng, cấu hình thiếu là lỗi chứ không skip.
+- `integration_test/`: luồng demo Android dùng asset/SQLite thật và luồng connected Android dùng Supabase local, Mailpit và mô phỏng ngắt API. Hai suite đạt trên Samsung A11; không thay thế Cloud UAT và thao tác bàn phím/mạng thật.
+- CI chạy format/analyze/unit-widget/build APK, SQL và connected SDK. Chỉ dẫn kết quả run của commit thực tế.
+- Phần còn phải nghiệm thu: email/đăng nhập Cloud bằng tài khoản người dùng, bàn phím và mạng thật, video 2–3 phút và mốc mã nguồn nộp. OCR/LLM/conflict đa thiết bị theo M3.
 
-| Thứ tự | Công việc | Điều kiện đạt |
-|---|---|---|
-| 1 | Chạy connected trên Android, hoàn thiện màn hình hồ sơ | Đăng ký/xác nhận/đăng nhập được; hồ sơ lưu và đọc lại đúng user |
-| 2 | Hoàn thiện lưu/bỏ lưu mẫu và trạng thái học | Dữ liệu cục bộ có migration; thao tác lặp không trùng; số đếm lấy từ bản ghi thật |
-| 3 | Sửa/xóa ghi chú và bổ sung tombstone | Không mất thao tác khi khởi động lại; ghi chú được phân vùng đúng tài khoản |
-| 4 | Worker đồng bộ một thiết bị | Chỉ gửi bằng session chủ sở hữu; giữ outbox khi lỗi; retry idempotent; phản hồi cũ không ghi đè thay đổi mới |
-| 5 | Nhận dữ liệu từ xa và giải thích trạng thái cache | Lần đầu tải được; offline đọc cache có thông báo; lỗi xác thực không bị báo thành đồng bộ thành công |
-| 6 | Chạy E2E và quay video | FR-01 đến FR-06 đạt trên thiết bị; video 2–3 phút khớp tag/commit M2 |
+## Lịch sử kiểm chứng tại cloud ngày 22/10/2026
 
-OCR, LLM và xử lý xung đột nhiều thiết bị tiếp tục ở M3 theo PRD. Không tạo tag `milestone-2` trước khi bộ tiêu chí nghiệm thu đạt.
-
-## Kiểm chứng tại cloud ngày 22/10/2026
 
 - Flutter 3.35.7 / Dart 3.9.2; Supabase CLI 2.121.0 được cài và chạy.
 - `flutter analyze`: không có vấn đề; 12 test use case/repository/Drift/widget đạt.

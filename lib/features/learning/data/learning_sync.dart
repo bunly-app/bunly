@@ -69,6 +69,8 @@ class SupabaseLearningRemote implements LearningRemote {
 }
 
 /// Single-device sync. Pending local writes always take priority over a pull.
+/// Manual network/account-switch checks: M2-MANUAL-07..09 in
+/// documents/development/M2-TEST-HANDOFF.md. Multi-device conflict is M3 scope.
 class LearningSync {
   LearningSync(
     this.database,

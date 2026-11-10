@@ -7,6 +7,8 @@
 
 > Bản xem trước được cập nhật theo base trên nhánh `feat/m2-architecture-base` ngày 22/10/2026. Đã có Flutter, schema, kiểm thử và CI; chưa đạt nghiệm thu toàn bộ M2. Kế hoạch nằm trong [PRD M2](../planning/PRD-M2-Architecture-Base.md); hướng phát triển và giới hạn đã kiểm chứng nằm trong [tài liệu kiến trúc](../development/ARCHITECTURE.md).
 
+> Đây là snapshot lịch sử của base. Xem [báo cáo M2 cập nhật](Capstone-Report-2-Architecture.md) và [biên bản kiểm chứng](M2-Verification-2026-10-29.md) cho đợt triển khai ngày 29/10/2026.
+
 ## 1. CLEAN ARCHITECTURE IMPLEMENTATION
 
 ### 1.1. Luồng chức năng mục tiêu
