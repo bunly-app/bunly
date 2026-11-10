@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/bunly_theme.dart';
-import '../../../app/providers.dart';
 import '../../grammar/domain/grammar_point.dart';
 import '../../grammar/presentation/grammar_detail_screen.dart';
 import '../domain/personal_repository.dart';
@@ -244,7 +242,7 @@ class StackedProgressBar extends StatelessWidget {
   }
 }
 
-class GrammarEntry extends ConsumerWidget {
+class GrammarEntry extends StatelessWidget {
   const GrammarEntry({
     super.key,
     required this.point,
@@ -257,7 +255,7 @@ class GrammarEntry extends ConsumerWidget {
   final bool saved;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
@@ -283,24 +281,16 @@ class GrammarEntry extends ConsumerWidget {
           ],
         ),
       ),
-      trailing: IconButton(
-        tooltip: saved ? 'Bỏ lưu ${point.pattern}' : 'Lưu ${point.pattern}',
-        icon: Icon(saved ? Icons.bookmark : Icons.bookmark_border),
-        color: colors.primary,
-        onPressed: ref.watch(learningControllerProvider).isLoading
-            ? null
-            : () async {
-                final ok = await ref
-                    .read(learningControllerProvider.notifier)
-                    .perform((useCase) => useCase.setSaved(point.id, !saved));
-                if (!ok && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Chưa lưu được thay đổi. Hãy thử lại.'),
-                    ),
-                  );
-                }
-              },
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (saved)
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: Icon(Icons.bookmark, size: 18, color: colors.primary),
+            ),
+          Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
+        ],
       ),
       onTap: () => openGrammar(context, point),
     );

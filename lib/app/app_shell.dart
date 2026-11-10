@@ -55,7 +55,6 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   Widget build(BuildContext context) {
     final connected = ref.watch(configProvider).connected;
-    final signOut = ref.watch(signOutControllerProvider);
     final colors = Theme.of(context).colorScheme;
 
     return PopScope(
@@ -120,25 +119,6 @@ class _AppShellState extends ConsumerState<AppShell> {
                 MaterialPageRoute<void>(builder: (_) => const ProfileScreen()),
               ),
             ),
-            if (connected)
-              IconButton(
-                tooltip: 'Đăng xuất',
-                icon: const Icon(Icons.logout),
-                onPressed: signOut.isLoading
-                    ? null
-                    : () async {
-                        final success = await ref
-                            .read(signOutControllerProvider.notifier)
-                            .submit();
-                        if (!success && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Chưa thể đăng xuất. Hãy thử lại.'),
-                            ),
-                          );
-                        }
-                      },
-              ),
           ],
         ),
         body: SafeArea(
@@ -149,46 +129,7 @@ class _AppShellState extends ConsumerState<AppShell> {
               constraints: const BoxConstraints(maxWidth: 640),
               child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 6,
-                    ),
-                    child: connected
-                        ? const SyncBanner()
-                        : Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 7,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colors.surfaceContainerLow,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.offline_pin_outlined,
-                                  size: 16,
-                                  color: colors.primary,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'Chế độ ngoại tuyến · Dữ liệu và ghi chú lưu trên thiết bị.',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelMedium
-                                        ?.copyWith(
-                                          color: colors.onSurfaceVariant,
-                                        ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                  ),
+                  if (connected) const SyncBanner(),
                   Expanded(
                     child: IndexedStack(
                       index: selected,
@@ -196,7 +137,6 @@ class _AppShellState extends ConsumerState<AppShell> {
                         TodayScreen(
                           scrollController: _tabControllers[0],
                           onBrowse: () => select(1),
-                          onNotebook: () => select(2),
                         ),
                         GrammarScreen(scrollController: _tabControllers[1]),
                         NotebookScreen(

@@ -11,15 +11,9 @@ import '../domain/personal_repository.dart';
 import 'learning_widgets.dart';
 
 class TodayScreen extends ConsumerWidget {
-  const TodayScreen({
-    super.key,
-    required this.onBrowse,
-    required this.onNotebook,
-    this.scrollController,
-  });
+  const TodayScreen({super.key, required this.onBrowse, this.scrollController});
 
   final VoidCallback onBrowse;
-  final VoidCallback onNotebook;
   final ScrollController? scrollController;
 
   @override
@@ -180,42 +174,31 @@ class TodayScreen extends ConsumerWidget {
                     ),
                   ],
                   const SizedBox(height: 14),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      if (dueQuestions.isNotEmpty)
-                        FilledButton.icon(
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => CuratedPracticeSessionScreen(
-                                questions: dueQuestions,
-                                pool: cachedQuestions,
-                                catalogById: pointById,
-                                source: PracticeSessionSource.dueSrs,
-                              ),
-                            ),
+                  if (dueQuestions.isNotEmpty)
+                    FilledButton.icon(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => CuratedPracticeSessionScreen(
+                            questions: dueQuestions,
+                            pool: cachedQuestions,
+                            catalogById: pointById,
+                            source: PracticeSessionSource.dueSrs,
                           ),
-                          icon: const Icon(Icons.play_arrow),
-                          label: Text('Ôn ngay (${dueQuestions.length} câu)'),
-                        )
-                      else
-                        FilledButton.icon(
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => const PracticeSetupScreen(),
-                            ),
-                          ),
-                          icon: const Icon(Icons.fitness_center),
-                          label: const Text('Mở bài luyện tập'),
                         ),
-                      OutlinedButton.icon(
-                        onPressed: onBrowse,
-                        icon: const Icon(Icons.menu_book_outlined),
-                        label: const Text('Mở kho ngữ pháp'),
                       ),
-                    ],
-                  ),
+                      icon: const Icon(Icons.play_arrow),
+                      label: Text('Ôn ngay (${dueQuestions.length} câu)'),
+                    )
+                  else
+                    FilledButton.icon(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const PracticeSetupScreen(),
+                        ),
+                      ),
+                      icon: const Icon(Icons.fitness_center),
+                      label: const Text('Mở bài luyện tập'),
+                    ),
                   if (review.isNotEmpty) ...[
                     const SizedBox(height: 10),
                     Text(
@@ -472,39 +455,6 @@ class TodayScreen extends ConsumerWidget {
                   ),
                   icon: const Icon(Icons.fitness_center),
                   label: const Text('Mở bài luyện tập'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            LearningSection(
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.auto_stories_outlined,
-                      size: 20,
-                      color: colors.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Sổ học của bạn',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${data.saved.length} mẫu đã lưu trong kho hiện có. Ghi chú luôn gắn với mẫu để bạn đọc lại đúng ngữ cảnh.',
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: onNotebook,
-                  icon: const Icon(Icons.menu_book_outlined),
-                  label: const Text('Mở sổ học'),
                 ),
               ],
             ),

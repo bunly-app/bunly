@@ -21,7 +21,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final minutes = TextEditingController();
   String level = 'N5';
   bool initialized = false;
+  bool _syncing = false;
   String? message;
+
+  Future<void> _syncNow() async {
+    if (_syncing) return;
+    final learningSync = ref.read(learningSyncProvider);
+    final practiceSync = ref.read(practiceSyncProvider);
+    if (learningSync == null && practiceSync == null) return;
+    setState(() => _syncing = true);
+    try {
+      if (learningSync != null) {
+        await learningSync.run();
+      }
+      if (practiceSync != null) {
+        await practiceSync.run();
+        if (mounted) {
+          ref.invalidate(cachedQuestionsProvider);
+        }
+      }
+      if (mounted) {
+        ref.invalidate(analysisQuotaProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đã đồng bộ với máy chủ.')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Chưa đồng bộ được. Hãy kiểm tra mạng.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _syncing = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -38,6 +74,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final connected = ref.watch(configProvider).connected;
     final user = ref.watch(userProvider).valueOrNull;
     final signOut = ref.watch(signOutControllerProvider);
+    final pendingSync = connected
+        ? ref.watch(pendingSyncProvider)
+        : const AsyncData(0);
     final themePref = ref.watch(themeControllerProvider);
     final colors = Theme.of(context).colorScheme;
 
@@ -310,6 +349,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                         color: colors.onSurfaceVariant,
                                       ),
                                 ),
+                                if (connected) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    pendingSync.hasError
+                                        ? 'Chưa đọc được hàng đợi đồng bộ'
+                                        : (pendingSync.valueOrNull ?? 0) > 0
+                                        ? 'Tự đồng bộ: còn ${pendingSync.valueOrNull} mục chờ mạng'
+                                        : 'Tự động đồng bộ bật · Dữ liệu đã sao lưu',
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: colors.onSurfaceVariant,
+                                        ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -321,6 +374,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           spacing: 10,
                           runSpacing: 10,
                           children: [
+                            OutlinedButton.icon(
+                              onPressed: _syncing ? null : _syncNow,
+                              icon: _syncing
+                                  ? SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: colors.primary,
+                                      ),
+                                    )
+                                  : const Icon(Icons.sync),
+                              label: Text(
+                                _syncing ? 'Đang đồng bộ…' : 'Đồng bộ ngay',
+                              ),
+                            ),
                             OutlinedButton.icon(
                               onPressed: () => Navigator.of(context).push(
                                 MaterialPageRoute<void>(

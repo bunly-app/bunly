@@ -14,21 +14,26 @@ class SyncBanner extends ConsumerStatefulWidget {
 class _SyncBannerState extends ConsumerState<SyncBanner>
     with WidgetsBindingObserver {
   Timer? timer;
+  Timer? _debounceTimer;
   bool loading = false;
   bool failed = false;
-  bool synced = false;
+  bool _rerunRequested = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => run());
-    timer = Timer.periodic(const Duration(seconds: 30), (_) => run());
+    timer = Timer.periodic(const Duration(seconds: 30), (_) {
+      final pending = ref.read(pendingSyncProvider).valueOrNull ?? 0;
+      if (failed || pending > 0) run();
+    });
   }
 
   @override
   void dispose() {
     timer?.cancel();
+    _debounceTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -38,8 +43,25 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
     if (state == AppLifecycleState.resumed) run();
   }
 
+  void _schedulePendingSync() {
+    if (!mounted) return;
+    if (loading) {
+      _rerunRequested = true;
+      return;
+    }
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 350), () {
+      if (mounted) unawaited(run());
+    });
+  }
+
   Future<void> run() async {
-    if (!mounted || loading) return;
+    if (!mounted) return;
+    if (loading) {
+      _rerunRequested = true;
+      return;
+    }
+    _debounceTimer?.cancel();
     final learningSync = ref.read(learningSyncProvider);
     final practiceSync = ref.read(practiceSyncProvider);
     if (learningSync == null && practiceSync == null) return;
@@ -47,6 +69,7 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
       loading = true;
       failed = false;
     });
+    var hadError = false;
     try {
       if (learningSync != null) {
         await learningSync.run();
@@ -59,17 +82,19 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
       }
       if (mounted) {
         ref.invalidate(analysisQuotaProvider);
-        setState(() => synced = true);
       }
     } catch (_) {
+      hadError = true;
       if (mounted) {
-        setState(() {
-          failed = true;
-          synced = false;
-        });
+        setState(() => failed = true);
       }
     } finally {
+      final shouldRerun = _rerunRequested && !hadError;
+      _rerunRequested = false;
       if (mounted) setState(() => loading = false);
+      if (shouldRerun && mounted) {
+        unawaited(run());
+      }
     }
   }
 
@@ -78,70 +103,75 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
     // Watch keeps workers alive while this screen is mounted.
     ref.watch(learningSyncProvider);
     ref.watch(practiceSyncProvider);
+    ref.listen<AsyncValue<int>>(pendingSyncProvider, (previous, next) {
+      final nextCount = next.valueOrNull ?? 0;
+      final prevCount = previous?.valueOrNull;
+      if (nextCount > 0 && (prevCount == null || nextCount > prevCount)) {
+        _schedulePendingSync();
+      }
+    });
     final pending = ref.watch(pendingSyncProvider);
-    final count = pending.valueOrNull;
-    final colors = Theme.of(context).colorScheme;
+    final count = pending.valueOrNull ?? 0;
     final hasError = pending.hasError || failed;
-    final text = pending.hasError
-        ? 'Chưa đọc được hàng đợi đồng bộ.'
-        : loading
-        ? 'Đang đồng bộ…'
-        : failed
-        ? 'Chưa đồng bộ được. Dữ liệu chờ vẫn ở trên máy.'
-        : (count ?? 0) > 0
-        ? '$count thao tác đang chờ gửi.'
-        : synced
-        ? 'Đã đồng bộ lần gần nhất.'
-        : 'Dữ liệu lưu trên máy; đang chờ kiểm tra đồng bộ.';
+    if (!loading && !hasError && count == 0) {
+      return const SizedBox.shrink();
+    }
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
+    final colors = Theme.of(context).colorScheme;
+    final text = pending.hasError
+        ? 'Chưa đọc được hàng đợi đồng bộ. Chạm để thử lại.'
+        : failed
+        ? 'Chưa đồng bộ được. Chạm để thử lại.'
+        : loading
+        ? 'Đang tự đồng bộ…'
+        : 'Đang tự đồng bộ $count mục…';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(18, 6, 18, 0),
+      child: Material(
         color: hasError ? colors.errorContainer : colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          if (loading)
-            SizedBox(
-              width: 14,
-              height: 14,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: colors.primary,
-              ),
-            )
-          else
-            Icon(
-              hasError
-                  ? Icons.cloud_off_outlined
-                  : synced
-                  ? Icons.cloud_done_outlined
-                  : Icons.cloud_queue_outlined,
-              size: 16,
-              color: hasError ? colors.onErrorContainer : colors.primary,
-            ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: hasError
-                    ? colors.onErrorContainer
-                    : colors.onSurfaceVariant,
-              ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: loading ? null : run,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              children: [
+                if (loading)
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: colors.primary,
+                    ),
+                  )
+                else
+                  Icon(
+                    hasError
+                        ? Icons.cloud_off_outlined
+                        : Icons.cloud_upload_outlined,
+                    size: 16,
+                    color: hasError ? colors.onErrorContainer : colors.primary,
+                  ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: hasError
+                          ? colors.onErrorContainer
+                          : colors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                if (hasError)
+                  Icon(Icons.refresh, size: 16, color: colors.onErrorContainer),
+              ],
             ),
           ),
-          TextButton(
-            onPressed: loading ? null : run,
-            style: TextButton.styleFrom(
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            ),
-            child: const Text('Đồng bộ'),
-          ),
-        ],
+        ),
       ),
     );
   }

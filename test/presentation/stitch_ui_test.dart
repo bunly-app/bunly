@@ -214,13 +214,23 @@ void main() {
         ),
         findsOneWidget,
       );
-      await tester.tap(find.byTooltip('Làm mới kho'));
+      await tester.tap(
+        find.text(
+          'Đang đọc nội dung đã tải trên thiết bị; chưa cập nhật từ máy chủ.',
+        ),
+      );
       await tester.pump();
       expect(find.text('Đang kiểm tra cập nhật…'), findsOneWidget);
       expect(find.text('N4 · 〜たことがある'), findsOneWidget);
       refreshCompleter.complete(await WidgetGrammar().load());
       await tester.pumpAndSettle();
-      expect(find.text('Kho hiện có 2 mẫu.'), findsOneWidget);
+      expect(
+        find.text(
+          'Đang đọc nội dung đã tải trên thiết bị; chưa cập nhật từ máy chủ.',
+        ),
+        findsNothing,
+      );
+      expect(find.text('Đang kiểm tra cập nhật…'), findsNothing);
       await tester.scrollUntilVisible(
         find.text('N5 · 〜たい'),
         200,

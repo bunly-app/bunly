@@ -52,25 +52,9 @@ class _GrammarDetailScreenState extends ConsumerState<GrammarDetailScreen> {
     );
     final colors = Theme.of(context).colorScheme;
     final tones = BunlyTones.of(context);
-    final isSaved = summary.valueOrNull?.saved.contains(point.id) ?? false;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Chi tiết ngữ pháp'),
-        actions: [
-          if (summary.hasValue && !summary.hasError)
-            IconButton(
-              tooltip: isSaved ? 'Bỏ đánh dấu mẫu' : 'Đánh dấu mẫu',
-              icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border),
-              color: colors.primary,
-              onPressed: mutation.isLoading
-                  ? null
-                  : () => ref
-                        .read(learningControllerProvider.notifier)
-                        .perform((u) => u.setSaved(point.id, !isSaved)),
-            ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Chi tiết ngữ pháp')),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 640),
@@ -288,7 +272,7 @@ class _GrammarDetailScreenState extends ConsumerState<GrammarDetailScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Ghi chú lưu ngay trên thiết bị. Ở chế độ kết nối, dùng Đồng bộ tại kho ngữ pháp để gửi lên tài khoản.',
+                    'Ghi chú lưu ngay trên thiết bị. Ở chế độ kết nối, hệ thống tự động đồng bộ khi có mạng.',
                     style: TextStyle(color: colors.onSurfaceVariant),
                   ),
                   const SizedBox(height: 14),

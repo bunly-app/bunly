@@ -98,14 +98,30 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Đăng xuất'));
+      await tester.tap(find.byTooltip('Hồ sơ học tập'));
+      await tester.pumpAndSettle();
+      final profileScroll = find
+          .descendant(
+            of: find.byType(ListView),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      await tester.scrollUntilVisible(
+        find.text('Đăng xuất'),
+        200,
+        scrollable: profileScroll,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Đăng xuất'));
       await tester.pump();
       expect(
         tester
-            .widget<IconButton>(
-              find.byWidgetPredicate(
-                (widget) =>
-                    widget is IconButton && widget.tooltip == 'Đăng xuất',
+            .widget<ButtonStyleButton>(
+              find.ancestor(
+                of: find.text('Đang đăng xuất…'),
+                matching: find.byWidgetPredicate(
+                  (widget) => widget is ButtonStyleButton,
+                ),
               ),
             )
             .onPressed,
@@ -117,7 +133,7 @@ void main() {
       expect(find.text('Chưa thể đăng xuất. Hãy thử lại.'), findsOneWidget);
       expect(auth.currentUser?.id, 'A');
       auth.pending = null;
-      await tester.tap(find.byTooltip('Đăng xuất'));
+      await tester.tap(find.text('Đăng xuất'));
       await tester.pumpAndSettle();
       expect(auth.calls, 2);
       expect(find.text('Tạo tài khoản mới'), findsOneWidget);

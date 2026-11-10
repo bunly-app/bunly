@@ -143,10 +143,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Bunly'), findsOneWidget);
-      expect(
-        find.text('Chế độ ngoại tuyến · Dữ liệu và ghi chú lưu trên thiết bị.'),
-        findsOneWidget,
-      );
+      expect(find.byTooltip('Hồ sơ học tập'), findsOneWidget);
       await tester.tap(find.text('Tra cứu'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField).first, 'đã từng');

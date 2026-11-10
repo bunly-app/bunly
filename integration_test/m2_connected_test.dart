@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:drift/drift.dart' show BooleanExpressionOperators;
 import 'package:bunly/app/config.dart';
 import 'package:bunly/app/providers.dart';
 import 'package:bunly/features/grammar/presentation/grammar_screen.dart';
@@ -66,21 +67,42 @@ void main() {
         await waitFor(find.text('Một mẫu ngữ pháp, một bước học tiếp.'));
         await tester.tap(find.text('Tra cứu'));
         await tester.pumpAndSettle();
-        await waitFor(find.text('Kho ngữ pháp'));
+        await waitFor(find.text('Tìm mẫu hoặc ý nghĩa'));
       }
 
       Future<void> syncNow() async {
-        final button = find.widgetWithText(TextButton, 'Đồng bộ');
         for (var i = 0; i < 200; i++) {
+          final retry = find.text('Chưa đồng bộ được. Chạm để thử lại.');
+          if (retry.evaluate().isNotEmpty) {
+            await tester.tap(retry);
+          }
           await tester.pump(const Duration(milliseconds: 100));
-          if (button.evaluate().isNotEmpty &&
-              tester.widget<TextButton>(button).onPressed != null) {
-            break;
+          final anchor = find.byTooltip('Hồ sơ học tập');
+          if (anchor.evaluate().isEmpty) continue;
+          final scope = ProviderScope.containerOf(tester.element(anchor));
+          final config = scope.read(configProvider);
+          final user = scope.read(userProvider).valueOrNull;
+          if (user == null) continue;
+          final db = scope.read(databaseProvider);
+          final pending = await tester.runAsync(
+            () =>
+                (db.select(db.syncOutbox)..where(
+                      (r) =>
+                          r.namespace.equals(config.namespace) &
+                          r.ownerId.equals(user.id),
+                    ))
+                    .get(),
+          );
+          final syncingBanner = find.textContaining('Đang tự đồng bộ');
+          final failedBanner = find.text('Chưa đồng bộ được. Chạm để thử lại.');
+          if (pending != null &&
+              pending.isEmpty &&
+              syncingBanner.evaluate().isEmpty &&
+              failedBanner.evaluate().isEmpty) {
+            return;
           }
         }
-        await tester.tap(button);
-        await tester.pump();
-        await waitFor(find.text('Đã đồng bộ lần gần nhất.'));
+        fail('Auto-sync did not finish draining outbox cleanly');
       }
 
       final config = AppConfig.fromEnvironment();
@@ -279,7 +301,10 @@ void main() {
       );
       expect(rows, hasLength(1));
       expect(rows!.single['user_id'], client.auth.currentUser!.id);
-      await tester.tap(find.byTooltip('Đăng xuất'));
+      await tester.tap(find.byTooltip('Hồ sơ học tập'));
+      await tester.pumpAndSettle();
+      await reveal(find.text('Đăng xuất'));
+      await tester.tap(find.text('Đăng xuất'));
       await tester.pumpAndSettle();
       await waitFor(find.text('Tạo tài khoản mới'));
       await login(emailB);

@@ -166,15 +166,6 @@ class _SentenceResultScreenState extends ConsumerState<SentenceResultScreen> {
           child: LearningPage(
             storageKey: 'sentence-result',
             children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton.tonalIcon(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.edit_note, size: 18),
-                  label: const Text('Sửa câu'),
-                ),
-              ),
-              const SizedBox(height: 10),
               LearningSection(
                 children: [
                   Wrap(

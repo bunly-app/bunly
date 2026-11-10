@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../domain/auth_failure.dart';
@@ -47,15 +48,20 @@ class DemoAuthRepository implements AuthRepository {
 
 class SupabaseAuthRepository implements AuthRepository {
   SupabaseAuthRepository(this.client) {
-    _subscription = client.auth.onAuthStateChange.listen((state) {
-      if (state.event == AuthChangeEvent.passwordRecovery) {
-        _recovering = true;
-        _emitRecovery();
-      } else if (state.event == AuthChangeEvent.signedOut) {
-        _recovering = false;
-        _emitRecovery();
-      }
-    });
+    _subscription = client.auth.onAuthStateChange.listen(
+      (state) {
+        if (state.event == AuthChangeEvent.passwordRecovery) {
+          _recovering = true;
+          _emitRecovery();
+        } else if (state.event == AuthChangeEvent.signedOut) {
+          _recovering = false;
+          _emitRecovery();
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        // Ignore transient network refresh errors; genuine sign-out emits AuthChangeEvent.signedOut.
+      },
+    );
   }
 
   static const authRedirectUrl = 'bunly://auth-callback';
@@ -135,8 +141,38 @@ class SupabaseAuthRepository implements AuthRepository {
   AppUser? get currentUser => _map(client.auth.currentUser);
 
   @override
-  Stream<AppUser?> get changes =>
-      client.auth.onAuthStateChange.map((event) => _map(event.session?.user));
+  Stream<AppUser?> get changes => mapAuthStateChanges(
+    client.auth.onAuthStateChange,
+    () => client.auth.currentUser,
+  );
+
+  @visibleForTesting
+  static Stream<AppUser?> mapAuthStateChanges(
+    Stream<AuthState> source,
+    User? Function() readCurrentUser,
+  ) {
+    return source.transform(
+      StreamTransformer<AuthState, AppUser?>.fromHandlers(
+        handleData: (event, sink) {
+          final user = event.session?.user;
+          sink.add(user == null ? null : AppUser(user.id, user.email ?? ''));
+        },
+        handleError: (error, stackTrace, sink) {
+          if (error is AuthRetryableFetchException ||
+              error is SocketException ||
+              error is TimeoutException ||
+              error is HttpException) {
+            final cached = readCurrentUser();
+            sink.add(
+              cached == null ? null : AppUser(cached.id, cached.email ?? ''),
+            );
+            return;
+          }
+          sink.addError(error, stackTrace);
+        },
+      ),
+    );
+  }
 
   @override
   Stream<bool> get recoveryEvents async* {

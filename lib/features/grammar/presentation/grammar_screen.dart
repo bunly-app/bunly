@@ -57,6 +57,24 @@ class _GrammarScreenState extends ConsumerState<GrammarScreen> {
       'experience': 'Trải nghiệm',
       'desire': 'Mong muốn',
       'aspect': 'Trạng thái',
+      'particles': 'Trợ từ',
+      'existence': 'Tồn tại & Sở hữu',
+      'tense_negation': 'Thì & Phủ định',
+      'adjectives': 'Tính từ',
+      'permission': 'Cho phép',
+      'prohibition': 'Cấm đoán',
+      'obligation': 'Bắt buộc',
+      'request_suggestion': 'Đề nghị & Yêu cầu',
+      'intention': 'Dự định & Mục đích',
+      'simultaneous': 'Song song & Thời điểm',
+      'sequence': 'Trình tự',
+      'comparison': 'So sánh',
+      'ability': 'Khả năng',
+      'reason_contrast': 'Nguyên nhân & Tương phản',
+      'condition': 'Điều kiện',
+      'quoting_noun': 'Trích dẫn & Danh từ hóa',
+      'giving_receiving': 'Cho & Nhận',
+      'voice_politeness': 'Bị động, Sai khiến & Kính ngữ',
     };
     final categories = <String>{
       ...categoryNames.keys,
@@ -263,56 +281,61 @@ class _GrammarScreenState extends ConsumerState<GrammarScreen> {
                       onSelected: (value) => setState(() => savedOnly = value),
                     ),
                   ),
-                  if (catalog.hasValue && !catalog.hasError) ...[
+                  if (catalog.hasValue &&
+                      !catalog.hasError &&
+                      (refreshing ||
+                          catalog.requireValue.origin ==
+                              GrammarOrigin.cache)) ...[
                     const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colors.surfaceContainerLow,
+                    Material(
+                      color: colors.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(12),
+                      child: InkWell(
                         borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          if (refreshing)
-                            SizedBox(
-                              width: 15,
-                              height: 15,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: colors.primary,
+                        onTap: refreshing ? null : _refreshCatalog,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          child: Row(
+                            children: [
+                              if (refreshing)
+                                SizedBox(
+                                  width: 15,
+                                  height: 15,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: colors.primary,
+                                  ),
+                                )
+                              else
+                                Icon(
+                                  Icons.cloud_off_outlined,
+                                  size: 16,
+                                  color: colors.primary,
+                                ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  refreshing
+                                      ? 'Đang kiểm tra cập nhật…'
+                                      : 'Đang đọc nội dung đã tải trên thiết bị; chưa cập nhật từ máy chủ.',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: colors.onSurfaceVariant,
+                                      ),
+                                ),
                               ),
-                            )
-                          else
-                            Icon(
-                              catalog.requireValue.origin == GrammarOrigin.cache
-                                  ? Icons.cloud_off_outlined
-                                  : Icons.cloud_done_outlined,
-                              size: 16,
-                              color: colors.primary,
-                            ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              refreshing
-                                  ? 'Đang kiểm tra cập nhật…'
-                                  : catalog.requireValue.origin ==
-                                        GrammarOrigin.cache
-                                  ? 'Đang đọc nội dung đã tải trên thiết bị; chưa cập nhật từ máy chủ.'
-                                  : 'Kho hiện có ${catalog.requireValue.points.length} mẫu.',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: colors.onSurfaceVariant),
-                            ),
+                              if (!refreshing)
+                                Icon(
+                                  Icons.refresh,
+                                  size: 16,
+                                  color: colors.primary,
+                                ),
+                            ],
                           ),
-                          IconButton(
-                            tooltip: 'Làm mới kho',
-                            visualDensity: VisualDensity.compact,
-                            onPressed: refreshing ? null : _refreshCatalog,
-                            icon: const Icon(Icons.refresh, size: 18),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ],
