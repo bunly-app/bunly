@@ -1,5 +1,1664 @@
 [
-  {"id":"10000000-0000-0000-0000-000000000001","pattern":"〜たことがある","level":"N4","category":"experience","meaning_vi":"Đã từng làm việc gì","formula":"Động từ thể た + ことがある","usage_vi":"Diễn tả trải nghiệm đã xảy ra trước thời điểm nói.","grammar_examples":[{"sentence_ja":"日本へ行ったことがあります。","translation_vi":"Tôi đã từng đến Nhật Bản."}]},
-  {"id":"10000000-0000-0000-0000-000000000002","pattern":"〜たい","level":"N5","category":"desire","meaning_vi":"Muốn làm việc gì","formula":"Động từ thể ます bỏ ます + たい","usage_vi":"Diễn tả mong muốn thực hiện một hành động của người nói.","grammar_examples":[{"sentence_ja":"日本語を勉強したいです。","translation_vi":"Tôi muốn học tiếng Nhật."}]},
-  {"id":"10000000-0000-0000-0000-000000000003","pattern":"〜ている","level":"N5","category":"aspect","meaning_vi":"Đang thực hiện hành động","formula":"Động từ thể て + いる","usage_vi":"Trong ví dụ này, diễn tả một hành động đang diễn ra.","grammar_examples":[{"sentence_ja":"本を読んでいます。","translation_vi":"Tôi đang đọc sách."}]}
+  {
+    "id": "10000000-0000-0000-0000-000000000001",
+    "pattern": "〜たことがある",
+    "level": "N4",
+    "category": "experience",
+    "meaning_vi": "Đã từng làm việc gì",
+    "formula": "Động từ thể た + ことがある",
+    "usage_vi": "Diễn tả trải nghiệm đã xảy ra trước thời điểm nói.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "日本へ行ったことがあります。",
+        "translation_vi": "Tôi đã từng đến Nhật Bản."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000002",
+    "pattern": "〜たい",
+    "level": "N5",
+    "category": "desire",
+    "meaning_vi": "Muốn làm việc gì",
+    "formula": "Động từ thể ます bỏ ます + たい",
+    "usage_vi": "Diễn tả mong muốn thực hiện một hành động của người nói.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "日本語を勉強したいです。",
+        "translation_vi": "Tôi muốn học tiếng Nhật."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000003",
+    "pattern": "〜ている",
+    "level": "N5",
+    "category": "aspect",
+    "meaning_vi": "Đang thực hiện hành động",
+    "formula": "Động từ thể て + いる",
+    "usage_vi": "Trong ví dụ này, diễn tả một hành động đang diễn ra.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "本を読んでいます。",
+        "translation_vi": "Tôi đang đọc sách."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000004",
+    "pattern": "〜てもいい",
+    "level": "N5",
+    "category": "permission",
+    "meaning_vi": "Được phép làm việc gì",
+    "formula": "Động từ thể て + もいい",
+    "usage_vi": "Hỏi hoặc cho phép một hành động; ví dụ dùng câu hỏi lịch sự.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "ここで写真を撮ってもいいですか。",
+        "translation_vi": "Tôi có thể chụp ảnh ở đây không?"
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000005",
+    "pattern": "〜てはいけない",
+    "level": "N5",
+    "category": "prohibition",
+    "meaning_vi": "Không được làm việc gì",
+    "formula": "Động từ thể て + はいけない",
+    "usage_vi": "Nêu điều cấm; cách nói có thể mạnh tùy quan hệ và tình huống.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "ここでタバコを吸ってはいけません。",
+        "translation_vi": "Không được hút thuốc ở đây."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000006",
+    "pattern": "〜なければならない",
+    "level": "N4",
+    "category": "obligation",
+    "meaning_vi": "Phải làm việc gì",
+    "formula": "Động từ thể ない bỏ い + ければならない",
+    "usage_vi": "Nêu nghĩa vụ; ví dụ しない chuyển thành しなければならない.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "明日までに宿題をしなければなりません。",
+        "translation_vi": "Tôi phải làm bài tập trước hạn ngày mai."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000007",
+    "pattern": "〜なくてもいい",
+    "level": "N4",
+    "category": "permission",
+    "meaning_vi": "Không cần làm việc gì",
+    "formula": "Động từ thể ない bỏ い + くてもいい",
+    "usage_vi": "Diễn tả không bắt buộc làm, không phải lệnh cấm làm.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "今日は学校へ行かなくてもいいです。",
+        "translation_vi": "Hôm nay không cần đến trường."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000008",
+    "pattern": "〜つもりだ",
+    "level": "N4",
+    "category": "intention",
+    "meaning_vi": "Dự định làm việc gì",
+    "formula": "Động từ thể từ điển + つもりだ",
+    "usage_vi": "Diễn tả dự định của người nói; ví dụ dùng dạng lịch sự つもりです.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "来年、日本へ行くつもりです。",
+        "translation_vi": "Tôi dự định đến Nhật Bản vào năm sau."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000009",
+    "pattern": "〜ながら",
+    "level": "N4",
+    "category": "simultaneous",
+    "meaning_vi": "Vừa làm việc này vừa làm việc khác",
+    "formula": "Động từ thể ます bỏ ます + ながら",
+    "usage_vi": "Hai hành động cùng chủ thể; mệnh đề sau là hành động chính trong ví dụ.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "音楽を聞きながら勉強します。",
+        "translation_vi": "Tôi vừa nghe nhạc vừa học."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000010",
+    "pattern": "〜より〜のほうが",
+    "level": "N5",
+    "category": "comparison",
+    "meaning_vi": "So với A thì B hơn về một mặt",
+    "formula": "A より B のほうが + tính từ",
+    "usage_vi": "So sánh hai đối tượng theo đặc điểm được nêu, không khái quát mọi mặt.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "バスより電車のほうが速いです。",
+        "translation_vi": "So với xe buýt, tàu điện nhanh hơn."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000011",
+    "pattern": "〜ことができる",
+    "level": "N4",
+    "category": "ability",
+    "meaning_vi": "Có thể làm việc gì",
+    "formula": "Động từ thể từ điển + ことができる",
+    "usage_vi": "Trong ví dụ, diễn tả năng lực thực hiện một hành động.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "私は日本語を話すことができます。",
+        "translation_vi": "Tôi có thể nói tiếng Nhật."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000012",
+    "pattern": "〜てから",
+    "level": "N5",
+    "category": "sequence",
+    "meaning_vi": "Sau khi làm A thì làm B",
+    "formula": "Động từ thể て + から、B",
+    "usage_vi": "Diễn tả thứ tự hành động A rồi B.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "手を洗ってから、ご飯を食べます。",
+        "translation_vi": "Tôi rửa tay rồi mới ăn cơm."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000013",
+    "pattern": "〜は〜です",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "A là B (khẳng định lịch sự)",
+    "formula": "Danh từ A + は + Danh từ B + です",
+    "usage_vi": "Giới thiệu chủ đề A và khẳng định tính chất hoặc danh phận B một cách lịch sự.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "私は学生です。",
+        "translation_vi": "Tôi là sinh viên."
+      },
+      {
+        "sentence_ja": "明日は日曜日です。",
+        "translation_vi": "Ngày mai là Chủ nhật."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000014",
+    "pattern": "〜ではありません",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "Không phải là ~ (phủ định lịch sự)",
+    "formula": "Danh từ / Tính từ な + ではありません（じゃありません）",
+    "usage_vi": "Phủ định danh từ hoặc tính từ đuôi な trong văn nói/viết lịch sự.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "私は先生ではありません。",
+        "translation_vi": "Tôi không phải là giáo viên."
+      },
+      {
+        "sentence_ja": "ここは図書館ではありません。",
+        "translation_vi": "Đây không phải là thư viện."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000015",
+    "pattern": "〜か",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "Câu hỏi lịch sự (có phải ~ không?)",
+    "formula": "Câu lịch sự (〜です / 〜ます) + か",
+    "usage_vi": "Đặt か ở cuối câu để chuyển thành câu nghi vấn lịch sự, không cần thêm dấu hỏi chấm khi viết chuẩn.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "お名前は何ですか。",
+        "translation_vi": "Tên bạn là gì vậy?"
+      },
+      {
+        "sentence_ja": "毎朝コーヒーを飲みますか。",
+        "translation_vi": "Mỗi sáng bạn có uống cà phê không?"
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000016",
+    "pattern": "〜の〜",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "Của ~ / bổ nghĩa giữa hai danh từ",
+    "formula": "Danh từ 1 + の + Danh từ 2",
+    "usage_vi": "Nối hai danh từ để biểu thị sở hữu, nguồn gốc hoặc nội dung của danh từ đứng sau.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "これは私の本です。",
+        "translation_vi": "Đây là sách của tôi."
+      },
+      {
+        "sentence_ja": "日本語の先生と話しました。",
+        "translation_vi": "Tôi đã nói chuyện với thầy giáo tiếng Nhật."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000017",
+    "pattern": "〜も",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "Cũng ~ (thêm đối tượng tương đồng)",
+    "formula": "Danh từ + も",
+    "usage_vi": "Thay cho は hoặc が khi muốn diễn tả đối tượng khác cũng có trạng thái hay hành động tương tự.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "私も学生です。",
+        "translation_vi": "Tôi cũng là sinh viên."
+      },
+      {
+        "sentence_ja": "昨日も雨が降りました。",
+        "translation_vi": "Hôm qua trời cũng mưa."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000018",
+    "pattern": "〜を",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "Tân ngữ trực tiếp của hành động",
+    "formula": "Danh từ + を + Ngoại động từ",
+    "usage_vi": "Chỉ đối tượng chịu tác động trực tiếp của hành động.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "朝ご飯を食べます。",
+        "translation_vi": "Tôi ăn bữa sáng."
+      },
+      {
+        "sentence_ja": "毎日日本語を勉強します。",
+        "translation_vi": "Mỗi ngày tôi học tiếng Nhật."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000019",
+    "pattern": "〜に（時間）",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "Vào lúc ~ (mốc thời gian cụ thể)",
+    "formula": "Danh từ thời gian có số cụ thể + に + Động từ",
+    "usage_vi": "Dùng cho giờ, ngày, tháng, năm, thứ; không dùng sau 今日, 明日, 毎日.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "毎朝六時に起きます。",
+        "translation_vi": "Mỗi sáng tôi dậy lúc 6 giờ."
+      },
+      {
+        "sentence_ja": "十月に日本へ行きます。",
+        "translation_vi": "Tháng 10 tôi sẽ đi Nhật."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000020",
+    "pattern": "〜に・へ（方向）",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "Đi về hướng / tới địa điểm ~",
+    "formula": "Địa điểm + に / へ + 行きます・来ます・帰ります",
+    "usage_vi": "Biểu thị điểm đến hoặc phương hướng với các động từ di chuyển.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "来週、東京へ行きます。",
+        "translation_vi": "Tuần sau tôi sẽ đi Tokyo."
+      },
+      {
+        "sentence_ja": "五時に家へ帰ります。",
+        "translation_vi": "5 giờ tôi về nhà."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000021",
+    "pattern": "〜で（場所）",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "Tại địa điểm ~ (nơi diễn ra hành động)",
+    "formula": "Địa điểm + で + Hành động",
+    "usage_vi": "Chỉ địa điểm nơi một hành động cụ thể diễn ra; khác với に dùng cho tồn tại hoặc đích đến.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "食堂で昼ご飯を食べます。",
+        "translation_vi": "Tôi ăn trưa ở nhà ăn."
+      },
+      {
+        "sentence_ja": "駅で新聞を買いました。",
+        "translation_vi": "Tôi đã mua báo ở nhà ga."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000022",
+    "pattern": "〜で（手段・道具）",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "Bằng phương tiện / công cụ / ngôn ngữ ~",
+    "formula": "Phương tiện / Công cụ / Ngôn ngữ + で + Động từ",
+    "usage_vi": "Nêu cách thức, phương tiện đi lại, dụng cụ hoặc ngôn ngữ thực hiện hành động.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "電車で会社へ行きます。",
+        "translation_vi": "Tôi đi đến công ty bằng tàu điện."
+      },
+      {
+        "sentence_ja": "はしでご飯を食べます。",
+        "translation_vi": "Tôi ăn cơm bằng đũa."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000023",
+    "pattern": "〜と（共同）",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "Cùng với ai / và (liệt kê đầy đủ)",
+    "formula": "Người + と + Hành động / Danh từ A + と + Danh từ B",
+    "usage_vi": "Diễn tả đối tượng cùng thực hiện hành động, hoặc nối trọn vẹn các danh từ.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "友達と映画を見ました。",
+        "translation_vi": "Tôi đã xem phim cùng bạn."
+      },
+      {
+        "sentence_ja": "机の上に本とペンがあります。",
+        "translation_vi": "Trên bàn có sách và bút."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000024",
+    "pattern": "〜から〜まで",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "Từ ~ đến ~ (thời gian / địa điểm)",
+    "formula": "Mốc A + から + Mốc B + まで",
+    "usage_vi": "Xác định điểm bắt đầu và điểm kết thúc của khoảng thời gian hoặc quãng đường.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "授業は九時から十一時までです。",
+        "translation_vi": "Tiết học từ 9 giờ đến 11 giờ."
+      },
+      {
+        "sentence_ja": "うちから駅まで歩いて十分です。",
+        "translation_vi": "Từ nhà đến ga đi bộ mất 10 phút."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000025",
+    "pattern": "〜や〜など",
+    "level": "N5",
+    "category": "particles",
+    "meaning_vi": "A, B và những thứ khác (liệt kê tiêu biểu)",
+    "formula": "Danh từ A + や + Danh từ B（+ など）",
+    "usage_vi": "Liệt kê vài ví dụ tiêu biểu trong nhóm nhiều sự vật, hàm ý còn nhiều thứ khác nữa.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "かばんの中にノートや辞書などが入っています。",
+        "translation_vi": "Trong cặp có vở, từ điển v.v."
+      },
+      {
+        "sentence_ja": "休みはテニスや水泳をします。",
+        "translation_vi": "Ngày nghỉ tôi chơi tennis, bơi lội..."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000026",
+    "pattern": "〜に〜がある",
+    "level": "N5",
+    "category": "existence",
+    "meaning_vi": "Có (đồ vật / sự kiện) ở ~",
+    "formula": "Địa điểm + に + Đồ vật / Sự việc + が + あります",
+    "usage_vi": "Dùng động từ あります để nói về sự tồn tại của vật vô tri, cây cối hoặc sự kiện.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "教室にテレビがあります。",
+        "translation_vi": "Trong lớp học có ti vi."
+      },
+      {
+        "sentence_ja": "明日、会議があります。",
+        "translation_vi": "Ngày mai có cuộc họp."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000027",
+    "pattern": "〜に〜がいる",
+    "level": "N5",
+    "category": "existence",
+    "meaning_vi": "Có (người / động vật) ở ~",
+    "formula": "Địa điểm + に + Người / Động vật + が + います",
+    "usage_vi": "Dùng động từ います để diễn tả người hoặc động vật đang có mặt tại nơi nào đó.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "庭に猫がいます。",
+        "translation_vi": "Ở ngoài sân có con mèo."
+      },
+      {
+        "sentence_ja": "事務所に誰もいません。",
+        "translation_vi": "Trong văn phòng không có ai cả."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000028",
+    "pattern": "〜ます・〜ません",
+    "level": "N5",
+    "category": "tense_negation",
+    "meaning_vi": "Thể lịch sự hiện tại & phủ định",
+    "formula": "Động từ gốc ます + ます（khẳng định）/ ません（phủ định）",
+    "usage_vi": "Diễn tả thói quen hàng ngày hoặc dự định trong tương lai ở sắc thái lịch sự.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "毎朝七時に朝ご飯を食べます。",
+        "translation_vi": "Mỗi sáng tôi ăn sáng lúc 7 giờ."
+      },
+      {
+        "sentence_ja": "お酒は飲みません。",
+        "translation_vi": "Tôi không uống rượu."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000029",
+    "pattern": "〜ました・〜ませんでした",
+    "level": "N5",
+    "category": "tense_negation",
+    "meaning_vi": "Thể lịch sự quá khứ & phủ định quá khứ",
+    "formula": "Động từ gốc ます + ました / ませんでした",
+    "usage_vi": "Diễn tả hành động đã hoàn thành hoặc không xảy ra trong quá khứ.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "昨日、図書館で勉強しました。",
+        "translation_vi": "Hôm qua tôi đã học ở thư viện."
+      },
+      {
+        "sentence_ja": "今朝、テレビを見ませんでした。",
+        "translation_vi": "Sáng nay tôi đã không xem ti vi."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000030",
+    "pattern": "〜ていない",
+    "level": "N5",
+    "category": "tense_negation",
+    "meaning_vi": "Chưa làm ~ / trạng thái chưa diễn ra",
+    "formula": "Động từ thể て + いない（います・いません）",
+    "usage_vi": "Khi đi với まだ (vẫn chưa), diễn tả việc tính đến hiện tại vẫn chưa xảy ra hoặc chưa xong.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "まだ昼ご飯を食べていません。",
+        "translation_vi": "Tôi vẫn chưa ăn trưa."
+      },
+      {
+        "sentence_ja": "田中さんはまだ来ていないようです。",
+        "translation_vi": "Anh Tanaka hình như vẫn chưa đến."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000031",
+    "pattern": "〜た・〜なかった",
+    "level": "N5",
+    "category": "tense_negation",
+    "meaning_vi": "Thể thông thường quá khứ",
+    "formula": "Động từ thể た / Động từ thể ない bỏ い + かった",
+    "usage_vi": "Dùng khi nói chuyện thân mật hoặc trước danh từ/liên từ nối câu trong quá khứ.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "昨日、友達と会った。",
+        "translation_vi": "Hôm qua tôi đã gặp bạn."
+      },
+      {
+        "sentence_ja": "朝ご飯は食べなかった。",
+        "translation_vi": "Tôi đã không ăn sáng."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000032",
+    "pattern": "い形容詞（〜い・〜くない）",
+    "level": "N5",
+    "category": "adjectives",
+    "meaning_vi": "Tính từ đuôi い khẳng định & phủ định",
+    "formula": "Gốc tính từ い + い（khẳng định）/ + くない（phủ định）",
+    "usage_vi": "Biểu thị tính chất sự vật; lưu ý ngoại lệ いい chia phủ định thành よくない.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "この部屋は広いです。",
+        "translation_vi": "Căn phòng này rộng."
+      },
+      {
+        "sentence_ja": "今日のテストは難しくないです。",
+        "translation_vi": "Bài kiểm tra hôm nay không khó."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000033",
+    "pattern": "な形容詞（〜だ・〜ではない）",
+    "level": "N5",
+    "category": "adjectives",
+    "meaning_vi": "Tính từ đuôi な (bổ nghĩa & vị ngữ)",
+    "formula": "Vị ngữ: Tính từ な + です / ではありません; Bổ nghĩa: Tính từ な + な + Danh từ",
+    "usage_vi": "Mô tả tính chất; khi đứng trước danh từ phải giữ chữ な.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "京都は静かな町です。",
+        "translation_vi": "Kyoto là một thành phố yên tĩnh."
+      },
+      {
+        "sentence_ja": "この駅はあまり賑やかではありません。",
+        "translation_vi": "Nhà ga này không náo nhiệt lắm."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000034",
+    "pattern": "〜くなる・〜になる",
+    "level": "N5",
+    "category": "adjectives",
+    "meaning_vi": "Trở nên / biến đổi trạng thái",
+    "formula": "Tính từ い bỏ い + くなる / Tính từ な・Danh từ + になる",
+    "usage_vi": "Diễn tả sự thay đổi tự nhiên hoặc kết quả theo thời gian.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "だんだん暖かくなりました。",
+        "translation_vi": "Trời dần trở nên ấm áp."
+      },
+      {
+        "sentence_ja": "妹は来年二十歳になります。",
+        "translation_vi": "Năm sau em gái tôi sẽ bước sang tuổi 20."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000035",
+    "pattern": "〜くて・〜で",
+    "level": "N5",
+    "category": "adjectives",
+    "meaning_vi": "Nối hai tính từ / danh từ mang nghĩa liệt kê",
+    "formula": "Tính từ い bỏ い + くて / Tính từ な・Danh từ + で",
+    "usage_vi": "Nối các đặc điểm cùng chiều hoặc trung tính trong một câu mô tả.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "この店は安くておいしいです。",
+        "translation_vi": "Quán này vừa rẻ vừa ngon."
+      },
+      {
+        "sentence_ja": "ミラーさんは親切でハンサムです。",
+        "translation_vi": "Anh Miller vừa tốt bụng vừa đẹp trai."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000036",
+    "pattern": "〜が好きだ・〜が上手だ",
+    "level": "N5",
+    "category": "adjectives",
+    "meaning_vi": "Thích / giỏi / ghét / kém ~ (với trợ từ が)",
+    "formula": "Danh từ + が + 好き・嫌い・上手・下手 + です",
+    "usage_vi": "Đối tượng của cảm xúc, sở thích và năng lực đi với trợ từ が chứ không dùng を.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "私は日本料理が好きです。",
+        "translation_vi": "Tôi thích món ăn Nhật."
+      },
+      {
+        "sentence_ja": "山本さんは歌が上手ですね。",
+        "translation_vi": "Bạn Yamamoto hát hay quá nhỉ."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000037",
+    "pattern": "〜てください",
+    "level": "N5",
+    "category": "request_suggestion",
+    "meaning_vi": "Xin hãy làm ~ (yêu cầu lịch sự)",
+    "formula": "Động từ thể て + ください",
+    "usage_vi": "Dùng để nhờ vả, hướng dẫn hoặc mời ai đó làm việc gì một cách lịch sự.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "ここに名前を書いてください。",
+        "translation_vi": "Xin hãy viết tên vào đây."
+      },
+      {
+        "sentence_ja": "すみませんが、ちょっと待ってください。",
+        "translation_vi": "Xin lỗi, vui lòng đợi một chút."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000038",
+    "pattern": "〜ないでください",
+    "level": "N5",
+    "category": "request_suggestion",
+    "meaning_vi": "Xin đừng làm ~ (nhắc nhở lịch sự)",
+    "formula": "Động từ thể ない + で + ください",
+    "usage_vi": "Yêu cầu hoặc khuyên người khác đừng thực hiện một hành động nào đó.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "ここで写真を撮らないでください。",
+        "translation_vi": "Xin đừng chụp ảnh ở đây."
+      },
+      {
+        "sentence_ja": "大切なことですから、忘れないでください。",
+        "translation_vi": "Vì là việc quan trọng nên đừng quên nhé."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000039",
+    "pattern": "〜ませんか",
+    "level": "N5",
+    "category": "request_suggestion",
+    "meaning_vi": "Cùng làm ~ không? (mời rủ lịch sự)",
+    "formula": "Động từ gốc ます + ませんか",
+    "usage_vi": "Mời người nghe cùng tham gia hành động, tôn trọng lựa chọn từ chối của đối phương.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "いっしょに昼ご飯を食べませんか。",
+        "translation_vi": "Chúng ta cùng ăn trưa nhé?"
+      },
+      {
+        "sentence_ja": "土曜日、映画を見に行きませんか。",
+        "translation_vi": "Thứ Bảy đi xem phim cùng không?"
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000040",
+    "pattern": "〜ましょう",
+    "level": "N5",
+    "category": "request_suggestion",
+    "meaning_vi": "Hãy cùng làm ~ nhé (đề xuất hào hứng)",
+    "formula": "Động từ gốc ます + ましょう",
+    "usage_vi": "Đưa ra đề nghị cùng làm ngay hoặc đáp lại đồng ý lời mời của người khác.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "そろそろ帰りましょう。",
+        "translation_vi": "Chúng ta về thôi nào."
+      },
+      {
+        "sentence_ja": "ちょっと休みましょう。",
+        "translation_vi": "Nghỉ một chút nhé."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000041",
+    "pattern": "〜ましょうか",
+    "level": "N5",
+    "category": "request_suggestion",
+    "meaning_vi": "Để tôi làm giúp ~ nhé? / Chúng ta làm ~ nhé?",
+    "formula": "Động từ gốc ます + ましょうか",
+    "usage_vi": "Đề nghị giúp đỡ người nghe một việc gì đó hoặc gợi ý cùng làm.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "荷物を持ちましょうか。",
+        "translation_vi": "Để tôi xách hành lý giúp bạn nhé?"
+      },
+      {
+        "sentence_ja": "駅まで迎えに行きましょうか。",
+        "translation_vi": "Tôi ra ga đón bạn nhé?"
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000042",
+    "pattern": "〜たほうがいい",
+    "level": "N5",
+    "category": "request_suggestion",
+    "meaning_vi": "Nên làm / không nên làm ~",
+    "formula": "Động từ thể た / Động từ thể ない + ほうがいいです",
+    "usage_vi": "Đưa ra lời khuyên trực tiếp cho người nghe nên hoặc không nên làm việc gì.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "熱があるときは、早く寝たほうがいいです。",
+        "translation_vi": "Khi bị sốt thì bạn nên đi ngủ sớm."
+      },
+      {
+        "sentence_ja": "夜は甘いものを食べないほうがいいです。",
+        "translation_vi": "Buổi tối thì không nên ăn đồ ngọt."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000043",
+    "pattern": "〜から（理由）",
+    "level": "N5",
+    "category": "reason_contrast",
+    "meaning_vi": "Vì ~ nên ~ (nêu lý do chủ quan)",
+    "formula": "Mệnh đề lý do + から、Mệnh đề kết quả",
+    "usage_vi": "Trình bày nguyên nhân rồi dẫn tới kết luận, phán đoán hoặc yêu cầu của người nói.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "時間がありませんから、急ぎましょう。",
+        "translation_vi": "Vì không có thời gian nên hãy nhanh lên."
+      },
+      {
+        "sentence_ja": "今日は寒いから、コートを着ます。",
+        "translation_vi": "Hôm nay lạnh nên tôi mặc áo khoác."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000044",
+    "pattern": "〜が・〜けれども",
+    "level": "N5",
+    "category": "reason_contrast",
+    "meaning_vi": "Nhưng mà ~ (nối hai ý tương phản nhẹ)",
+    "formula": "Mệnh đề A + が / けれども、Mệnh đề B",
+    "usage_vi": "Nối hai mệnh đề trái ngược hoặc dùng để mở đầu nhẹ nhàng khi nhờ vả.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "日本の生活は楽しいですが、少し寂しいです。",
+        "translation_vi": "Cuộc sống ở Nhật vui nhưng hơi cô đơn một chút."
+      },
+      {
+        "sentence_ja": "すみませんが、塩を取ってください。",
+        "translation_vi": "Xin lỗi, vui lòng lấy giúp tôi lọ muối."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000045",
+    "pattern": "〜て・〜で（順接）",
+    "level": "N5",
+    "category": "reason_contrast",
+    "meaning_vi": "Làm A rồi làm B (liệt kê hành động nối tiếp)",
+    "formula": "Động từ 1 thể て + Động từ 2 thể て + Động từ chính",
+    "usage_vi": "Sắp xếp nhiều hành động theo trình tự thời gian liên tiếp trong một câu.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "朝起きて、顔を洗って、学校へ行きます。",
+        "translation_vi": "Sáng dậy, rửa mặt rồi tôi đi học."
+      },
+      {
+        "sentence_ja": "デパートへ行って、買い物をしました。",
+        "translation_vi": "Tôi đã đến trung tâm thương mại và mua sắm."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000046",
+    "pattern": "〜の中で〜がいちばん",
+    "level": "N5",
+    "category": "comparison",
+    "meaning_vi": "Trong số ~ thì ~ nhất",
+    "formula": "Phạm vi + の中で + Đối tượng + がいちばん + Tính từ",
+    "usage_vi": "So sánh bậc nhất trong một tập hợp cùng loại (mùa, món ăn, môn thể thao...).",
+    "grammar_examples": [
+      {
+        "sentence_ja": "季節の中で春がいちばん好きです。",
+        "translation_vi": "Trong các mùa, tôi thích mùa xuân nhất."
+      },
+      {
+        "sentence_ja": "日本料理の中で寿司がいちばんおいしいと思います。",
+        "translation_vi": "Trong đồ ăn Nhật tôi nghĩ sushi ngon nhất."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000047",
+    "pattern": "〜がほしい",
+    "level": "N5",
+    "category": "desire",
+    "meaning_vi": "Muốn có (một đồ vật / điều gì)",
+    "formula": "Danh từ + が + ほしいです（ngôi thứ nhất）",
+    "usage_vi": "Bày tỏ mong muốn sở hữu một đồ vật hay trạng thái cụ thể; khác 〜たい đi với động từ.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "新しいパソコンがほしいです。",
+        "translation_vi": "Tôi muốn có một chiếc máy tính mới."
+      },
+      {
+        "sentence_ja": "今、いちばんほしいものは時間です。",
+        "translation_vi": "Thứ tôi muốn nhất bây giờ là thời gian."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000048",
+    "pattern": "〜の（名詞化）",
+    "level": "N5",
+    "category": "quoting_noun",
+    "meaning_vi": "Danh từ hóa động từ / tính từ",
+    "formula": "Động từ thể thông thường + の + が好き・上手・下手・速い...",
+    "usage_vi": "Biến cụm động từ thành cụm danh từ để làm chủ ngữ hoặc tân ngữ cho câu.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "絵を描くのが好きです。",
+        "translation_vi": "Tôi thích vẽ tranh."
+      },
+      {
+        "sentence_ja": "朝早く起きるのは大変です。",
+        "translation_vi": "Việc dậy sớm vào buổi sáng thật vất vả."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000049",
+    "pattern": "〜に行く・来る",
+    "level": "N5",
+    "category": "quoting_noun",
+    "meaning_vi": "Đi / đến để làm việc gì (mục đích)",
+    "formula": "Địa điểm + へ + (Động từ gốc ます / Danh từ) + に + 行きます・来ます",
+    "usage_vi": "Nêu mục đích của hành động di chuyển.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "デパートへ靴を買いに行きます。",
+        "translation_vi": "Tôi đi trung tâm thương mại để mua giày."
+      },
+      {
+        "sentence_ja": "日本へ経済の勉強に来ました。",
+        "translation_vi": "Tôi đến Nhật để học kinh tế."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000050",
+    "pattern": "〜あげる・〜もらう・〜くれる",
+    "level": "N5",
+    "category": "giving_receiving",
+    "meaning_vi": "Tặng, nhận và được người khác tặng",
+    "formula": "A は B に V(vật) を あげる / もらう / くれる",
+    "usage_vi": "あげます (tặng cho ai), もらいます (nhận từ ai), くれます (ai đó tặng cho mình/nhóm mình).",
+    "grammar_examples": [
+      {
+        "sentence_ja": "私は母に花をあげました。",
+        "translation_vi": "Tôi đã tặng hoa cho mẹ."
+      },
+      {
+        "sentence_ja": "友だちが私に誕生日プレゼントをくれました。",
+        "translation_vi": "Bạn tôi đã tặng quà sinh nhật cho tôi."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000051",
+    "pattern": "〜まえに",
+    "level": "N5",
+    "category": "sequence",
+    "meaning_vi": "Trước khi làm việc gì",
+    "formula": "Động từ thể từ điển / Danh từ + の + まえに",
+    "usage_vi": "Cho biết hành động ở vế sau diễn ra trước thời điểm hoặc hành động A; lưu ý động từ trước まえに luôn ở thể từ điển.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "寝るまえに、歯を磨きます。",
+        "translation_vi": "Trước khi đi ngủ tôi đánh răng."
+      },
+      {
+        "sentence_ja": "食事のまえに、手を洗いましょう。",
+        "translation_vi": "Trước bữa ăn hãy rửa tay nhé."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000052",
+    "pattern": "可能形（〜られる・〜える）",
+    "level": "N4",
+    "category": "ability",
+    "meaning_vi": "Động từ thể khả năng (có thể làm)",
+    "formula": "Nhóm I: u -> eru; Nhóm II: ru -> rareru; する -> できる; くる -> こられる",
+    "usage_vi": "Diễn tả năng lực hoặc điều kiện cho phép thực hiện hành động; đối tượng thường dùng trợ từ が.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "私は漢字が少し読めます。",
+        "translation_vi": "Tôi có thể đọc được một ít chữ Hán."
+      },
+      {
+        "sentence_ja": "この川では泳げません。",
+        "translation_vi": "Không thể bơi ở con sông này."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000053",
+    "pattern": "〜てある",
+    "level": "N4",
+    "category": "aspect",
+    "meaning_vi": "Được làm sẵn (trạng thái kết quả có chủ đích)",
+    "formula": "N + が + Tha động từ thể て + ある",
+    "usage_vi": "Miêu tả trạng thái tồn tại hiện tại do ai đó đã chủ ý thực hiện hành động từ trước; trợ từ trước động từ chuyển sang が.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "壁に地図が貼ってあります。",
+        "translation_vi": "Trên tường có dán sẵn bản đồ."
+      },
+      {
+        "sentence_ja": "テーブルの上にお皿が並べてあります。",
+        "translation_vi": "Trên bàn đã bày sẵn đĩa rồi."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000054",
+    "pattern": "〜ておく",
+    "level": "N4",
+    "category": "aspect",
+    "meaning_vi": "Làm sẵn trước để chuẩn bị",
+    "formula": "Động từ thể て + おく（văn nói rút gọn thành とく）",
+    "usage_vi": "Thực hiện một hành động trước để chuẩn bị cho việc sắp diễn ra hoặc giữ nguyên trạng thái.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "旅行の前に切符を買っておきます。",
+        "translation_vi": "Trước chuyến du lịch tôi mua sẵn vé."
+      },
+      {
+        "sentence_ja": "会議の前に資料を配っておいてください。",
+        "translation_vi": "Trước cuộc họp hãy phát sẵn tài liệu nhé."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000055",
+    "pattern": "〜てしまう",
+    "level": "N4",
+    "category": "aspect",
+    "meaning_vi": "Làm xong hoàn toàn / lỡ làm (tiếc nuối)",
+    "formula": "Động từ thể て + しまう（rút gọn: ちゃう・じゃう）",
+    "usage_vi": "Hai sắc thái chính: hoàn thành triệt để một việc gì, hoặc lỡ làm việc không mong muốn gây hối tiếc.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "借りた本を全部読んでしまいました。",
+        "translation_vi": "Tôi đã đọc xong hết cuốn sách mượn rồi."
+      },
+      {
+        "sentence_ja": "電車の中に傘を忘れてしまいました。",
+        "translation_vi": "Tôi lỡ quên mất chiếc ô trên tàu điện rồi."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000056",
+    "pattern": "〜てくる・〜ていく",
+    "level": "N4",
+    "category": "aspect",
+    "meaning_vi": "Tiến triển đến hiện tại / tiếp diễn về tương lai",
+    "formula": "Động từ thể て + くる / いく",
+    "usage_vi": "〜てくる: thay đổi hoặc hành động hướng gần tới hiện tại/người nói; 〜ていく: biến đổi dần về tương lai hoặc rời xa dần.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "最近、日本語がだんだんわかってきました。",
+        "translation_vi": "Gần đây tôi dần dần hiểu tiếng Nhật hơn rồi."
+      },
+      {
+        "sentence_ja": "これからも日本語を勉強していきます。",
+        "translation_vi": "Từ giờ trở đi tôi vẫn sẽ tiếp tục học tiếng Nhật."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000057",
+    "pattern": "〜はじめる・〜おわる",
+    "level": "N4",
+    "category": "aspect",
+    "meaning_vi": "Bắt đầu làm ~ / làm xong ~",
+    "formula": "Động từ gốc ます + はじめる / おわる",
+    "usage_vi": "Nêu điểm khởi đầu hoặc kết thúc hoàn toàn của một hành động kéo dài.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "急に雨が降りはじめました。",
+        "translation_vi": "Trời đột nhiên bắt đầu đổ mưa."
+      },
+      {
+        "sentence_ja": "この小説をやっと読みおわりました。",
+        "translation_vi": "Cuối cùng tôi cũng đọc xong cuốn tiểu thuyết này."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000058",
+    "pattern": "〜つづける",
+    "level": "N4",
+    "category": "aspect",
+    "meaning_vi": "Tiếp tục làm việc gì liên tục",
+    "formula": "Động từ gốc ます + つづける",
+    "usage_vi": "Nhấn mạnh một hành động được duy trì đều đặn qua khoảng thời gian hoặc diễn ra không ngắt quãng.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "三時間ずっと歩きつづけました。",
+        "translation_vi": "Tôi đã đi bộ liên tục suốt 3 tiếng."
+      },
+      {
+        "sentence_ja": "あきらめないで努力しつづけたいです。",
+        "translation_vi": "Tôi muốn không bỏ cuộc mà tiếp tục nỗ lực."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000059",
+    "pattern": "〜たばかり",
+    "level": "N4",
+    "category": "tense_negation",
+    "meaning_vi": "Vừa mới làm xong ~ (theo cảm nhận còn mới)",
+    "formula": "Động từ thể た + ばかりだ",
+    "usage_vi": "Nhấn mạnh cảm nhận chủ quan của người nói rằng sự việc mới diễn ra chưa lâu (có thể vài giờ hoặc vài tháng).",
+    "grammar_examples": [
+      {
+        "sentence_ja": "先月日本へ来たばかりです。",
+        "translation_vi": "Tôi mới vừa đến Nhật tháng trước thôi."
+      },
+      {
+        "sentence_ja": "さっき昼ご飯を食べたばかりなので、おなかがいっぱいです。",
+        "translation_vi": "Vì vừa mới ăn trưa lúc nãy nên bụng vẫn no."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000060",
+    "pattern": "〜ところだ",
+    "level": "N4",
+    "category": "tense_negation",
+    "meaning_vi": "Sắp / đang đúng lúc / vừa mới ~",
+    "formula": "Vる + ところ (sắp) / Vている + ところ (đang) / Vた + ところ (vừa mới)",
+    "usage_vi": "Chỉ thời điểm tức thì của hành động xét theo khoảnh khắc đang nói.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "今から昼ご飯を食べるところです。",
+        "translation_vi": "Bây giờ tôi chuẩn bị ăn trưa đây."
+      },
+      {
+        "sentence_ja": "ちょうど今、駅に着いたところです。",
+        "translation_vi": "Tôi vừa mới tới ga đúng lúc này."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000061",
+    "pattern": "〜ないで",
+    "level": "N4",
+    "category": "tense_negation",
+    "meaning_vi": "Làm B mà không làm A",
+    "formula": "Động từ thể ない + で + Động từ chính",
+    "usage_vi": "Diễn tả trạng thái làm hành động thứ hai trong khi bỏ qua hành động thứ nhất vốn thường đi kèm.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "今日は傘を持たないで出かけました。",
+        "translation_vi": "Hôm nay tôi ra ngoài mà không mang ô."
+      },
+      {
+        "sentence_ja": "辞書を使わないで新聞を読みます。",
+        "translation_vi": "Tôi đọc báo mà không dùng từ điển."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000062",
+    "pattern": "〜ずに",
+    "level": "N4",
+    "category": "tense_negation",
+    "meaning_vi": "Không làm A mà làm B (hơi trang trọng)",
+    "formula": "Động từ thể ない bỏ ない + ずに (する -> せずに)",
+    "usage_vi": "Ý nghĩa tương tự 〜ないで nhưng mang sắc thái văn viết hoặc trang trọng hơn.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "昨日、晩ご飯を食べずに寝てしまいました。",
+        "translation_vi": "Hôm qua tôi đã ngủ luôn mà không ăn tối."
+      },
+      {
+        "sentence_ja": "誰にも相談せずに決めました。",
+        "translation_vi": "Tôi đã quyết định mà không bàn với ai."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000063",
+    "pattern": "〜と（条件）",
+    "level": "N4",
+    "category": "condition",
+    "meaning_vi": "Hễ A thì tất yếu xảy ra B",
+    "formula": "Thể từ điển / Thể ない + と、Mệnh đề kết quả",
+    "usage_vi": "Quy luật tự nhiên, thao tác máy móc, chỉ đường; vế sau không dùng câu mệnh lệnh, ý chí hay nhờ vả.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "このボタンを押すと、おつりが出ます。",
+        "translation_vi": "Ấn nút này thì tiền thối sẽ ra."
+      },
+      {
+        "sentence_ja": "春になると、桜が咲きます。",
+        "translation_vi": "Hễ sang xuân là hoa anh đào nở."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000064",
+    "pattern": "〜たら",
+    "level": "N4",
+    "category": "condition",
+    "meaning_vi": "Nếu ~ / Sau khi ~ thì ~",
+    "formula": "Thể quá khứ thông thường (〜た・〜かった・〜だった) + ら",
+    "usage_vi": "Dùng rất linh hoạt cho giả định, tình huống tương lai chắc chắn xảy ra, hoặc sau khi hoàn thành A; vế sau có thể là ý định, mời gọi.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "雨が降ったら、試合は中止です。",
+        "translation_vi": "Nếu trời mưa thì trận đấu sẽ bị hủy."
+      },
+      {
+        "sentence_ja": "家へ帰ったら、すぐ電話をください。",
+        "translation_vi": "Về đến nhà rồi hãy gọi cho tôi ngay nhé."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000065",
+    "pattern": "〜ば",
+    "level": "N4",
+    "category": "condition",
+    "meaning_vi": "Nếu / Miễn là A thì B",
+    "formula": "Nhóm I: u -> eba; Nhóm II: ru -> reba; Tính từ い -> ければ; ない -> なければ",
+    "usage_vi": "Nhấn mạnh điều kiện cần để kết quả ở vế sau xảy ra hoặc đưa ra giả định chung.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "毎日練習すれば、上手になります。",
+        "translation_vi": "Nếu luyện tập mỗi ngày thì sẽ giỏi lên."
+      },
+      {
+        "sentence_ja": "天気がよければ、散歩しましょう。",
+        "translation_vi": "Nếu thời tiết đẹp thì đi dạo nhé."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000066",
+    "pattern": "〜なら",
+    "level": "N4",
+    "category": "condition",
+    "meaning_vi": "Nếu là nói về ~ (dựa vào thông tin vừa nghe)",
+    "formula": "Danh từ / Tính từ な / Động từ thông thường + なら",
+    "usage_vi": "Đón lấy chủ đề hoặc lời đối phương vừa nói để đưa ra lời khuyên hay nhận xét phù hợp.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "京都へ行くなら、秋がいちばんきれいですよ。",
+        "translation_vi": "Nếu đi Kyoto thì mùa thu là đẹp nhất đấy."
+      },
+      {
+        "sentence_ja": "カメラなら、駅前の店が安いです。",
+        "translation_vi": "Nếu nói về máy ảnh thì cửa hàng trước ga rẻ lắm."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000067",
+    "pattern": "〜たらどうですか",
+    "level": "N4",
+    "category": "condition",
+    "meaning_vi": "Bạn thử làm ~ xem sao? (gợi ý nhẹ nhàng)",
+    "formula": "Động từ thể た + らどうですか",
+    "usage_vi": "Khuyên hoặc gợi ý cho người nghe một giải pháp để cân nhắc.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "頭が痛いなら、少し休んだらどうですか。",
+        "translation_vi": "Nếu đau đầu thì bạn thử nghỉ một chút xem sao?"
+      },
+      {
+        "sentence_ja": "先生に聞いてみたらどうですか。",
+        "translation_vi": "Sao bạn không thử hỏi thầy xem?"
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000068",
+    "pattern": "〜ので",
+    "level": "N4",
+    "category": "reason_contrast",
+    "meaning_vi": "Vì ~ nên ~ (lý do khách quan, lịch sự)",
+    "formula": "Thể thông thường + ので (Tính từ な・Danh từ giữ な + ので)",
+    "usage_vi": "Giải thích nguyên nhân một cách khách quan, mềm mại hơn から, hay dùng khi xin phép hoặc xin lỗi.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "バスが遅れたので、授業に間に合いませんでした。",
+        "translation_vi": "Vì xe buýt đến trễ nên tôi không kịp giờ học."
+      },
+      {
+        "sentence_ja": "ここは静かなので、勉強しやすいです。",
+        "translation_vi": "Vì ở đây yên tĩnh nên rất dễ học."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000069",
+    "pattern": "〜のに",
+    "level": "N4",
+    "category": "reason_contrast",
+    "meaning_vi": "Thế mà / Mặc dù ~ nhưng lại ~ (trái kỳ vọng)",
+    "formula": "Thể thông thường + のに (Tính từ な・Danh từ giữ な + のに)",
+    "usage_vi": "Bày tỏ sự bất ngờ, thất vọng hoặc không hài lòng vì kết quả trái ngược hẳn với điều kiện ban đầu.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "目覚まし時計をかけたのに、寝坊してしまいました。",
+        "translation_vi": "Đã đặt đồng hồ báo thức rồi vậy mà vẫn ngủ quên mất."
+      },
+      {
+        "sentence_ja": "日曜日なのに、仕事に行かなければなりません。",
+        "translation_vi": "Dù là Chủ nhật mà vẫn phải đi làm."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000070",
+    "pattern": "〜ても",
+    "level": "N4",
+    "category": "reason_contrast",
+    "meaning_vi": "Cho dù ~ đi nữa thì vẫn ~",
+    "formula": "Động từ thể て + も / Tính từ い bỏ い + くても / Tính từ な・Danh từ + でも",
+    "usage_vi": "Nêu giả định điều kiện dù có xảy ra thì kết quả vẫn không đổi.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "雨が降っても、サッカーの試合をします。",
+        "translation_vi": "Cho dù trời có mưa thì vẫn thi đấu bóng đá."
+      },
+      {
+        "sentence_ja": "いくら高くても、この本を買いたいです。",
+        "translation_vi": "Dù có đắt thế nào tôi vẫn muốn mua cuốn sách này."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000071",
+    "pattern": "〜し、〜し",
+    "level": "N4",
+    "category": "reason_contrast",
+    "meaning_vi": "Vừa ~ vừa ~ / Hơn nữa lại ~",
+    "formula": "Thể thông thường + し、Thể thông thường + し",
+    "usage_vi": "Liệt kê nhiều đặc điểm đồng hướng hoặc nhiều lý do cộng dồn để giải thích cho kết luận.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "この町は交通も便利だし、物価も安いです。",
+        "translation_vi": "Thành phố này giao thông vừa tiện, vật giá lại rẻ."
+      },
+      {
+        "sentence_ja": "今日は忙しいし、天気も悪いし、家にいよう。",
+        "translation_vi": "Hôm nay vừa bận vừa thời tiết xấu nên ở nhà thôi."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000072",
+    "pattern": "〜て（原因・理由）",
+    "level": "N4",
+    "category": "reason_contrast",
+    "meaning_vi": "Vì ~ mà (cảm xúc / kết quả không chủ ý)",
+    "formula": "Động từ thể て / Tính từ い bỏ い + くて / Tính từ な + で",
+    "usage_vi": "Chỉ nguyên nhân nhẹ dẫn đến cảm xúc (vui, buồn, lo) hoặc tình huống ngoài ý muốn ở vế sau.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "ニュースを聞いて、びっくりしました。",
+        "translation_vi": "Nghe tin tức mà tôi giật cả mình."
+      },
+      {
+        "sentence_ja": "道が込んでいて、遅れてしまいました。",
+        "translation_vi": "Vì đường kẹt nên tôi bị trễ mất."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000073",
+    "pattern": "〜すぎる",
+    "level": "N4",
+    "category": "adjectives",
+    "meaning_vi": "Quá mức / vượt quá giới hạn",
+    "formula": "Động từ gốc ます / Tính từ い bỏ い / Tính từ な + すぎる",
+    "usage_vi": "Nhận xét hành động hay tính chất vượt quá mức bình thường, thường mang sắc thái không tốt.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "昨日、お酒を飲みすぎてしまいました。",
+        "translation_vi": "Hôm qua tôi đã uống quá nhiều rượu."
+      },
+      {
+        "sentence_ja": "このセーターは私には大きすぎます。",
+        "translation_vi": "Chiếc áo len này quá rộng so với tôi."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000074",
+    "pattern": "〜やすい・〜にくい",
+    "level": "N4",
+    "category": "adjectives",
+    "meaning_vi": "Dễ làm ~ / Khó làm ~",
+    "formula": "Động từ gốc ます + やすい（dễ）/ にくい（khó）",
+    "usage_vi": "Đánh giá tính chất khách quan của sự vật rằng nó thuận tiện hay gây khó khăn khi thực hiện.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "このペンはとても書きやすいです。",
+        "translation_vi": "Cây bút này rất dễ viết."
+      },
+      {
+        "sentence_ja": "この漢字は画数が多くて覚えにくいです。",
+        "translation_vi": "Chữ Hán này nhiều nét nên khó nhớ."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000075",
+    "pattern": "〜そうだ（様態）",
+    "level": "N4",
+    "category": "adjectives",
+    "meaning_vi": "Trông có vẻ như ~ / Sắp sửa ~",
+    "formula": "Động từ gốc ます / Tính từ い bỏ い / Tính từ な + そうだ",
+    "usage_vi": "Suy đoán bằng trực giác dựa trên vẻ ngoài quan sát được ngay lúc nói (lưu ý: いい -> よさそうだ, ない -> なさそうだ).",
+    "grammar_examples": [
+      {
+        "sentence_ja": "このケーキはとてもおいしそうですね。",
+        "translation_vi": "Chiếc bánh này trông ngon quá nhỉ."
+      },
+      {
+        "sentence_ja": "今にも雨が降りそうです。",
+        "translation_vi": "Trời trông cứ như sắp mưa đến nơi rồi."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000076",
+    "pattern": "〜がる",
+    "level": "N4",
+    "category": "adjectives",
+    "meaning_vi": "Có vẻ muốn / tỏ ra cảm thấy ~ (ngôi thứ 3)",
+    "formula": "Tính từ cảm xúc bỏ い / な + がる（thường chia がっている）",
+    "usage_vi": "Miêu tả cảm giác, mong muốn của người khác qua biểu hiện bên ngoài (chủ ngữ không phải người nói).",
+    "grammar_examples": [
+      {
+        "sentence_ja": "子供は新しいおもちゃをほしがっています。",
+        "translation_vi": "Đứa trẻ có vẻ rất muốn món đồ chơi mới."
+      },
+      {
+        "sentence_ja": "妹は暗いところを怖がっています。",
+        "translation_vi": "Em gái tôi sợ chỗ tối."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000077",
+    "pattern": "〜てみる",
+    "level": "N4",
+    "category": "request_suggestion",
+    "meaning_vi": "Làm thử xem sao",
+    "formula": "Động từ thể て + みる",
+    "usage_vi": "Thử trải nghiệm một việc gì đó để kiểm tra hoặc biết cảm giác/kết quả ra sao.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "日本の納豆を食べてみたいです。",
+        "translation_vi": "Tôi muốn ăn thử món natto của Nhật."
+      },
+      {
+        "sentence_ja": "サイズが合うか、一度着てみてください。",
+        "translation_vi": "Hãy mặc thử một lần xem có vừa cỡ không."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000078",
+    "pattern": "〜なさい",
+    "level": "N4",
+    "category": "request_suggestion",
+    "meaning_vi": "Hãy làm ~ (mệnh lệnh nhẹ nhàng)",
+    "formula": "Động từ gốc ます + なさい",
+    "usage_vi": "Thường dùng từ người lớn nói với trẻ nhỏ, thầy cô với học sinh hoặc trong đề thi.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "早く寝なさい。明日は学校ですよ。",
+        "translation_vi": "Đi ngủ sớm đi con. Ngày mai đi học đấy."
+      },
+      {
+        "sentence_ja": "次の文を読んで質問に答えなさい。",
+        "translation_vi": "Hãy đọc đoạn văn sau và trả lời câu hỏi."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000079",
+    "pattern": "〜てほしい",
+    "level": "N4",
+    "category": "request_suggestion",
+    "meaning_vi": "Muốn ai đó làm gì cho mình",
+    "formula": "Người + に + Động từ thể て + ほしい",
+    "usage_vi": "Bày tỏ mong muốn người khác thực hiện hành động nào đó.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "友達に手伝ってほしいです。",
+        "translation_vi": "Tôi muốn bạn giúp đỡ mình."
+      },
+      {
+        "sentence_ja": "みんなに私の国へ来てほしいです。",
+        "translation_vi": "Tôi muốn mọi người đến thăm đất nước tôi."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000080",
+    "pattern": "〜ようと思う",
+    "level": "N4",
+    "category": "intention",
+    "meaning_vi": "Tôi định sẽ làm ~ (dự định đang hình thành)",
+    "formula": "Động từ thể ý chí (〜よう / 〜おう) + と思う（と思っている）",
+    "usage_vi": "Nêu ý định của người nói vừa nảy ra hoặc dự định mang tính cá nhân linh hoạt hơn つもり.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "夏休みに国へ帰ろうと思っています。",
+        "translation_vi": "Tôi đang định nghỉ hè sẽ về quê hương."
+      },
+      {
+        "sentence_ja": "来月から水泳を始めようと思います。",
+        "translation_vi": "Tôi định từ tháng sau sẽ bắt đầu học bơi."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000081",
+    "pattern": "〜予定だ",
+    "level": "N4",
+    "category": "intention",
+    "meaning_vi": "Dự kiến / theo lịch trình sẽ ~",
+    "formula": "Động từ thể từ điển / Danh từ + の + 予定だ",
+    "usage_vi": "Thông báo một kế hoạch, lịch trình đã được sắp xếp sẵn (thường mang tính lịch hẹn hoặc công việc).",
+    "grammar_examples": [
+      {
+        "sentence_ja": "来月の十日に出張する予定です。",
+        "translation_vi": "Theo lịch tôi sẽ đi công tác vào ngày 10 tháng sau."
+      },
+      {
+        "sentence_ja": "会議は二時間の予定です。",
+        "translation_vi": "Cuộc họp dự kiến kéo dài hai tiếng."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000082",
+    "pattern": "〜ことにする・〜ことになる",
+    "level": "N4",
+    "category": "intention",
+    "meaning_vi": "Tự quyết định / được quyết định rằng",
+    "formula": "Vる・Vない + ことにする（chủ động）/ + ことになる（khách quan）",
+    "usage_vi": "ことにする: bản thân tự quyết định; ことになる: tổ chức/hoàn cảnh quyết định không phụ thuộc ý muốn cá nhân.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "健康のために、毎日歩くことにしました。",
+        "translation_vi": "Vì sức khỏe, tôi đã quyết định mỗi ngày sẽ đi bộ."
+      },
+      {
+        "sentence_ja": "来月、大阪へ転勤することになりました。",
+        "translation_vi": "Tháng sau tôi được điều chuyển công tác tới Osaka."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000083",
+    "pattern": "〜と思う",
+    "level": "N4",
+    "category": "quoting_noun",
+    "meaning_vi": "Tôi nghĩ rằng ~ (trích dẫn suy nghĩ)",
+    "formula": "Thể thông thường + と思う",
+    "usage_vi": "Trình bày ý kiến, suy đoán của bản thân; khi hỏi ý kiến người khác dùng と思いますか.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "明日は雨が降ると思います。",
+        "translation_vi": "Tôi nghĩ ngày mai trời sẽ mưa."
+      },
+      {
+        "sentence_ja": "日本の生活はどう思いますか。",
+        "translation_vi": "Bạn nghĩ sao về cuộc sống ở Nhật?"
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000084",
+    "pattern": "〜と言う",
+    "level": "N4",
+    "category": "quoting_noun",
+    "meaning_vi": "Nói rằng ~ (tường thuật lời nói)",
+    "formula": "Thể thông thường / 「Câu trực tiếp」 + と言う",
+    "usage_vi": "Thuật lại lời nói gián tiếp hoặc trích nguyên văn lời ai đó đã nói.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "先生は明日テストがあると言いました。",
+        "translation_vi": "Thầy giáo nói rằng ngày mai có bài kiểm tra."
+      },
+      {
+        "sentence_ja": "田中さんは「ちょっと遅れます」と言っていました。",
+        "translation_vi": "Anh Tanaka nói là 'Tôi sẽ đến muộn một chút'."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000085",
+    "pattern": "〜かどうか",
+    "level": "N4",
+    "category": "quoting_noun",
+    "meaning_vi": "Liệu có ~ hay không",
+    "formula": "Thể thông thường + かどうか",
+    "usage_vi": "Lồng ghép một câu hỏi Có/Không vào làm tân ngữ cho động từ biết, nhớ, hỏi, kiểm tra...",
+    "grammar_examples": [
+      {
+        "sentence_ja": "明日、彼が来るかどうかわかりません。",
+        "translation_vi": "Tôi không biết ngày mai anh ấy có đến hay không."
+      },
+      {
+        "sentence_ja": "この料理が辛いかどうか食べてみます。",
+        "translation_vi": "Tôi ăn thử xem món này có cay hay không."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000086",
+    "pattern": "〜ために",
+    "level": "N4",
+    "category": "quoting_noun",
+    "meaning_vi": "Để ~ (mục đích) / Vì ~ (nguyên nhân)",
+    "formula": "Động từ thể từ điển / Danh từ + の + ために",
+    "usage_vi": "Trước động từ ý chí chỉ mục đích cần cố gắng đạt được; hoặc nêu nguyên nhân gây tác động ở danh từ.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "自分の店を持つために、お金をためています。",
+        "translation_vi": "Tôi đang tiết kiệm tiền để có cửa hàng riêng."
+      },
+      {
+        "sentence_ja": "台風のために電車が止まりました。",
+        "translation_vi": "Vì bão nên tàu điện đã dừng chạy."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000087",
+    "pattern": "〜ように",
+    "level": "N4",
+    "category": "quoting_noun",
+    "meaning_vi": "Để có thể đạt tới trạng thái ~",
+    "formula": "Động từ khả năng / Động từ thể ない / Tự động từ + ように",
+    "usage_vi": "Khác với ために, dùng với động từ không mang ý chí trực tiếp (có thể làm, trở nên, không bị quên) để nêu mục tiêu.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "忘れないようにメモします。",
+        "translation_vi": "Tôi ghi chú lại để không bị quên."
+      },
+      {
+        "sentence_ja": "早く日本語が話せるように毎日練習します。",
+        "translation_vi": "Tôi luyện tập mỗi ngày để có thể nói tiếng Nhật sớm."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000088",
+    "pattern": "〜てあげる・〜てもらう・〜てくれる",
+    "level": "N4",
+    "category": "giving_receiving",
+    "meaning_vi": "Làm giúp / nhờ làm / được ai làm cho",
+    "formula": "Động từ thể て + あげる / もらう / くれる",
+    "usage_vi": "Diễn tả ân huệ hành động giữa người thực hiện và người nhận lợi ích.",
+    "grammar_examples": [
+      {
+        "sentence_ja": "私は友達に漢字の読み方を教えてあげました。",
+        "translation_vi": "Tôi đã dạy bạn cách đọc chữ Hán."
+      },
+      {
+        "sentence_ja": "先輩にパソコンを直してもらいました。",
+        "translation_vi": "Tôi đã nhờ anh khóa trên sửa máy tính giúp."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000089",
+    "pattern": "受身形（〜られる・〜れる）",
+    "level": "N4",
+    "category": "voice_politeness",
+    "meaning_vi": "Thể bị động (bị / được ai làm gì)",
+    "formula": "Nhóm I: u -> areru; Nhóm II: ru -> rareru; する -> される; くる -> こられる",
+    "usage_vi": "Người hoặc vật chịu tác động từ hành động của người khác (thường dùng với に trước tác nhân).",
+    "grammar_examples": [
+      {
+        "sentence_ja": "私は先生にほめられました。",
+        "translation_vi": "Tôi đã được thầy giáo khen."
+      },
+      {
+        "sentence_ja": "電車の中で隣の人に足を踏まれました。",
+        "translation_vi": "Trên tàu tôi bị người bên cạnh giẫm lên chân."
+      }
+    ]
+  },
+  {
+    "id": "10000000-0000-0000-0000-000000000090",
+    "pattern": "〜かもしれない",
+    "level": "N4",
+    "category": "voice_politeness",
+    "meaning_vi": "Có lẽ / biết đâu chừng ~",
+    "formula": "Thể thông thường + かもしれない (Danh từ・Tính từ な không thêm だ)",
+    "usage_vi": "Nêu phán đoán với xác suất chưa chắc chắn (khoảng 50%).",
+    "grammar_examples": [
+      {
+        "sentence_ja": "午後から雪が降るかもしれません。",
+        "translation_vi": "Từ chiều trở đi có lẽ tuyết sẽ rơi."
+      },
+      {
+        "sentence_ja": "彼はもう帰ったかもしれません。",
+        "translation_vi": "Có khi anh ấy đã về rồi cũng nên."
+      }
+    ]
+  }
 ]

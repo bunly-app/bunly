@@ -37,9 +37,9 @@ def validate(directory):
     points = grammar["grammar_points"]
     require(len(points) == 12, "B0 requires 12 grammar points")
     ids = check_ids(points, "grammar")
-    by_id = {point["id"]: point for point in points}
-    for original in read_json(ROOT / "assets/data/grammar.json"):
-        require(by_id.get(original["id"]) == original, "Legacy grammar was modified")
+    by_asset_id = {point["id"]: point for point in read_json(ROOT / "assets/data/grammar.json")}
+    for point in points:
+        require(by_asset_id.get(point["id"]) == point, "Asset grammar diverges from B0 fixture")
     fields = ["pattern", "level", "category", "meaning_vi", "formula", "usage_vi"]
     for point in points:
         require(point["level"] in ("N5", "N4"), "Unknown JLPT level")

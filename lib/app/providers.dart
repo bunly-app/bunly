@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:drift/drift.dart' show BooleanExpressionOperators;
 
 import 'package:flutter/material.dart' show ThemeMode;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -294,7 +296,24 @@ final cachedQuestionsProvider =
     FutureProvider.autoDispose<List<CuratedPracticeQuestion>>((ref) async {
       final user = ref.watch(userProvider).valueOrNull;
       if (user == null) return const [];
-      return ref.watch(practiceStorageRepositoryProvider).loadCachedQuestions();
+      final config = ref.watch(configProvider);
+      final storage = ref.watch(practiceStorageRepositoryProvider);
+      final existing = await storage.loadCachedQuestions();
+      if (existing.isNotEmpty ||
+          config.connected ||
+          storage is! LocalPracticeStorageRepository) {
+        return existing;
+      }
+      final raw = await rootBundle.loadString(
+        'assets/data/practice_questions.json',
+      );
+      final decoded = (jsonDecode(raw) as List<dynamic>)
+          .cast<Map<String, dynamic>>()
+          .map(practiceQuestionFromJson)
+          .toList(growable: false);
+      if (decoded.isEmpty) return existing;
+      await storage.replaceCachedQuestions(decoded);
+      return storage.loadCachedQuestions();
     });
 
 final practiceAttemptsProvider =

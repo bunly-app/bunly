@@ -342,6 +342,9 @@ List<String> buildClozeWordBank(
     ...question.acceptedAnswers.map((e) => e.trim()),
   };
 
+  bool isCompactToken(String token) =>
+      !token.contains(' ') && token.runes.length <= 24;
+
   // Prefer same-grammar alternatives first, then broader pool, sorted deterministically.
   final sameGrammar = pool.where(
     (q) => q.id != question.id && q.grammarId == question.grammarId,
@@ -350,18 +353,25 @@ List<String> buildClozeWordBank(
     (q) => q.id != question.id && q.grammarId != question.grammarId,
   );
 
-  for (final candidate in [...sameGrammar, ...others]) {
-    final tokens = candidate.type == PracticeBankType.mcq
-        ? candidate.options
-        : candidate.acceptedAnswers;
-    for (final raw in tokens) {
-      final token = raw.trim();
-      if (token.isEmpty || seen.contains(token)) continue;
-      seen.add(token);
-      distractors.add(token);
-      if (distractors.length >= 3) break;
+  void collect({required bool compactOnly}) {
+    for (final candidate in [...sameGrammar, ...others]) {
+      final tokens = candidate.type == PracticeBankType.mcq
+          ? candidate.options
+          : candidate.acceptedAnswers;
+      for (final raw in tokens) {
+        final token = raw.trim();
+        if (token.isEmpty || seen.contains(token)) continue;
+        if (compactOnly && !isCompactToken(token)) continue;
+        seen.add(token);
+        distractors.add(token);
+        if (distractors.length >= 3) return;
+      }
     }
-    if (distractors.length >= 3) break;
+  }
+
+  collect(compactOnly: true);
+  if (distractors.length < 3) {
+    collect(compactOnly: false);
   }
 
   if (distractors.isEmpty) return const [];

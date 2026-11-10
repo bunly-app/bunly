@@ -426,7 +426,10 @@ void main() {
         );
         await practiceSync.run();
         expect(await db.select(db.syncOutbox).get(), isEmpty);
-        expect(await storage.loadCachedQuestions(), isA<List<dynamic>>());
+        expect(
+          await storage.loadCachedQuestions(),
+          hasLength(greaterThanOrEqualTo(180)),
+        );
       } finally {
         await remote?.dispose();
         await db.close();

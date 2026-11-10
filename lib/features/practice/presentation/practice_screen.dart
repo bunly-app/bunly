@@ -334,19 +334,33 @@ class _PracticeSetupScreenState extends ConsumerState<PracticeSetupScreen> {
                   ),
                   if (activeSource == PracticeSessionSource.byGrammar &&
                       grammarIdsInBank.length > 1) ...[
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      key: ValueKey(activeGrammarId),
+                      initialValue: activeGrammarId,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Chọn mẫu ngữ pháp',
+                        prefixIcon: Icon(Icons.menu_book_outlined),
+                      ),
+                      items: [
                         for (final gId in grammarIdsInBank)
-                          ChoiceChip(
-                            label: Text(catalogById[gId]?.pattern ?? gId),
-                            selected: activeGrammarId == gId,
-                            onSelected: (_) =>
-                                setState(() => _selectedGrammarId = gId),
+                          DropdownMenuItem<String>(
+                            value: gId,
+                            child: Text(
+                              catalogById[gId] != null
+                                  ? '${catalogById[gId]!.level} · ${catalogById[gId]!.pattern}'
+                                  : gId,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                       ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedGrammarId = value);
+                        }
+                      },
                     ),
                   ],
                   const SizedBox(height: 8),
@@ -2820,7 +2834,7 @@ class _FormattedPromptText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const markers = ['［　　　］', '（　？　）', '(___)'];
+    const markers = ['［　　　］', '（　？　）', '（　）', '(___)'];
     for (final marker in markers) {
       final idx = prompt.indexOf(marker);
       if (idx != -1) {

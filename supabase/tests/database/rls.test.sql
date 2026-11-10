@@ -2,7 +2,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 select no_plan();
 select has_table('public', 'notes', 'notes table exists');
-select is((select count(*)::int from public.grammar_points), 3, 'three development grammar points seeded');
+select is((select count(*)::int from public.grammar_points), 90, '90 N5/N4 draft grammar points seeded');
 insert into auth.users(id, email) values
  ('20000000-0000-0000-0000-000000000001', 'a@example.test'),
  ('20000000-0000-0000-0000-000000000002', 'b@example.test');
