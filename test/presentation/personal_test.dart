@@ -5,6 +5,7 @@ import 'package:bunly/features/learning/domain/personal_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/fake_practice_storage.dart';
 import 'app_test.dart' show WidgetGrammar, WidgetLearning;
 
 class PersonalFake extends WidgetLearning {
@@ -52,11 +53,13 @@ void main() {
     tester,
   ) async {
     final repository = PersonalFake();
+    final practiceStorage = FakePracticeStorageRepository();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           learningRepositoryProvider.overrideWithValue(repository),
           grammarRepositoryProvider.overrideWithValue(WidgetGrammar()),
+          practiceStorageRepositoryProvider.overrideWithValue(practiceStorage),
         ],
         child: const BunlyApp(),
       ),
@@ -77,42 +80,64 @@ void main() {
     expect(repository.profile.dailyMinutes, 30);
     await tester.pageBack();
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Tra cứu'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('N4 · 〜たことがある'));
+    await tester.pumpAndSettle();
+    final scrollable = find
+        .descendant(
+          of: find.byType(ListView),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.scrollUntilVisible(
+      find.text('Lưu mẫu'),
+      250,
+      scrollable: scrollable,
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Lưu mẫu'));
     await tester.pumpAndSettle();
     expect(repository.summary.saved, {'g'});
-    await tester.tap(
-      find
-          .byWidgetPredicate(
-            (widget) => widget is DropdownButtonFormField<LearningStatus>,
-          )
-          .first,
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('status-pill-mastered')),
+      150,
+      scrollable: scrollable,
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Đã nắm').last);
+    await tester.tap(find.byKey(const ValueKey('status-pill-mastered')));
     await tester.pumpAndSettle();
     expect(repository.summary.statusOf('g'), LearningStatus.mastered);
+    await tester.ensureVisible(find.text('Bỏ lưu mẫu'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Bỏ lưu mẫu'));
     await tester.pumpAndSettle();
     expect(repository.summary.saved, isEmpty);
     repository.failStatus = true;
-    await tester.tap(
-      find
-          .byWidgetPredicate(
-            (widget) => widget is DropdownButtonFormField<LearningStatus>,
-          )
-          .first,
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('status-pill-review')),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Cần ôn').last);
+    await tester.tap(find.byKey(const ValueKey('status-pill-review')));
     await tester.pumpAndSettle();
     expect(repository.summary.statusOf('g'), LearningStatus.mastered);
     expect(find.text('Chưa lưu được thay đổi. Hãy thử lại.'), findsOneWidget);
-    expect(find.text('Đã nắm'), findsOneWidget);
+    final selectedMasteredPill = tester.widget<Semantics>(
+      find
+          .descendant(
+            of: find.byKey(const ValueKey('status-pill-mastered')),
+            matching: find.byWidgetPredicate(
+              (widget) =>
+                  widget is Semantics && widget.properties.selected == true,
+            ),
+          )
+          .first,
+    );
+    expect(selectedMasteredPill.properties.selected, isTrue);
     await tester.pumpWidget(const SizedBox());
     await repository.changes.close();
     await repository.profileChanges.close();
     await repository.summaryChanges.close();
+    await practiceStorage.dispose();
   });
 }

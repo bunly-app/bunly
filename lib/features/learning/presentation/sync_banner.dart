@@ -17,6 +17,7 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
   bool loading = false;
   bool failed = false;
   bool synced = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,15 +40,27 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
 
   Future<void> run() async {
     if (!mounted || loading) return;
-    final sync = ref.read(learningSyncProvider);
-    if (sync == null) return;
+    final learningSync = ref.read(learningSyncProvider);
+    final practiceSync = ref.read(practiceSyncProvider);
+    if (learningSync == null && practiceSync == null) return;
     setState(() {
       loading = true;
       failed = false;
     });
     try {
-      await sync.run();
-      if (mounted) setState(() => synced = true);
+      if (learningSync != null) {
+        await learningSync.run();
+      }
+      if (practiceSync != null) {
+        await practiceSync.run();
+        if (mounted) {
+          ref.invalidate(cachedQuestionsProvider);
+        }
+      }
+      if (mounted) {
+        ref.invalidate(analysisQuotaProvider);
+        setState(() => synced = true);
+      }
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -62,10 +75,13 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
 
   @override
   Widget build(BuildContext context) {
-    // Watch keeps worker alive while this screen is mounted.
+    // Watch keeps workers alive while this screen is mounted.
     ref.watch(learningSyncProvider);
+    ref.watch(practiceSyncProvider);
     final pending = ref.watch(pendingSyncProvider);
     final count = pending.valueOrNull;
+    final colors = Theme.of(context).colorScheme;
+    final hasError = pending.hasError || failed;
     final text = pending.hasError
         ? 'Chưa đọc được hàng đợi đồng bộ.'
         : loading
@@ -77,14 +93,56 @@ class _SyncBannerState extends ConsumerState<SyncBanner>
         : synced
         ? 'Đã đồng bộ lần gần nhất.'
         : 'Dữ liệu lưu trên máy; đang chờ kiểm tra đồng bộ.';
-    return Row(
-      children: [
-        Expanded(child: Text(text)),
-        TextButton(
-          onPressed: loading ? null : run,
-          child: const Text('Đồng bộ'),
-        ),
-      ],
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: hasError ? colors.errorContainer : colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          if (loading)
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: colors.primary,
+              ),
+            )
+          else
+            Icon(
+              hasError
+                  ? Icons.cloud_off_outlined
+                  : synced
+                  ? Icons.cloud_done_outlined
+                  : Icons.cloud_queue_outlined,
+              size: 16,
+              color: hasError ? colors.onErrorContainer : colors.primary,
+            ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: hasError
+                    ? colors.onErrorContainer
+                    : colors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: loading ? null : run,
+            style: TextButton.styleFrom(
+              minimumSize: const Size(0, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            ),
+            child: const Text('Đồng bộ'),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -50,7 +50,7 @@ void main() {
     final editedText = '$noteText đã sửa';
     await app.main();
     await tester.pumpAndSettle();
-    expect(find.text('Bunly · Demo'), findsOneWidget);
+    expect(find.text('Bunly'), findsOneWidget);
     await tester.tap(find.byTooltip('Hồ sơ học tập'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).at(0), 'Bunly M2');
@@ -62,6 +62,8 @@ void main() {
     await waitFor(find.text('Đã lưu trên thiết bị.'));
     expect(find.text('Đã lưu trên thiết bị.'), findsOneWidget);
     await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tra cứu'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'たい');
     await tester.pumpAndSettle();

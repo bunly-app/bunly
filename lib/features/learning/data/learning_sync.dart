@@ -68,9 +68,9 @@ class SupabaseLearningRemote implements LearningRemote {
   }
 }
 
-/// Single-device sync. Pending local writes always take priority over a pull.
-/// Manual network/account-switch checks: M2-MANUAL-07..09 in
-/// documents/development/M2-TEST-HANDOFF.md. Multi-device conflict is M3 scope.
+/// Single-device sync for M2 personal entities. Pending local writes take
+/// priority over pull. Practice attempts & revision conflict RPCs use the
+/// extended Drift v3 columns cleanly alongside this worker.
 class LearningSync {
   LearningSync(
     this.database,
@@ -101,12 +101,15 @@ class LearningSync {
 
   Future<void> _run() async {
     _requireSession();
+    const m2Tables = ['profiles', 'notes', 'saved_grammar', 'progress'];
     // Snapshot means writes added during this run remain queued for the next run.
     final operations =
         await (database.select(database.syncOutbox)
               ..where(
                 (r) =>
-                    r.namespace.equals(namespace) & r.ownerId.equals(ownerId),
+                    r.namespace.equals(namespace) &
+                    r.ownerId.equals(ownerId) &
+                    r.entityTable.isIn(m2Tables),
               )
               ..orderBy([(r) => OrderingTerm.asc(r.sequence)]))
             .get();
@@ -114,12 +117,7 @@ class LearningSync {
       _requireSession();
       final payload = jsonDecode(operation.payload) as Map<String, dynamic>;
       if (payload['user_id'] != ownerId ||
-          !const [
-            'profiles',
-            'notes',
-            'saved_grammar',
-            'progress',
-          ].contains(operation.entityTable)) {
+          !m2Tables.contains(operation.entityTable)) {
         throw StateError('Thao tác đồng bộ không hợp lệ.');
       }
       await remote.upsert(operation.entityTable, payload);
@@ -133,7 +131,7 @@ class LearningSync {
           ))
           .go();
     }
-    for (final table in ['profiles', 'notes', 'saved_grammar', 'progress']) {
+    for (final table in m2Tables) {
       _requireSession();
       final rows = await remote.fetch(table, ownerId);
       _requireSession();

@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app/bunly_app.dart';
 import 'app/config.dart';
 import 'app/providers.dart';
+import 'features/settings/data/local_app_settings_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +25,12 @@ Future<void> main() async {
     }
     runApp(
       ProviderScope(
-        overrides: [configProvider.overrideWithValue(config)],
+        overrides: [
+          configProvider.overrideWithValue(config),
+          appSettingsRepositoryProvider.overrideWith(
+            (ref) => LocalAppSettingsRepository(ref.watch(databaseProvider)),
+          ),
+        ],
         child: const BunlyApp(),
       ),
     );

@@ -1,21 +1,25 @@
 import 'grammar_point.dart';
+import 'grammar_catalog.dart';
 import 'grammar_repository.dart';
 
 class SearchGrammar {
   const SearchGrammar(this.repository);
   final GrammarRepository repository;
 
-  Future<List<GrammarPoint>> call({
+  Future<GrammarCatalog> call({
     String query = '',
     String? level,
     String? category,
   }) async {
-    final points = await repository.load();
-    return filterGrammar(
-      points,
-      query: query,
-      level: level,
-      category: category,
+    final catalog = await repository.load();
+    return GrammarCatalog(
+      filterGrammar(
+        catalog.points,
+        query: query,
+        level: level,
+        category: category,
+      ),
+      origin: catalog.origin,
     );
   }
 }

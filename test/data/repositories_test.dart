@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bunly/core/database/app_database.dart';
 import 'package:bunly/features/grammar/data/cached_grammar_repository.dart';
 import 'package:bunly/features/grammar/data/grammar_sources.dart';
+import 'package:bunly/features/grammar/domain/grammar_catalog.dart';
 import 'package:bunly/features/learning/data/local_learning_repository.dart';
 import 'package:bunly/features/learning/domain/note.dart';
 import 'package:drift/native.dart';
@@ -86,6 +87,36 @@ void main() {
     expect(await learning('A').watchNotes('g').first, isEmpty);
     expect(await database.select(database.syncOutbox).get(), isEmpty);
   });
+  test(
+    'notebook observes notes from all patterns, excluding other owners, backends and tombstones',
+    () async {
+      final a = learning('A');
+      await a.saveNote(note('first', 'A first'));
+      await a.saveNote(
+        Note(
+          id: 'second',
+          grammarId: 'another-pattern',
+          content: 'A second',
+          updatedAt: DateTime.utc(2026, 2),
+        ),
+      );
+      await learning('B').saveNote(note('other-user', 'B private'));
+      await learning(
+        'A',
+        namespace: 'other-backend',
+      ).saveNote(note('other-backend', 'private backend'));
+      expect((await a.watchAllNotes().first).map((n) => n.id), [
+        'second',
+        'first',
+      ]);
+      await a.deleteNote('first');
+      expect((await a.watchAllNotes().first).map((n) => n.id), ['second']);
+      expect(
+        (await learning('B').watchAllNotes().first).single.content,
+        'B private',
+      );
+    },
+  );
   test('saving same stable ID updates one note', () async {
     await learning('A').saveNote(note('n', 'old'));
     await learning('A').saveNote(note('n', 'new'));
@@ -98,16 +129,16 @@ void main() {
     () async {
       final source = ControlledSource();
       final repository = CachedGrammarRepository(database, source, 'backend');
-      expect(await repository.load(), hasLength(1));
+      expect((await repository.load()).points, hasLength(1));
       source.offline = true;
-      expect(await repository.load(), hasLength(1));
+      expect((await repository.load()).points, hasLength(1));
       await expectLater(
         CachedGrammarRepository(database, source, 'other').load(),
         throwsA(isA<SocketException>()),
       );
       source.offline = false;
       source.rows = [];
-      expect(await repository.load(), isEmpty);
+      expect((await repository.load()).points, isEmpty);
       source.offline = true;
       await expectLater(repository.load(), throwsA(isA<SocketException>()));
     },
@@ -141,6 +172,33 @@ void main() {
     }
   });
   test(
+    'load origin belongs to its result and errors cannot mutate earlier results',
+    () async {
+      final source = ControlledSource();
+      final repository = CachedGrammarRepository(database, source, 'backend');
+      final fresh = await repository.load();
+      source.offline = true;
+      final cached = await repository.load();
+      expect(fresh.origin, GrammarOrigin.source);
+      expect(cached.origin, GrammarOrigin.cache);
+      expect(cached.points.single.id, fresh.points.single.id);
+      expect(() => cached.points.clear(), throwsUnsupportedError);
+      source.failure = const PostgrestException(
+        message: 'denied',
+        code: '42501',
+      );
+      await expectLater(repository.load(), throwsA(isA<PostgrestException>()));
+      expect(fresh.origin, GrammarOrigin.source);
+      expect(cached.origin, GrammarOrigin.cache);
+      source.failure = null;
+      source.offline = false;
+      source.rows = [];
+      final empty = await repository.load();
+      expect(empty.points, isEmpty);
+      expect(empty.origin, GrammarOrigin.source);
+    },
+  );
+  test(
     'permission errors never masquerade as a successful cached refresh',
     () async {
       final source = ControlledSource();
@@ -151,11 +209,10 @@ void main() {
         code: '42501',
       );
       await expectLater(repository.load(), throwsA(isA<PostgrestException>()));
-      expect(repository.lastLoadFromCache, isFalse);
       source.failure = null;
       source.offline = true;
-      expect(await repository.load(), hasLength(1));
-      expect(repository.lastLoadFromCache, isTrue);
+      expect((await repository.load()).points, hasLength(1));
+      expect((await repository.load()).origin, GrammarOrigin.cache);
     },
   );
 }
