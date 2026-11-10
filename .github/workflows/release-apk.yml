@@ -36,19 +36,34 @@ jobs:
           distribution: temurin
           java-version: '17'
       - name: Build Demo offline release APK (debug-signed preview)
-        run: flutter build apk --release --dart-define-from-file=config/demo.example.json
-      - name: Prepare release asset and SHA-256 checksum
-        id: asset
         run: |
           mkdir -p release-assets
           TAG_LABEL="${GITHUB_REF_NAME:-preview}"
-          APK_NAME="bunly-${TAG_LABEL}-demo-offline.apk"
-          cp build/app/outputs/flutter-apk/app-release.apk "release-assets/${APK_NAME}"
-          (cd release-assets && sha256sum "${APK_NAME}" > "${APK_NAME}.sha256")
-          echo "apk_name=${APK_NAME}" >> "$GITHUB_OUTPUT"
+          flutter build apk --release --dart-define-from-file=config/demo.example.json
+          DEMO_APK="bunly-${TAG_LABEL}-demo-offline.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "release-assets/${DEMO_APK}"
+          (cd release-assets && sha256sum "${DEMO_APK}" > "${DEMO_APK}.sha256")
+      - name: Build Connected Cloud release APK (when repository secrets are configured)
+        env:
+          BUNLY_SUPABASE_URL: ${{ secrets.BUNLY_SUPABASE_URL }}
+          BUNLY_SUPABASE_ANON_KEY: ${{ secrets.BUNLY_SUPABASE_ANON_KEY }}
+        run: |
+          TAG_LABEL="${GITHUB_REF_NAME:-preview}"
+          if [ -z "${BUNLY_SUPABASE_URL}" ] || [ -z "${BUNLY_SUPABASE_ANON_KEY}" ]; then
+            echo "Skipping connected-cloud APK build (BUNLY_SUPABASE_URL / BUNLY_SUPABASE_ANON_KEY secrets not set)."
+            exit 0
+          fi
+          CLOUD_CFG="$(mktemp "${RUNNER_TEMP}/connected-cloud.XXXXXX.json")"
+          trap 'rm -f "${CLOUD_CFG}"' EXIT
+          python3 -c 'import json, os, pathlib, sys; u = os.environ["BUNLY_SUPABASE_URL"].strip(); k = os.environ["BUNLY_SUPABASE_ANON_KEY"].strip(); assert u.startswith("https://") and k, "Invalid Cloud secrets"; pathlib.Path(sys.argv[1]).write_text(json.dumps({"APP_MODE": "connected", "SUPABASE_URL": u, "SUPABASE_ANON_KEY": k}), encoding="utf-8")' "${CLOUD_CFG}"
+          rm -f build/app/outputs/flutter-apk/app-release.apk
+          flutter build apk --release --dart-define-from-file="${CLOUD_CFG}"
+          CLOUD_APK="bunly-${TAG_LABEL}-connected-cloud.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "release-assets/${CLOUD_APK}"
+          (cd release-assets && sha256sum "${CLOUD_APK}" > "${CLOUD_APK}.sha256")
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.asset.outputs.apk_name }}
+          name: bunly-release-apks
           path: release-assets/*
       - name: Publish GitHub Pre-release
         if: startsWith(github.ref, 'refs/tags/v')
@@ -56,12 +71,11 @@ jobs:
         with:
           prerelease: true
           files: |
-            release-assets/${{ steps.asset.outputs.apk_name }}
-            release-assets/${{ steps.asset.outputs.apk_name }}.sha256
+            release-assets/*
           body: |
-            ## Bunly ${{ github.ref_name }} — Demo Offline Preview APK
+            ## Bunly ${{ github.ref_name }} — Android Pre-release APKs
 
-            - **Chế độ build**: Demo ngoại tuyến (`config/demo.example.json`, dữ liệu lưu cục bộ bằng SQLite/Drift).
-            - **Ký APK**: Debug signing key (dành cho cài đặt thử nghiệm / QA trên Android; chưa dùng keystore phát hành Play Store).
+            - **`*-connected-cloud.apk`** (nếu có kèm trên release): Bản kết nối trực tiếp Supabase Cloud (`bunly-dev`), dùng Wi-Fi/4G không cần dây USB, kèm AI phân tích câu và đồng bộ SRS/lịch sử/ghi chú.
+            - **`*-demo-offline.apk`**: Bản Demo ngoại tuyến (`config/demo.example.json`, lưu cục bộ SQLite/Drift).
+            - **Ký APK**: Debug signing key (dành cho cài đặt thử nghiệm / QA trên Android; chưa dùng keystore phát hành Play Store). Nếu máy đã cài APK build từ máy dev bằng keystore khác, hãy gỡ bản cũ trước khi cài bản CI hoặc tải bản cùng keystore.
             - **Nội dung**: 90 điểm ngữ pháp N5/N4 (45 N5, 45 N4) và 180 câu luyện tập (`AI-authored draft` chờ nhóm duyệt nội dung trước khi phát hành chính thức).
-            - **Lưu ý kết nối**: Không trỏ tới Supabase Cloud trong bản preview này; chế độ kết nối (`BUNLY_CONNECTED=true`) sẽ dùng sau khi kích hoạt lại backend Supabase HTTPS.
