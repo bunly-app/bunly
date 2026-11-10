@@ -51,9 +51,9 @@ insert into public.practice_questions (
   'Trước ことがある dùng thể た.'
 );
 
--- Entitlement for A only (daily_limit = 5), quota 0 used initially
+-- Explicit Pro-test entitlement override for A (20/day); B keeps default Free signup limit (5/day)
 insert into bunly_analysis_private.entitlements(user_id, daily_limit)
-values ('22000000-0000-0000-0000-000000000001', 5);
+values ('22000000-0000-0000-0000-000000000001', 20) on conflict (user_id) do update set daily_limit = excluded.daily_limit;
 
 -- Anon privilege checks
 select ok(
@@ -76,7 +76,7 @@ select throws_ok($$insert into public.record_revisions(user_id,entity_table,reco
 
 -- Quota inspection returns A's exact remaining limit without write access
 select is((public.bunly_my_analysis_quota()->>'has_entitlement')::boolean, true, 'A sees own entitlement');
-select is((public.bunly_my_analysis_quota()->>'remaining_quota')::int, 5, 'A sees 5 remaining daily slots');
+select is((public.bunly_my_analysis_quota()->>'remaining_quota')::int, 20, 'A sees 20 remaining daily slots');
 
 -- Attempt anti-forgery & canonical SRS schedule
 select lives_ok($$
@@ -385,7 +385,8 @@ select set_config('request.jwt.claims', '{"sub":"22000000-0000-0000-0000-0000000
 select is((select count(*)::int from public.practice_attempts), 0, 'B cannot read A attempts');
 select is((select count(*)::int from public.review_states), 0, 'B cannot read A review_states');
 select is((select count(*)::int from public.record_revisions), 1, 'B sees only B profile revision');
-select is((public.bunly_my_analysis_quota()->>'has_entitlement')::boolean, false, 'B sees zero/unassigned quota, never A');
+select is((public.bunly_my_analysis_quota()->>'has_entitlement')::boolean, true, 'B gets auto-provisioned default free entitlement on signup');
+select is((public.bunly_my_analysis_quota()->>'daily_limit')::int, 5, 'B sees default Free 5 quota, never A Pro 20 quota');
 select throws_ok($$
   insert into public.practice_attempts (
     id, user_id, question_id, grammar_id, content_version, session_id,

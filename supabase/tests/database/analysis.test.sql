@@ -10,7 +10,7 @@ select ok(not has_function_privilege('authenticated', 'public.bunly_analysis_beg
 select ok(not has_function_privilege('authenticated', 'public.bunly_analysis_finish(uuid,uuid,bigint,jsonb,text)', 'EXECUTE'), 'client cannot finalize quota');
 select ok((select bool_and(not prosecdef) from pg_proc where proname in ('bunly_analysis_begin','bunly_analysis_finish')), 'analysis RPCs are invoker functions');
 insert into auth.users(id,email) values ('21000000-0000-0000-0000-000000000001','a05-rls@example.test');
-insert into bunly_analysis_private.entitlements(user_id,daily_limit) values ('21000000-0000-0000-0000-000000000001',1);
+insert into bunly_analysis_private.entitlements(user_id,daily_limit) values ('21000000-0000-0000-0000-000000000001',1) on conflict (user_id) do update set daily_limit = excluded.daily_limit;
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"21000000-0000-0000-0000-000000000001","role":"authenticated"}', true);
 select throws_ok($$select * from bunly_analysis_private.requests$$, '42501', null, 'client cannot read private request ledger');

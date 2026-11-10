@@ -31,7 +31,7 @@ test('real LOCAL Auth/PostgREST ledger integration; provider is an explicit test
       const login = await fetch(base.origin + '/auth/v1/token?grant_type=password', { method: 'POST', headers: headers(config.ANON_KEY), body: JSON.stringify({ email, password }) });
       assert.equal(login.status, 200);
       tokens.push((await login.json()).access_token);
-      sql(`insert into bunly_analysis_private.entitlements(user_id,daily_limit) values ('${user.id}',2);`);
+      sql(`insert into bunly_analysis_private.entitlements(user_id,daily_limit) values ('${user.id}',2) on conflict (user_id) do update set daily_limit = excluded.daily_limit;`);
     }
     const points = await fetch(base.origin + '/rest/v1/grammar_points?select=id,pattern,meaning_vi&limit=1', { headers: headers(config.ANON_KEY, tokens[0]) });
     assert.equal(points.status, 200);
