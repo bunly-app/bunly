@@ -13,6 +13,7 @@ flutter run --dart-define-from-file=config/demo.example.json
 
 Dùng Flutter **3.35.7** theo `.flutter-version`; chọn thiết bị bằng `flutter devices`.
 
+- **[Hướng dẫn tiếp nhận & hoàn thiện code cho thành viên nhóm](documents/development/TEAM-HANDOFF-GUIDE.md)** — tóm tắt ứng dụng đang có gì, cách clone/chạy trên máy và danh sách việc cần code để hoàn thiện app trước khi chốt báo cáo.
 - [PRD tổng thể: bản cơ bản đầy đủ chức năng và tiêu chí nghiệm thu](documents/planning/PRD-BUNLY-Full-Function-Baseline.md).
 - [Bảng hạ tầng hiện tại, dịch vụ và cấu hình cần thiết lập](documents/development/INFRASTRUCTURE-SETUP-MATRIX.md).
 - [Phân công Hoàng / Ánh / Vy, giao việc agent và bàn giao baseline](documents/planning/BASELINE-DELIVERY-OWNERSHIP.md).
