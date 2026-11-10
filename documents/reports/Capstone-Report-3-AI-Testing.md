@@ -25,14 +25,16 @@
 So với kiến trúc ban đầu ở M2 (chỉ gồm ML Kit OCR thô và gửi toàn bộ 90 mẫu sang Gemini Cloud), M3 bổ sung tầng xử lý thông minh ngay trên thiết bị (**On-Device AI**), kết hợp **Vision OCR**, **Speech-to-Text (`ja-JP`)** và **Rule-based Morphological Detector** theo sơ đồ sau:
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph Input["1. Đầu vào Đa phương thức (On-Device / Native)"]
-        CAM["Camera / Thư viện ảnh<br/>Google ML Kit Text Recognition v2"]
-        MIC["Micro Giọng nói (ja-JP)<br/>Android RecognizerIntent"]
-        TYPE["Nhập tay / Dán văn bản"]
+        direction LR
+        CAM["Camera / Ảnh<br/>ML Kit Vision v2"]
+        MIC["Micro (ja-JP)<br/>RecognizerIntent"]
+        TYPE["Nhập tay / Dán"]
     end
 
     subgraph Post["2. Hậu xử lý & Review (Pure Dart)"]
+        direction LR
         PP["JapaneseOcrPostProcessor<br/>Xóa space CJK, nối dòng, chuẩn hóa NFKC"]
         CONF["Confidence Tier & Split Sentences<br/>Cao / Trung bình / Thấp + Chip tách câu"]
     end
@@ -42,17 +44,18 @@ flowchart LR
     end
 
     subgraph CloudAI["4. Hybrid Cloud AI (Khi có mạng)"]
-        EF["Edge Function: analyze-grammar<br/>Lọc Top-18 ứng viên từ candidate_ids"]
-        GEM["Gemini 3.5 Flash-Lite<br/>Trả grammar_id nằm trong allowlist"]
-        FUSE["Span Fusion (AnalyzeGrammarSentence)<br/>Gắn UTF-16 Span từ Edge AI vào kết quả Cloud"]
+        direction LR
+        EF["Edge Function: analyze-grammar<br/>Lọc Top-18 từ candidate_ids"]
+        GEM["Gemini 3.5 Flash-Lite<br/>Trả grammar_id thuộc allowlist"]
+        FUSE["Span Fusion<br/>Gắn UTF-16 Span vào kết quả"]
+        EF --> GEM --> FUSE
     end
 
-    CAM --> PP --> CONF
+    CAM --> PP --> CONF --> DET
     MIC --> PP
     TYPE --> DET
-    CONF --> DET
-    DET -- "Chế độ Offline / Hết quota" --> UI["SentenceResultScreen<br/>(Tô sáng span + % khớp)"]
-    DET -- "candidate_ids (Edge Pre-filter)" --> EF --> GEM --> FUSE --> UI
+    DET -- "Offline / Hết quota" --> UI["SentenceResultScreen<br/>(Tô sáng span + % khớp)"]
+    DET -- "candidate_ids (Edge Pre-filter)" --> CloudAI --> UI
 ```
 
 ### 1.2. Vision AI (On-Device OCR), Hậu xử lý & Confidence Indicator (`M3-01`)
@@ -138,11 +141,11 @@ Cơ sở dữ liệu cục bộ tại [`lib/core/database/app_database.dart`](..
 
 ```mermaid
 sequenceDiagram
-    actor User as Người dùng (Máy 1)
-    participant Repo as LocalLearningRepository (SQLite)
+    actor User as Người dùng
+    participant Repo as LocalLearningRepo
     participant Worker as LearningSync
-    participant Cloud as Supabase PostgreSQL
-    participant UI as NotebookScreen & SyncBanner
+    participant Cloud as Supabase Cloud
+    participant UI as Notebook & Banner
 
     User->>Repo: Sửa ghi chú khi offline (lưu base_content vào sync_outbox)
     Note over Cloud: Thiết bị 2 đã cập nhật cùng note_id trên Cloud
