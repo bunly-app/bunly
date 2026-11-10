@@ -9,9 +9,18 @@ import 'package:bunly/features/grammar/domain/grammar_catalog.dart';
 import 'package:bunly/features/grammar/domain/grammar_point.dart';
 import 'package:bunly/features/grammar/domain/grammar_repository.dart';
 import 'package:bunly/features/ocr/domain/ocr_draft.dart';
+import 'package:bunly/features/ocr/domain/speech_draft.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_practice_storage.dart';
+
+class _FakeSpeechRepository implements SpeechRepository {
+  _FakeSpeechRepository(this.nextDraft);
+  final SpeechDraft? nextDraft;
+
+  @override
+  Future<SpeechDraft?> listenJapanese({String? prompt}) async => nextDraft;
+}
 
 class _FullAssetGrammarCatalog implements GrammarRepository {
   _FullAssetGrammarCatalog() {
@@ -254,6 +263,33 @@ void main() {
         // Span was fused from Stage 1 OnDeviceGrammarDetector!
         expect(result.matches.single.span, isNotNull);
         expect(result.matches.single.span!.text, contains('したことがあります'));
+      },
+    );
+
+    test(
+      'ListenJapaneseSpeech normalizes spoken Japanese text, adds sentence period, and deduplicates alternatives',
+      () async {
+        final useCase = ListenJapaneseSpeech(
+          _FakeSpeechRepository(
+            SpeechDraft(
+              draftId: 'sp-1',
+              text: '日 本 へ 行った ことが あります',
+              alternatives: const [
+                '日本へ行ったことがあります',
+                '日本へ行った事があります',
+                'にほんへいったことがあります',
+              ],
+              confidence: 0.92,
+              latencyMs: 380,
+            ),
+          ),
+        );
+
+        final draft = await useCase();
+        expect(draft, isNotNull);
+        expect(draft!.text, '日本へ行ったことがあります。');
+        expect(draft.confidenceTier, OcrConfidenceTier.high);
+        expect(draft.alternatives, ['日本へ行った事があります。', 'にほんへいったことがあります。']);
       },
     );
   });

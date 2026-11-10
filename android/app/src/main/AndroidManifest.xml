@@ -55,5 +55,8 @@
             <action android:name="android.intent.action.GET_CONTENT"/>
             <data android:mimeType="image/*"/>
         </intent>
+        <intent>
+            <action android:name="android.speech.action.RECOGNIZE_SPEECH"/>
+        </intent>
     </queries>
 </manifest>

@@ -7,6 +7,7 @@ import '../../../app/providers.dart';
 import '../../auth/domain/auth_repository.dart';
 import '../../learning/presentation/learning_widgets.dart';
 import '../../ocr/domain/ocr_draft.dart';
+import '../../ocr/domain/speech_draft.dart';
 import '../domain/grammar_analysis.dart';
 import 'sentence_result_screen.dart';
 
@@ -27,10 +28,13 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
 
   String? _ownerId;
   bool scanning = false;
+  bool listening = false;
   bool submitting = false;
   bool pendingProcessing = false;
   bool ocrApplied = false;
+  bool voiceApplied = false;
   OcrDraft? lastOcrDraft;
+  SpeechDraft? lastSpeechDraft;
   String? error;
   String? ocrWarning;
 
@@ -54,10 +58,13 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
     text.text = widget.initialText;
     _requestSession.reset();
     scanning = false;
+    listening = false;
     submitting = false;
     pendingProcessing = false;
     ocrApplied = false;
+    voiceApplied = false;
     lastOcrDraft = null;
+    lastSpeechDraft = null;
     error = null;
     ocrWarning = null;
   }
@@ -79,7 +86,7 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
   }
 
   Future<void> _scanOcr(OcrSource source) async {
-    if (scanning || submitting) return;
+    if (scanning || listening || submitting) return;
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       scanning = true;
@@ -104,7 +111,9 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
         text.text = draft.text;
         text.selection = TextSelection.collapsed(offset: text.text.length);
         ocrApplied = true;
+        voiceApplied = false;
         lastOcrDraft = draft;
+        lastSpeechDraft = null;
         _requestSession.reset();
       });
     } on OcrException catch (e) {
@@ -120,6 +129,46 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
       }
     } finally {
       if (mounted) setState(() => scanning = false);
+    }
+  }
+
+  Future<void> _listenVoice() async {
+    if (scanning || listening || submitting) return;
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      listening = true;
+      error = null;
+      ocrWarning = null;
+      pendingProcessing = false;
+    });
+    try {
+      final draft = await ref.read(listenJapaneseSpeechProvider)();
+      if (!mounted) return;
+      if (draft == null) {
+        return;
+      }
+      setState(() {
+        text.text = draft.text;
+        text.selection = TextSelection.collapsed(offset: text.text.length);
+        voiceApplied = true;
+        ocrApplied = false;
+        lastSpeechDraft = draft;
+        lastOcrDraft = null;
+        _requestSession.reset();
+      });
+    } on SpeechException catch (e) {
+      if (mounted) {
+        setState(() => ocrWarning = e.message);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => ocrWarning =
+              'Chưa thể nhận diện giọng nói lúc này. Bạn vẫn có thể nhập tay hoặc quét ảnh.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => listening = false);
     }
   }
 
@@ -243,7 +292,7 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
               .toList()
         : const <String>[];
     final charCount = text.text.trim().runes.length;
-    final busy = submitting || scanning;
+    final busy = submitting || scanning || listening;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Xác nhận câu tiếng Nhật')),
@@ -399,14 +448,22 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
                         ),
                         label: const Text('Chọn ảnh'),
                       ),
+                      OutlinedButton.icon(
+                        key: const ValueKey('voice-input-button'),
+                        onPressed: busy ? null : _listenVoice,
+                        icon: const Icon(Icons.mic_outlined, size: 18),
+                        label: const Text('Giọng nói (Micro)'),
+                      ),
                     ],
                   ),
-                  if (scanning) ...[
+                  if (scanning || listening) ...[
                     const SizedBox(height: 10),
                     const LinearProgressIndicator(),
                     const SizedBox(height: 6),
                     Text(
-                      'Đang nhận diện chữ Nhật trên thiết bị…',
+                      listening
+                          ? 'Đang lắng nghe giọng nói tiếng Nhật (ja-JP)…'
+                          : 'Đang nhận diện chữ Nhật trên thiết bị…',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colors.onSurfaceVariant,
                       ),
@@ -466,6 +523,59 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
                                   ? null
                                   : (sentence) => setState(() {
                                       text.text = sentence;
+                                      text.selection = TextSelection.collapsed(
+                                        offset: text.text.length,
+                                      );
+                                      error = null;
+                                      pendingProcessing = false;
+                                      _requestSession.reset();
+                                    }),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (voiceApplied && ocrWarning == null) ...[
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: tones.primaryFixed.withValues(alpha: 0.45),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.record_voice_over_outlined,
+                                size: 16,
+                                color: tones.onPrimaryFixed,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Đã điền câu từ nhận diện giọng nói tiếng Nhật (ja-JP). Bạn có thể chọn câu gợi ý khác hoặc sửa lại trước khi phân tích.',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: tones.onPrimaryFixed,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (lastSpeechDraft != null) ...[
+                            const SizedBox(height: 8),
+                            _SpeechDiagnosticsBar(
+                              draft: lastSpeechDraft!,
+                              onSelectAlternative: busy
+                                  ? null
+                                  : (alt) => setState(() {
+                                      text.text = alt;
                                       text.selection = TextSelection.collapsed(
                                         offset: text.text.length,
                                       );
@@ -884,6 +994,102 @@ class _OcrDiagnosticsBar extends StatelessWidget {
                   onPressed: onSelectSentence == null
                       ? null
                       : () => onSelectSentence!(sentence),
+                ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _SpeechDiagnosticsBar extends StatelessWidget {
+  const _SpeechDiagnosticsBar({
+    required this.draft,
+    required this.onSelectAlternative,
+  });
+
+  final SpeechDraft draft;
+  final ValueChanged<String>? onSelectAlternative;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final conf = draft.confidence;
+    final tier = draft.confidenceTier;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            Container(
+              key: const ValueKey('speech-confidence-badge'),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.mic, size: 14, color: colors.primary),
+                  const SizedBox(width: 4),
+                  Text(
+                    conf != null
+                        ? 'Độ tin cậy giọng nói: ${ocrConfidenceLabel(tier)} (${(conf * 100).round()}%)'
+                        : 'Nhận diện giọng nói: Tiếng Nhật (ja-JP)',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (draft.latencyMs != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  '${draft.latencyMs} ms',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        if (draft.alternatives.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Gợi ý cách viết Kanji/Kana khác (chạm để chọn):',
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final alt in draft.alternatives)
+                ActionChip(
+                  visualDensity: VisualDensity.compact,
+                  label: Text(
+                    alt,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  onPressed: onSelectAlternative == null
+                      ? null
+                      : () => onSelectAlternative!(alt),
                 ),
             ],
           ),

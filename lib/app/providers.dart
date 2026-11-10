@@ -40,8 +40,10 @@ import '../features/learning/domain/save_note.dart';
 import '../features/learning/domain/watch_notebook_notes.dart';
 import '../features/learning/presentation/learning_controller.dart';
 import '../features/learning/presentation/note_controller.dart';
+import '../features/ocr/data/method_channel_speech_repository.dart';
 import '../features/ocr/data/mlkit_ocr_repository.dart';
 import '../features/ocr/domain/ocr_draft.dart';
+import '../features/ocr/domain/speech_draft.dart';
 import '../features/practice/data/local_practice_storage_repository.dart';
 import '../features/practice/data/stitch_demo_practice.dart';
 import '../features/practice/data/supabase_practice_sync.dart';
@@ -76,6 +78,14 @@ final ocrRepositoryProvider = Provider<OcrRepository>((ref) {
 
 final scanJapaneseTextProvider = Provider<ScanJapaneseText>(
   (ref) => ScanJapaneseText(ref.watch(ocrRepositoryProvider)),
+);
+
+final speechRepositoryProvider = Provider<SpeechRepository>(
+  (ref) => MethodChannelSpeechRepository(),
+);
+
+final listenJapaneseSpeechProvider = Provider<ListenJapaneseSpeech>(
+  (ref) => ListenJapaneseSpeech(ref.watch(speechRepositoryProvider)),
 );
 
 final grammarAnalysisRepositoryProvider = Provider<GrammarAnalysisRepository?>((

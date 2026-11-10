@@ -5,6 +5,7 @@ import '../../../app/bunly_theme.dart';
 import '../../../app/providers.dart';
 import '../../analysis/presentation/sentence_review_screen.dart';
 import '../../learning/presentation/learning_widgets.dart';
+import '../../ocr/domain/speech_draft.dart';
 import '../domain/grammar_catalog.dart';
 
 class GrammarScreen extends ConsumerStatefulWidget {
@@ -43,6 +44,32 @@ class _GrammarScreenState extends ConsumerState<GrammarScreen> {
     } finally {
       if (mounted) setState(() => manualRefreshing = false);
     }
+  }
+
+  Future<void> _voiceSearch() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    try {
+      final draft = await ref.read(listenJapaneseSpeechProvider)(
+        prompt: 'Hãy đọc mẫu ngữ pháp hoặc từ tiếng Nhật cần tìm...',
+      );
+      if (!mounted || draft == null) return;
+      final spoken = draft.rawText.trim().replaceAll(RegExp(r'[。？！？!]+$'), '');
+      if (spoken.isEmpty) return;
+      final filter = ref.read(grammarFilterProvider);
+      query.text = spoken;
+      query.selection = TextSelection.collapsed(offset: spoken.length);
+      ref.read(grammarFilterProvider.notifier).state = (
+        query: spoken,
+        level: filter.level,
+        category: filter.category,
+      );
+      setState(() {});
+    } on SpeechException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? 'Chưa nhận diện được giọng nói.')),
+      );
+    } catch (_) {}
   }
 
   @override
@@ -211,9 +238,11 @@ class _GrammarScreenState extends ConsumerState<GrammarScreen> {
                           decoration: InputDecoration(
                             labelText: 'Tìm mẫu hoặc ý nghĩa',
                             prefixIcon: const Icon(Icons.search),
-                            suffixIcon: query.text.isEmpty
-                                ? null
-                                : IconButton(
+                            suffixIcon: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (query.text.isNotEmpty)
+                                  IconButton(
                                     tooltip: 'Xóa tìm kiếm',
                                     icon: const Icon(Icons.close, size: 18),
                                     onPressed: () {
@@ -228,6 +257,15 @@ class _GrammarScreenState extends ConsumerState<GrammarScreen> {
                                       setState(() {});
                                     },
                                   ),
+                                IconButton(
+                                  key: const ValueKey('grammar-voice-search'),
+                                  tooltip: 'Tìm bằng giọng nói tiếng Nhật',
+                                  icon: const Icon(Icons.mic_none_outlined),
+                                  color: colors.primary,
+                                  onPressed: _voiceSearch,
+                                ),
+                              ],
+                            ),
                           ),
                           onChanged: (value) {
                             ref.read(grammarFilterProvider.notifier).state = (
