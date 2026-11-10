@@ -97,6 +97,7 @@ class MlKitOcrRepository implements OcrRepository {
       );
     }
     try {
+      final stopwatch = Stopwatch()..start();
       final recognized = _recognizeImage != null
           ? await _recognizeImage(file.path)
           : await _recognizer.processImage(InputImage.fromFilePath(file.path));
@@ -110,16 +111,59 @@ class MlKitOcrRepository implements OcrRepository {
         );
       }
 
-      final blocks = recognized.blocks
-          .map((block) => normalizeOcrText(block.text))
-          .where((value) => value.isNotEmpty)
-          .map((value) => OcrBlock(text: value))
-          .toList(growable: false);
+      final allLines = <OcrLine>[];
+      final blocks = <OcrBlock>[];
+      for (final block in recognized.blocks) {
+        final blockText = normalizeOcrText(block.text);
+        if (blockText.isEmpty) continue;
+
+        final blockLines = <OcrLine>[];
+        for (final line in block.lines) {
+          final cleanLine = JapaneseOcrPostProcessor.normalizeLine(line.text);
+          if (cleanLine.isEmpty) continue;
+          final lineConfidence = _resolveLineConfidence(line);
+          final ocrLine = OcrLine(
+            text: cleanLine,
+            rawText: line.text.trim(),
+            confidence: lineConfidence,
+          );
+          blockLines.add(ocrLine);
+          allLines.add(ocrLine);
+        }
+
+        final blockConfidence = _averageConfidence(
+          blockLines.map((l) => l.confidence),
+        );
+        blocks.add(
+          OcrBlock(
+            text: blockText,
+            lines: blockLines,
+            confidence: blockConfidence,
+          ),
+        );
+      }
+
+      final avgConf = _averageConfidence(allLines.map((l) => l.confidence));
+      final minConf = _minConfidence(allLines.map((l) => l.confidence));
+      final candidateSentences = JapaneseOcrPostProcessor.splitSentences(
+        normalized,
+      );
+      stopwatch.stop();
 
       return OcrDraft(
         draftId: _nextId(),
         text: normalized,
+        rawText: recognized.text,
         blocks: blocks,
+        lines: allLines,
+        candidateSentences: candidateSentences,
+        averageConfidence: avgConf,
+        minConfidence: minConf,
+        latencyMs: stopwatch.elapsedMilliseconds,
+        wasPostProcessed: JapaneseOcrPostProcessor.wasModifiedByPostProcessing(
+          recognized.text,
+          normalized,
+        ),
         engine: 'mlkit_text_recognition_v2',
         script: 'Japanese',
       );
@@ -143,6 +187,39 @@ class MlKitOcrRepository implements OcrRepository {
         'Chưa đọc được chữ từ ảnh. Hãy thử ảnh rõ nét hơn hoặc nhập câu.',
       );
     }
+  }
+
+  double? _resolveLineConfidence(TextLine line) {
+    final direct = line.confidence;
+    if (direct != null && direct >= 0.0 && direct <= 1.0) {
+      return direct;
+    }
+    return _averageConfidence(line.elements.map((e) => e.confidence));
+  }
+
+  double? _averageConfidence(Iterable<double?> values) {
+    var sum = 0.0;
+    var count = 0;
+    for (final v in values) {
+      if (v != null && v >= 0.0 && v <= 1.0) {
+        sum += v;
+        count++;
+      }
+    }
+    if (count == 0) return null;
+    return sum / count;
+  }
+
+  double? _minConfidence(Iterable<double?> values) {
+    double? currentMin;
+    for (final v in values) {
+      if (v != null && v >= 0.0 && v <= 1.0) {
+        if (currentMin == null || v < currentMin) {
+          currentMin = v;
+        }
+      }
+    }
+    return currentMin;
   }
 
   OcrException _mapPlatformError(PlatformException error) {

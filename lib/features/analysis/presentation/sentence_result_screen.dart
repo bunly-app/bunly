@@ -38,16 +38,43 @@ class _SentenceResultScreenState extends ConsumerState<SentenceResultScreen> {
 
   String get confirmedText => widget.analysis?.text ?? widget.result!.text;
 
-  List<({GrammarPoint point, AnalysisUtf16Span? span})> get matchedEntries {
+  List<
+    ({
+      GrammarPoint point,
+      AnalysisUtf16Span? span,
+      int? confidencePercent,
+      OnDeviceMatchSource? matchSource,
+    })
+  >
+  get matchedEntries {
     final ai = widget.analysis;
     if (ai != null) {
       return [
         for (final match in ai.matches)
-          if (match.point != null) (point: match.point!, span: match.span),
+          if (match.point != null)
+            (
+              point: match.point!,
+              span: match.span,
+              confidencePercent: null,
+              matchSource: null,
+            ),
+      ];
+    }
+    final preview = widget.result!;
+    if (preview.onDeviceMatches.isNotEmpty) {
+      return [
+        for (final match in preview.onDeviceMatches)
+          (
+            point: match.point,
+            span: match.span,
+            confidencePercent: match.confidencePercent,
+            matchSource: match.source,
+          ),
       ];
     }
     return [
-      for (final point in widget.result!.matches) (point: point, span: null),
+      for (final point in preview.matches)
+        (point: point, span: null, confidencePercent: null, matchSource: null),
     ];
   }
 
@@ -77,9 +104,6 @@ class _SentenceResultScreenState extends ConsumerState<SentenceResultScreen> {
     ColorScheme colors,
     BunlyTones tones,
   ) {
-    final ai = widget.analysis;
-    if (ai == null) return [TextSpan(text: text)];
-
     final spans = <AnalysisUtf16Span>[];
     for (final entry in matchedEntries) {
       final span = entry.span;
@@ -138,14 +162,22 @@ class _SentenceResultScreenState extends ConsumerState<SentenceResultScreen> {
     final entries = matchedEntries;
     final points = [for (final entry in entries) entry.point];
     final ai = widget.analysis;
+    final preview = widget.result;
     final text = confirmedText;
     final colors = Theme.of(context).colorScheme;
     final tones = BunlyTones.of(context);
+
+    final hasOnDeviceMatches =
+        preview != null && preview.onDeviceMatches.isNotEmpty;
 
     final aiBadgeText = ai != null
         ? (ai.remainingQuota != null
               ? 'Phân tích AI · Còn ${ai.remainingQuota} lượt'
               : 'Phân tích AI')
+        : hasOnDeviceMatches
+        ? (widget.sourceIsOcr
+              ? 'OCR + Nhận diện trên máy'
+              : 'Nhận diện ngữ pháp trên máy')
         : widget.sourceIsOcr
         ? 'OCR trên máy · Chưa qua AI'
         : 'Chưa qua AI/OCR';
@@ -155,8 +187,8 @@ class _SentenceResultScreenState extends ConsumerState<SentenceResultScreen> {
               ? 'Nguồn: OCR trên máy + văn bản bạn đã sửa và xác nhận gửi AI.'
               : 'Nguồn: văn bản bạn đã nhập/sửa và xác nhận gửi AI.')
         : (widget.sourceIsOcr
-              ? 'Nguồn: OCR trên thiết bị (đối chiếu cục bộ, chưa gửi AI).'
-              : 'Nguồn: nhập tay / dán câu. Chưa qua OCR hoặc mô hình AI.');
+              ? 'Nguồn: OCR trên thiết bị + bộ nhận diện ngữ pháp ngoại tuyến (chưa gửi Cloud AI).'
+              : 'Nguồn: nhập tay / dán câu. Đối chiếu ngữ pháp trực tiếp trên thiết bị.');
 
     return Scaffold(
       appBar: AppBar(title: const Text('Ngữ pháp trong câu')),
@@ -202,7 +234,7 @@ class _SentenceResultScreenState extends ConsumerState<SentenceResultScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: isAiResult
+                          color: isAiResult || hasOnDeviceMatches
                               ? tones.primaryFixed
                               : colors.surfaceContainer,
                           borderRadius: BorderRadius.circular(20),
@@ -211,10 +243,10 @@ class _SentenceResultScreenState extends ConsumerState<SentenceResultScreen> {
                           aiBadgeText,
                           style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
-                                color: isAiResult
+                                color: isAiResult || hasOnDeviceMatches
                                     ? tones.onPrimaryFixed
                                     : colors.secondary,
-                                fontWeight: isAiResult
+                                fontWeight: isAiResult || hasOnDeviceMatches
                                     ? FontWeight.w700
                                     : FontWeight.w500,
                               ),
@@ -285,10 +317,11 @@ class _SentenceResultScreenState extends ConsumerState<SentenceResultScreen> {
                       : 'Câu có thể dùng mẫu chưa nằm trong tập được duyệt hiện tại. Bạn có thể sửa câu hoặc tìm thủ công trong Kho ngữ pháp.',
                 )
               else
-                const LearningNotice(
+                LearningNotice(
                   title: 'Kết quả đối chiếu cục bộ',
-                  message:
-                      'Chỉ hiển thị mẫu có câu ví dụ trùng hoàn toàn với câu bạn nhập. Đây chưa phải phân tích ngữ pháp bằng AI.',
+                  message: hasOnDeviceMatches
+                      ? 'Đã nhận diện cấu trúc ngữ pháp trực tiếp trên thiết bị (hoạt động 100% ngoại tuyến${preview.latencyMs != null ? ' · ${preview.latencyMs} ms' : ''}).'
+                      : 'Đối chiếu câu ví dụ và quy tắc hình thái cục bộ trên thiết bị (không cần kết nối mạng).',
                 ),
               const SizedBox(height: 18),
               Row(
@@ -417,6 +450,33 @@ class _SentenceResultScreenState extends ConsumerState<SentenceResultScreen> {
                                       ),
                                 ),
                               ),
+                              if (entry.confidencePercent != null)
+                                Container(
+                                  key: ValueKey(
+                                    'ondevice-confidence-${point.id}',
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colors.secondaryContainer,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    entry.matchSource ==
+                                            OnDeviceMatchSource.exactExample
+                                        ? 'Ví dụ chuẩn · ${entry.confidencePercent}%'
+                                        : 'Độ khớp: ${entry.confidencePercent}%',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: colors.onSecondaryContainer,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                  ),
+                                ),
                             ],
                           ),
                           const SizedBox(height: 8),

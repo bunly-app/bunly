@@ -30,6 +30,7 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
   bool submitting = false;
   bool pendingProcessing = false;
   bool ocrApplied = false;
+  OcrDraft? lastOcrDraft;
   String? error;
   String? ocrWarning;
 
@@ -56,6 +57,7 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
     submitting = false;
     pendingProcessing = false;
     ocrApplied = false;
+    lastOcrDraft = null;
     error = null;
     ocrWarning = null;
   }
@@ -102,6 +104,7 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
         text.text = draft.text;
         text.selection = TextSelection.collapsed(offset: text.text.length);
         ocrApplied = true;
+        lastOcrDraft = draft;
         _requestSession.reset();
       });
     } on OcrException catch (e) {
@@ -309,9 +312,10 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
                     if (isAiConnected) ...[
                       const SizedBox(height: 6),
                       TextButton.icon(
+                        key: const ValueKey('sentence-offline-ai-cta'),
                         onPressed: busy ? null : previewLocal,
                         icon: const Icon(Icons.find_in_page_outlined, size: 18),
-                        label: const Text('Đối chiếu nhanh ví dụ trên máy'),
+                        label: const Text('Phân tích nhanh trên máy (Offline)'),
                       ),
                     ],
                   ],
@@ -334,7 +338,7 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
                 icon: Icons.document_scanner_outlined,
                 message: isAiConnected
                     ? 'Ảnh được đọc trực tiếp trên máy (hoạt động cả khi mất mạng). Chỉ văn bản tiếng Nhật bạn xác nhận mới được gửi tới máy chủ AI.'
-                    : 'Ảnh được nhận diện ngoại tuyến trên thiết bị. Chế độ hiện tại chỉ đối chiếu ví dụ cục bộ trong kho.',
+                    : 'Ảnh được nhận diện và hậu xử lý ngoại tuyến trên thiết bị, sau đó đối chiếu mẫu ngữ pháp N5/N4 ngay trên máy.',
               ),
               if (isAiConnected) ...[
                 const SizedBox(height: 10),
@@ -430,25 +434,47 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
                         color: tones.primaryFixed.withValues(alpha: 0.45),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Row(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.verified_outlined,
-                            size: 16,
-                            color: tones.onPrimaryFixed,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.verified_outlined,
+                                size: 16,
+                                color: tones.onPrimaryFixed,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Đã điền chữ từ OCR trên thiết bị (chưa gửi ra ngoài). Hãy rà lại Kanji, furigana và trợ từ.',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: tones.onPrimaryFixed,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Đã điền chữ từ OCR trên thiết bị (chưa gửi ra ngoài). Hãy rà lại Kanji, furigana và trợ từ.',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: tones.onPrimaryFixed,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                          if (lastOcrDraft != null) ...[
+                            const SizedBox(height: 8),
+                            _OcrDiagnosticsBar(
+                              draft: lastOcrDraft!,
+                              onSelectSentence: busy
+                                  ? null
+                                  : (sentence) => setState(() {
+                                      text.text = sentence;
+                                      text.selection = TextSelection.collapsed(
+                                        offset: text.text.length,
+                                      );
+                                      error = null;
+                                      pendingProcessing = false;
+                                      _requestSession.reset();
+                                    }),
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     ),
@@ -604,6 +630,7 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
                                 setState(() {
                                   text.clear();
                                   ocrApplied = false;
+                                  lastOcrDraft = null;
                                   error = null;
                                   ocrWarning = null;
                                   pendingProcessing = false;
@@ -674,6 +701,7 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
                                     offset: text.text.length,
                                   );
                                   ocrApplied = false;
+                                  lastOcrDraft = null;
                                   error = null;
                                   ocrWarning = null;
                                   pendingProcessing = false;
@@ -688,13 +716,179 @@ class _SentenceReviewScreenState extends ConsumerState<SentenceReviewScreen> {
                 icon: Icons.verified_user_outlined,
                 message: isAiConnected
                     ? 'Ảnh OCR luôn ở trên máy. AI chỉ nhận chuỗi văn bản đã sửa khi bạn bấm “Phân tích ngữ pháp AI”, và câu chỉ lưu vào Sổ học khi bạn chọn lưu.'
-                    : 'Bản xem trước chỉ đối chiếu câu ví dụ trùng khớp trong kho. Không gửi văn bản hay ảnh ra ngoài; chưa lưu câu nếu bạn chưa chọn lưu.',
+                    : 'Bản xem trước nhận diện ngữ pháp và ví dụ cục bộ ngay trên thiết bị. Không gửi văn bản hay ảnh ra ngoài; chưa lưu câu nếu bạn chưa chọn lưu.',
               ),
               const SizedBox(height: 16),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _OcrDiagnosticsBar extends StatelessWidget {
+  const _OcrDiagnosticsBar({
+    required this.draft,
+    required this.onSelectSentence,
+  });
+
+  final OcrDraft draft;
+  final ValueChanged<String>? onSelectSentence;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final tier = draft.confidenceTier;
+    final confValue = draft.minConfidence ?? draft.averageConfidence;
+    final lowLines = draft.lowConfidenceLines;
+
+    final (Color badgeBg, Color badgeFg, IconData badgeIcon) = switch (tier) {
+      OcrConfidenceTier.high => (
+        colors.surface,
+        colors.primary,
+        Icons.check_circle_outline,
+      ),
+      OcrConfidenceTier.medium => (
+        colors.tertiaryContainer,
+        colors.onTertiaryContainer,
+        Icons.warning_amber_rounded,
+      ),
+      OcrConfidenceTier.low => (
+        colors.errorContainer,
+        colors.onErrorContainer,
+        Icons.error_outline,
+      ),
+      OcrConfidenceTier.unknown => (
+        colors.surfaceContainerHighest,
+        colors.onSurfaceVariant,
+        Icons.help_outline,
+      ),
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            if (confValue != null)
+              Container(
+                key: const ValueKey('ocr-confidence-badge'),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: badgeBg,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(badgeIcon, size: 14, color: badgeFg),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Độ tin cậy OCR: ${ocrConfidenceLabel(tier)} (${(confValue * 100).round()}%)',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: badgeFg,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (draft.latencyMs != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  '${draft.latencyMs} ms',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: colors.secondary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            if (draft.wasPostProcessed)
+              Container(
+                key: const ValueKey('ocr-postprocessed-badge'),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'Đã làm sạch khoảng trắng/ngắt dòng',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        if (lowLines.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Container(
+            key: const ValueKey('ocr-low-confidence-warning'),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: colors.errorContainer.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Dòng có độ tin cậy thấp (nên kiểm tra lại nét chữ):',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: colors.onErrorContainer,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                for (final line in lowLines)
+                  Text(
+                    '• 「${line.text}」 (${((line.confidence ?? 0) * 100).round()}%)',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colors.onErrorContainer,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+        if (draft.candidateSentences.length > 1) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Tách câu tự động (chạm để chọn 1 câu):',
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final sentence in draft.candidateSentences)
+                ActionChip(
+                  visualDensity: VisualDensity.compact,
+                  label: Text(
+                    sentence,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  onPressed: onSelectSentence == null
+                      ? null
+                      : () => onSelectSentence!(sentence),
+                ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }

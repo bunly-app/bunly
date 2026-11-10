@@ -55,9 +55,16 @@ final startDemoPracticeProvider = Provider<StartDemoPractice>(
   (ref) => const StartDemoPractice(StitchDemoPractice()),
 );
 
+final onDeviceGrammarDetectorProvider = Provider<OnDeviceGrammarDetector>(
+  (ref) => const OnDeviceGrammarDetector(),
+);
+
 final previewSentenceProvider = Provider<PreviewSentence>(
   (ref) => PreviewSentence(
-    CatalogSentencePreview(ref.watch(grammarRepositoryProvider)),
+    OnDeviceSentencePreview(
+      ref.watch(grammarRepositoryProvider),
+      detector: ref.watch(onDeviceGrammarDetectorProvider),
+    ),
   ),
 );
 

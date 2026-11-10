@@ -508,6 +508,124 @@ void main() {
     },
   );
 
+  testWidgets(
+    'M3-01 & M3-03: OCR confidence indicator, post-processed badge, sentence chip selection, and 100% offline OnDeviceGrammarDetector span highlight on unseen sentence',
+    (tester) async {
+      final auth = SessionAuth()..user = const AppUser('u1', 'u1@bunly.edu.vn');
+      final learning = PersonalFake();
+      final ocr = FakeOcrRepository(
+        nextDraft: OcrDraft(
+          draftId: 'ocr-m3',
+          text: '北海道 で スキー を した こと が あります 。\nまだ 東京 へ 行きたい です 。',
+          rawText: '北海道 で スキー を した こと が あります 。\nまだ 東京 へ 行きたい です 。',
+          averageConfidence: 0.78,
+          minConfidence: 0.62,
+          latencyMs: 18,
+          lines: const [
+            OcrLine(text: '北海道でスキーをしたことがあります。', confidence: 0.94),
+            OcrLine(text: 'まだ東京へ行きたいです。', confidence: 0.62),
+          ],
+        ),
+      );
+      final practiceStorage = FakePracticeStorageRepository();
+      addTearDown(() async {
+        await auth.controller.close();
+        await auth.recoveryController.close();
+        await closeLearning(learning);
+        await practiceStorage.dispose();
+      });
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            configProvider.overrideWithValue(const AppConfig(connected: false)),
+            authRepositoryProvider.overrideWithValue(auth),
+            grammarRepositoryProvider.overrideWithValue(_CuratedCatalog()),
+            learningRepositoryProvider.overrideWithValue(learning),
+            practiceStorageRepositoryProvider.overrideWithValue(
+              practiceStorage,
+            ),
+            ocrRepositoryProvider.overrideWithValue(ocr),
+          ],
+          child: MaterialApp(
+            theme: bunlyTheme(Brightness.light),
+            home: const SentenceReviewScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final reviewScroll = find
+          .descendant(
+            of: find.byKey(const PageStorageKey('sentence-review')),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+
+      await _revealAndTap(
+        tester,
+        find.byKey(const ValueKey('ocr-gallery-button')),
+        scrollable: reviewScroll,
+      );
+
+      // Post-processing cleaned intra-CJK spaces and displayed OCR confidence + low-confidence warning.
+      expect(
+        find.byKey(const ValueKey('ocr-confidence-badge')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('ocr-postprocessed-badge')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('ocr-low-confidence-warning')),
+        findsOneWidget,
+      );
+
+      // Tap the first candidate sentence chip to focus on the unseen sentence.
+      await _revealAndTap(
+        tester,
+        find.widgetWithText(ActionChip, '北海道でスキーをしたことがあります。'),
+        scrollable: reviewScroll,
+      );
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const ValueKey('sentence-input')))
+            .controller!
+            .text,
+        '北海道でスキーをしたことがあります。',
+      );
+
+      // Confirm in 100% offline mode -> OnDeviceGrammarDetector matches N4 〜たことがある with span & confidence!
+      await tester.tap(find.byKey(const ValueKey('sentence-primary-cta')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SentenceResultScreen), findsOneWidget);
+      expect(find.text('OCR + Nhận diện trên máy'), findsOneWidget);
+
+      final resultScroll = find
+          .descendant(
+            of: find.byKey(const PageStorageKey('sentence-result')),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      await _reveal(
+        tester,
+        find.text('N4 · 〜たことがある'),
+        scrollable: resultScroll,
+        delta: 180,
+      );
+      expect(find.text('N4 · 〜たことがある'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('ondevice-confidence-g1')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('したことがあります'), findsWidgets);
+
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
   test(
     'scanJapaneseTextProvider stays alive across external picker pause',
     () async {
