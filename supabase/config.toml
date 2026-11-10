@@ -37,7 +37,7 @@ enabled = false
 [auth]
 enabled = true
 site_url = "http://127.0.0.1:3000"
-additional_redirect_urls = []
+additional_redirect_urls = ["bunly://auth-callback"]
 jwt_expiry = 3600
 enable_signup = true
 minimum_password_length = 8
@@ -49,7 +49,10 @@ double_confirm_changes = true
 enable_confirmations = true
 
 [edge_runtime]
-enabled = false
+enabled = true
+
+[functions.analyze-grammar]
+verify_jwt = true
 
 [analytics]
 enabled = false
