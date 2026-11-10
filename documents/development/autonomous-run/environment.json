@@ -1,0 +1,79 @@
+{
+  "role": "environment",
+  "thread_id": "01a1bf45-c4e6-75e2-bf1a-ad9c410e2612",
+  "status": "running",
+  "baseline_head": "3ae5be9625edaa3a761253a4e578daa416a97322",
+  "baseline_includes_uncommitted_changes": true,
+  "last_completed": "Stitch-native UI code built PASS 2m5s; APK 7EDB3A2546AE61FAA93BFA173000CCBE4E3E0D8C85D95130116410BB555307F2 installed -r successfully on real A11; launch Status ok; UI smoke not yet run because phone keyguard showing/input restricted",
+  "next_task": "Quick A11 sentence and practice smoke; preserve notes; hand findings to Flutter",
+  "evidence": "documents/reports/A03-Stitch-Native-UI-2026-11-09.md; build/stitch-device-2026-11-09/",
+  "not_verified": [
+    "Full UI/Figma fidelity, light-mode/device text-scale matrix",
+    "Cold launch profile/release timing",
+    "OCR/AI/practice/review/reminders and full PRD",
+    "Cloud UAT/release"
+  ],
+  "changed_files": [
+    "scripts/a01-android-env.ps1",
+    "scripts/a01-flutter-inputs.gradle",
+    "documents/reports/A01-UI-First-Device-2026-11-09.md"
+  ],
+  "checks": [
+    {
+      "sha256": "3DA4A8DEEDAB8EB6CE2F3CAF3C7875180E86F26AC5128703A2689E2251849360",
+      "command": "Final BuildDemo with explicit Gradle Flutter inputs",
+      "exit_code": 0,
+      "seconds": 29
+    },
+    {
+      "installed_update_time": "2026-11-09 17:37:23",
+      "command": "adb install -r",
+      "data": "1 saved + exact original note preserved",
+      "exit_code": 0
+    },
+    {
+      "note": "cold launch 14.5s; am start timeout10.6s then visible",
+      "command": "actual A11 four tabs / N4 and N5 filters",
+      "result": "observed",
+      "mode": "dark"
+    },
+    {
+      "command": "source manifest",
+      "files": 65,
+      "changed": 0
+    }
+  ],
+  "updated_at": "2026-11-09T11:22:50.6099547+00:00",
+  "blocker_id": "A05-GEMINI-FREE-KEY-20261109",
+  "runtime": {
+    "docker": "running; no global settings or terms changed",
+    "edge": "own serve process and edge container stopped before lease release",
+    "scratch_databases": "removed, verified",
+    "disposable_api_users": "invocation-created test users removed, cleanup verified",
+    "supabase": "existing local DB/Auth/REST/mail retained; no reset",
+    "evidence_directory": "build/a05-03-evidence-2026-11-09",
+    "main_app_schema": "A05 private ledger + server-only RPCs added by two local migrations"
+  },
+  "human_decisions": {
+    "quota": "not selected; no user entitlements auto-created",
+    "budget": "Free only, paid upgrade later; budget 0 now",
+    "provider_selection": "Gemini 2.5 Flash-Lite Standard Free Tier per current official pricing; actual account billing not verified",
+    "a02_review": "User confirmed approved by Anh in direct reply"
+  },
+  "device_demo": {
+    "device": "Samsung A11 SM-A115F, Android12 real phone",
+    "screenshots": "build/demo-device-2026-11-09/",
+    "source": "Actual screen observations in this chat",
+    "missing": "OCR/AI/practice/review not implemented in installed version",
+    "data": "Only added own clearly labeled demo sample/note; did not clear data",
+    "mode": "demo",
+    "sample_note": "DEMO: Ghi chu luu tren dien thoai that.",
+    "verified": "catalog/detail/save/note/notebook"
+  },
+  "user_priority": {
+    "order": "UI first per supplied Figma; functional demo next; API improvements later",
+    "messaging_authorization": "Human explicitly said Có, gửi và làm tiếp ngay",
+    "key": "User added locally; not read/printed; API work deferred",
+    "figma": "https://www.figma.com/design/39hHCJ2CmxZNbe5NAUd6sA/Bunly?node-id=0-1"
+  }
+}

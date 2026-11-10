@@ -1,5 +1,7 @@
 # Bunly — Phân công hoàn tất M2 và triển khai M3
 
+**Cập nhật điều phối 09/11/2026:** dùng [phân công baseline mới](BASELINE-DELIVERY-OWNERSHIP.md) cho công việc sắp tới: Hoàng điều phối agent/tích hợp, Ánh reviewer kỹ thuật chính, Vy thiết kế/nghiệp vụ/nội dung/UAT. Các ngày nộp và giả định thời gian bên dưới là kế hoạch lịch sử 29/10, không dùng làm lịch hiện tại. Phạm vi toàn sản phẩm ở [PRD tổng thể](PRD-BUNLY-Full-Function-Baseline.md).
+
 Ngày lập: 29/10/2026. Trạng thái: kế hoạch thực hiện, chưa phải bằng chứng hoàn thành tính năng.
 
 ## 1. Các quyết định đã thống nhất và giả định lập lịch

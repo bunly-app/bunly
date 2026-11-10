@@ -1,5 +1,7 @@
 # PRD — Nền kiến trúc và hoàn thiện báo cáo M2 của Bunly
 
+**Bổ sung 09/11/2026:** [PRD tổng thể bản đầy đủ chức năng](PRD-BUNLY-Full-Function-Baseline.md) mở rộng từ nền M2 tới toàn bộ 9 nhóm MVP, đối chiếu knowledge pack Week 09–13. Xem [bảng hạ tầng](../development/INFRASTRUCTURE-SETUP-MATRIX.md) và [phân công mới](BASELINE-DELIVERY-OWNERSHIP.md) trước khi triển khai tiếp. FR-01–FR-06 và bằng chứng lịch sử M2 vẫn được giữ nguyên; tài liệu tổng thể không có nghĩa M2 đã nghiệm thu.
+
 **Dự án:** Bunly — Ứng dụng học và tra cứu ngữ pháp tiếng Nhật từ nội dung thực tế<br>
 **Nhóm:** Bunly • **Học kỳ:** Học kỳ 1, năm học 2026–2027<br>
 **Mốc đích:** M2 — Detailed Architecture & Core Feature Implementation • **Hạn theo template:** Tuần 8<br>

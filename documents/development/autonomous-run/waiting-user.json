@@ -1,0 +1,14 @@
+{
+  "thread_id": "01a1bf45-c4e6-75e2-bf1a-ad9c410e2612",
+  "question": "New Stitch Flutter APK installed successfully on real A11, but the phone is locked (keyguard showing/input restricted). Please unlock it for the quick UI smoke check, or explicitly defer device review. No PIN/password needed in chat.",
+  "asked_at": "2026-11-09T18:18:57.6795239+07:00",
+  "status": "resolved",
+  "prior_blocker_resolution": "New user HTML/Stitch source resolved Figma design blocker; code implemented, built and installed; API still deferred",
+  "blocked_action": "Visual/interaction check of new Stitch UI on A11; never bypass device lock",
+  "evidence": "build/stitch-device-2026-11-09/",
+  "blocker_id": "A11-UNLOCK-STITCH-UI-20261109",
+  "resolution": {
+    "device_check": "keyguard false / inputRestricted false verified",
+    "source": "Direct human reply: Đã mở khóa A11, kiểm tra tiếp"
+  }
+}

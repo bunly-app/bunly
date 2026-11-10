@@ -1,0 +1,169 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><meta content="mobile_stack" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-primary-container": "#9be4b2", "on-error-container": "#93000a", "surface-tint": "#236b43", "tertiary": "#34493c", "on-tertiary": "#ffffff", "on-primary-fixed": "#00210f", "on-error": "#ffffff", "secondary": "#4f6355", "on-tertiary-container": "#c2dbc8", "primary": "#004f2b", "on-secondary-fixed-variant": "#384b3e", "primary-fixed": "#a9f3c0", "tertiary-fixed": "#d0e9d6", "on-primary": "#ffffff", "inverse-on-surface": "#e4f5e6", "tertiary-fixed-dim": "#b4ccba", "on-surface": "#111e16", "surface-container-lowest": "#ffffff", "on-surface-variant": "#404941", "inverse-surface": "#25342a", "surface-dim": "#cdded0", "on-tertiary-fixed": "#0b2014", "tertiary-container": "#4b6152", "secondary-fixed": "#d2e8d6", "surface-container-high": "#dcecde", "inverse-primary": "#8ed6a5", "surface-variant": "#d6e7d8", "surface-container-highest": "#d6e7d8", "on-secondary-fixed": "#0d1f14", "surface-container-low": "#e7f8e9", "secondary-container": "#cfe5d3", "outline": "#707a71", "background": "#edfeef", "on-background": "#111e16", "primary-fixed-dim": "#8ed6a5", "secondary-fixed-dim": "#b6ccbb", "error-container": "#ffdad6", "on-tertiary-fixed-variant": "#364c3e", "primary-container": "#1f6840", "surface": "#edfeef", "on-primary-fixed-variant": "#00522d", "outline-variant": "#bfc9bf", "surface-bright": "#edfeef", "on-secondary": "#ffffff", "error": "#ba1a1a", "on-secondary-container": "#536759", "surface-container": "#e1f2e4" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "margin": "1.25rem", "space-xs": "0.25rem", "gutter": "1rem", "space-lg": "1rem", "space-sm": "0.5rem", "space-md": "0.75rem", "space-xl": "1.5rem" }, fontFamily: { "body-lg": ["Noto Sans"], "headline-lg": ["Noto Sans"], "body-md": ["Noto Sans"], "title-japanese": ["Noto Sans"], "label-md": ["Noto Sans"], "ruby-furigana": ["Noto Sans"], "label-sm": ["Noto Sans"], "headline-md": ["Noto Sans"], "body-japanese": ["Noto Sans"] }, fontSize: { "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "body-md": ["15px", { "lineHeight": "22px", "fontWeight": "400" }], "title-japanese": ["22px", { "lineHeight": "34px", "fontWeight": "700" }], "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }], "ruby-furigana": ["11px", { "lineHeight": "14px", "fontWeight": "500" }], "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "600" }], "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }], "body-japanese": ["18px", { "lineHeight": "30px", "fontWeight": "500" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin flex items-center justify-between gap-space-md"><button aria-label="Đóng phiên học" class="w-11 h-11 -ml-space-xs flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container active:bg-surface-container-high transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">close</span></button><div class="flex-1 flex flex-col items-center justify-center"><h1 class="font-headline-md text-headline-md text-on-surface truncate max-w-[200px]">Kiểm tra lời nói</h1><div class="flex items-center gap-space-xs"><span class="font-label-sm text-label-sm text-on-surface-variant font-medium">02/05</span><div class="w-24 h-1.5 bg-surface-container-highest rounded-full overflow-hidden"><div class="w-2/5 h-full bg-primary-container rounded-full"></div></div></div></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 px-margin bg-surface pb-safe"><div class="flex flex-col w-full pb-36">
+<!-- Minimalist Sync Status Bar -->
+<div class="flex items-center justify-between px-space-md py-space-xs bg-surface-container-low rounded-lg mb-space-md text-on-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-secondary">Đã lưu nháp giọng nói cục bộ</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">Offline an toàn</span>
+</div>
+<!-- Header: Target Grammar & Scenario Prompt -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm mb-space-lg">
+<div class="flex items-center justify-between gap-space-sm mb-space-xs">
+<span class="font-label-sm text-label-sm px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-semibold tracking-wide">JLPT N5</span>
+<span class="font-label-sm text-label-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">auto_stories</span>
+        Trọng tâm ngữ pháp
+      </span>
+</div>
+<h2 class="font-title-japanese text-title-japanese text-primary mb-1">
+      〜たことがある
+    </h2>
+<p class="font-body-md text-body-md text-on-surface-variant font-medium mb-space-md">
+      (Đã từng làm việc gì đó trong quá khứ)
+    </p>
+<div class="bg-surface-container-low rounded-lg p-space-md flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<div class="flex-1 min-w-0">
+<span class="font-label-sm text-label-sm text-secondary block font-semibold mb-0.5">Tình huống giao tiếp</span>
+<p class="font-body-md text-body-md text-on-surface leading-snug">
+          Kể về việc bạn đã từng leo núi Phú Sĩ.
+        </p>
+</div>
+</div>
+</div>
+<!-- Audio Player Card with Voice Waveform Preview -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm mb-space-lg">
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-primary">mic</span>
+        Bản ghi âm giọng nói
+      </span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-secondary font-mono">00:04</span>
+</div>
+<!-- Playback Interactive Bar -->
+<div class="flex items-center gap-space-md p-space-sm bg-surface-container-low rounded-xl mb-space-md">
+<button aria-label="Phát hoặc tạm dừng ghi âm" class="w-12 h-12 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm active:scale-95 transition-transform" id="playAudioBtn" type="button">
+<span class="material-symbols-outlined text-[26px]" id="playIcon" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+<!-- Waveform Simulation Bars -->
+<div class="flex-1 flex items-center gap-1 h-9 px-2 overflow-hidden">
+<span class="w-1 bg-primary/40 rounded-full h-3"></span>
+<span class="w-1 bg-primary/60 rounded-full h-5"></span>
+<span class="w-1 bg-primary rounded-full h-7"></span>
+<span class="w-1 bg-primary rounded-full h-4"></span>
+<span class="w-1 bg-primary/70 rounded-full h-8"></span>
+<span class="w-1 bg-primary rounded-full h-6"></span>
+<span class="w-1 bg-primary/50 rounded-full h-3"></span>
+<span class="w-1 bg-primary/80 rounded-full h-7"></span>
+<span class="w-1 bg-primary rounded-full h-5"></span>
+<span class="w-1 bg-primary/70 rounded-full h-8"></span>
+<span class="w-1 bg-primary rounded-full h-6"></span>
+<span class="w-1 bg-primary/40 rounded-full h-4"></span>
+<span class="w-1 bg-primary/30 rounded-full h-2"></span>
+<span class="w-1 bg-secondary-container rounded-full h-3"></span>
+<span class="w-1 bg-secondary-container rounded-full h-2"></span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono pr-2">00:04</span>
+</div>
+<!-- Quick Retake Voice Action -->
+<div class="flex justify-end">
+<button class="flex items-center gap-1.5 text-primary active:opacity-75 transition-opacity py-1 px-2 -mr-2 rounded-lg" onclick="alert('Quay lại màn hình S33 để thu âm lại.')" type="button">
+<span class="material-symbols-outlined text-[18px]">replay</span>
+<span class="font-label-md text-label-md font-semibold">Ghi lại nếu muốn đổi ý (→ S33)</span>
+</button>
+</div>
+</div>
+<!-- ASR Transcript Section (Editable Text Box) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm mb-space-lg">
+<div class="flex items-center justify-between gap-space-sm mb-space-sm">
+<div class="flex items-center gap-1.5 min-w-0">
+<span class="material-symbols-outlined text-[20px] text-primary">record_voice_over</span>
+<h3 class="font-headline-md text-headline-md text-on-surface text-[17px] font-semibold truncate">Văn bản nhận dạng (ASR)</h3>
+</div>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container text-on-surface-variant active:bg-surface-container-high transition-colors text-label-sm font-label-sm" id="toggleEditBtn" type="button">
+<span class="material-symbols-outlined text-[16px]" id="editIcon">edit</span>
+<span id="editText" class="">Sửa tay</span>
+</button>
+</div>
+<!-- Live Editable Transcript Area -->
+<div class="relative bg-surface rounded-xl p-space-md mb-space-md focus-within:bg-surface-container-lowest transition-colors">
+<div class="text-right pb-1">
+<span class="font-ruby-furigana text-ruby-furigana text-secondary font-medium">Nhấn vào câu để chỉnh sửa trực tiếp</span>
+</div>
+<textarea aria-label="Nội dung tiếng Nhật nhận dạng được" class="w-full bg-transparent font-title-japanese text-title-japanese text-on-surface resize-none focus:outline-none leading-relaxed tracking-wide border-0 p-0 m-0" id="transcriptInput" rows="2">富士山に登ることがあります。</textarea>
+<div class="flex items-center justify-between pt-2">
+<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">keyboard</span> Tiếng Nhật (Kana / Kanji)
+        </span>
+<span class="font-label-sm text-label-sm text-secondary font-mono" id="charCounter">14 ký tự</span>
+</div>
+</div>
+<!-- Transparency Callout -->
+<div class="p-space-md rounded-lg bg-surface-container-low flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">info</span>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed text-[13.5px]">
+        Văn bản do nhận dạng giọng nói tự động. Bạn có thể chạm vào để chỉnh sửa nếu máy nghe chưa đúng trước khi gửi thẩm định.
+      </p>
+</div>
+</div>
+<!-- Anti-Slop Integrity Notice -->
+<div class="bg-surface-container-high/60 rounded-xl p-space-md mb-space-md flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">verified_user</span>
+<div class="flex-1">
+<span class="font-label-sm text-label-sm text-on-surface font-semibold block mb-0.5">Kiểm soát chủ động</span>
+<p class="font-body-md text-body-md text-on-surface-variant text-[13px] leading-relaxed">
+        Chưa gửi phân tích. AI chỉ thẩm định ngữ pháp sau khi bạn bấm xác nhận bên dưới.
+      </p>
+</div>
+</div>
+<!-- Fallback / Exception Helper Row -->
+<div class="px-space-xs py-space-sm flex items-start gap-2 mb-space-lg text-secondary">
+<span class="material-symbols-outlined text-[18px] shrink-0 mt-0.5 text-outline">hearing</span>
+<p class="font-label-sm text-label-sm leading-normal">
+      Nếu máy không nhận diện đúng tiếng Nhật hoặc môi trường ồn, bạn có thể tự sửa lại hoặc bấm ghi âm lại.
+    </p>
+</div>
+<!-- Fixed Bottom CTA Bar -->
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-md px-margin py-space-md pb-safe shadow-[0_-4px_16px_rgba(17,30,22,0.06)] flex flex-col gap-space-sm max-w-[640px] mx-auto">
+<!-- Primary Confirmation Action -->
+<button class="w-full h-12 rounded-xl bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-space-xs shadow-sm active:bg-primary-container transition-colors" onclick="alert('Đã gửi câu chuẩn xác sang phân tích S35.')" type="button"><span class="">Gửi để góp ý ngữ pháp</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span></button>
+<!-- Outlined Secondary Action -->
+<button class="w-full h-11 rounded-xl bg-transparent text-primary font-label-md text-label-md flex items-center justify-center gap-space-xs active:bg-surface-container transition-colors" onclick="alert('Quay lại S33 để thử nói mẫu câu khác.')" type="button"><span class="material-symbols-outlined text-[18px]">mic_none</span>
+<span class="">Nói lại câu khác</span></button>
+</div>
+</div>
+<script>
+  // Dynamic Character Counter and Interaction Hook
+  const transcriptInput = document.getElementById('transcriptInput');
+  const charCounter = document.getElementById('charCounter');
+  const toggleEditBtn = document.getElementById('toggleEditBtn');
+  const playAudioBtn = document.getElementById('playAudioBtn');
+  const playIcon = document.getElementById('playIcon');
+
+  if (transcriptInput && charCounter) {
+    transcriptInput.addEventListener('input', () => {
+      const len = transcriptInput.value.length;
+      charCounter.textContent = len + ' ký tự';
+    });
+  }
+
+  if (toggleEditBtn && transcriptInput) {
+    toggleEditBtn.addEventListener('click', () => {
+      transcriptInput.focus();
+      transcriptInput.setSelectionRange(transcriptInput.value.length, transcriptInput.value.length);
+    });
+  }
+
+  let isPlaying = false;
+  if (playAudioBtn && playIcon) {
+    playAudioBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      playIcon.textContent = isPlaying ? 'pause' : 'play_arrow';
+    });
+  }
+</script></main>
+
+</body></html>

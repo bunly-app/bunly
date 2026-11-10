@@ -1,0 +1,21 @@
+import org.gradle.api.tasks.PathSensitivity
+
+// Process-scoped workaround for Flutter 3.35.7's Windows depfile path parsing.
+// Explicit inputs keep Gradle from reusing an APK after Dart/UI source changes.
+gradle.projectsEvaluated {
+    rootProject.allprojects { project ->
+        project.tasks.matching { it.name.startsWith('compileFlutterBuild') }.configureEach { task ->
+            def appRoot = rootProject.projectDir.parentFile
+            ['lib', 'assets'].each { directory ->
+                task.inputs.dir(new File(appRoot, directory))
+                    .withPropertyName('bunly_' + directory)
+                    .withPathSensitivity(PathSensitivity.RELATIVE)
+            }
+            ['pubspec.yaml', 'pubspec.lock', '.flutter-version', '.flutter-plugins-dependencies'].each { filename ->
+                task.inputs.file(new File(appRoot, filename))
+                    .withPropertyName('bunly_' + filename.replaceAll('[^a-zA-Z0-9]', '_'))
+                    .withPathSensitivity(PathSensitivity.RELATIVE)
+            }
+        }
+    }
+}

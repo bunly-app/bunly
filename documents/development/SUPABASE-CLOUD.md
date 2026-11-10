@@ -1,5 +1,7 @@
 # Supabase Cloud phát triển — Bunly
 
+**Snapshot trực tiếp 09/11/2026:** Supabase `list_projects` và `get_project` trả project `bunly-dev` (`jbyxiihjqveqooenofsr`) ở trạng thái **INACTIVE**. Chưa xác định nguyên nhân hoặc thực hiện restore; chưa chạy lại Auth/API/SQL/UAT. Các kết quả dưới đây thuộc hồ sơ thiết lập ngày 29/10, không chứng minh Cloud đang hoạt động hôm nay. Xem [ma trận hạ tầng và quy trình team](INFRASTRUCTURE-SETUP-MATRIX.md) để chuẩn bị hoạt động tiếp theo.
+
 Thiết lập ngày 29/10/2026 cho môi trường phát triển, không phải production.
 
 | Thuộc tính | Giá trị |

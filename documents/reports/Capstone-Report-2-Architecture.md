@@ -14,7 +14,11 @@
 
 > Trạng thái: đã bổ sung mã nguồn chức năng lõi; kiểm thử tự động Auth/API và Android đã đạt trên Supabase local. Báo cáo vẫn giữ các tình huống Cloud email, bàn phím/mạng thật, video và nội dung MVP chưa kiểm chứng hoặc chưa hoàn thành.
 
+> **Rà baseline 09/11/2026:** xem [báo cáo A00](A00-Baseline-Audit-2026-11-09.md). Trên HEAD `3ae5be9625edaa3a761253a4e578daa416a97322` cùng working tree chưa commit, dependency lockfile, format, analyze và 24/24 unit/widget/SQLite tests vừa đạt. Local Docker chưa hoạt động, chưa có Android kết nối và Cloud đang INACTIVE; SQL/connected/Android/Cloud chưa chạy lại. Audit phát hiện screen phụ thuộc concrete cache repository và logout chưa đi qua use case, cần xử lý ở A03. Kết quả mới không thay thế bằng chứng hoặc gỡ các trạng thái chưa nghiệm thu M2 bên dưới.
+
 ## 1. CLEAN ARCHITECTURE IMPLEMENTATION
+
+**Bổ sung A03-01 ngày 09/11/2026:** đã bỏ phụ thuộc concrete cache repository từ màn kho và đưa đăng xuất qua use case/controller. [Bản bàn giao A02/A03-01](A02-A03-01-Delivery-2026-11-09.md) ghi 30/30 tests trên HEAD `3ae5be9625edaa3a761253a4e578daa416a97322` cùng diff chưa commit; chưa phải kết quả CI hoặc kiểm thử connected/device mới. Nội dung 12 mẫu/24 câu mới là fixture chờ duyệt, không nâng số lượng kho thực tế đã phát hành từ 3 lên 12.
 
 ### 1.1. Phạm vi và luồng chức năng M2
 

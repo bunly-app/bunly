@@ -1,0 +1,176 @@
+{
+  "fixture_version": 1,
+  "status": "contract_fixture_not_live_AI",
+  "cases": [
+    {
+      "name": "success_unicode_span",
+      "request": {
+        "request_id": "30000000-0000-0000-0000-000000000001",
+        "text": "🌸日本へ行ったことがあります。",
+        "locale": "vi"
+      },
+      "expected_http": 200,
+      "response": {
+        "request_id": "30000000-0000-0000-0000-000000000001",
+        "matches": [
+          {
+            "grammar_id": "10000000-0000-0000-0000-000000000001",
+            "span": {
+              "start_utf16": 5,
+              "end_utf16": 15,
+              "text": "行ったことがあります"
+            }
+          }
+        ],
+        "remaining_quota": 4
+      }
+    },
+    {
+      "name": "no_match",
+      "request": {
+        "request_id": "30000000-0000-0000-0000-000000000002",
+        "text": "こんにちは。",
+        "locale": "vi"
+      },
+      "expected_http": 200,
+      "response": {
+        "request_id": "30000000-0000-0000-0000-000000000002",
+        "matches": [],
+        "remaining_quota": 3
+      }
+    },
+    {
+      "name": "unauthenticated",
+      "request": {
+        "request_id": "30000000-0000-0000-0000-000000000003",
+        "text": "🌸日本へ行ったことがあります。",
+        "locale": "vi"
+      },
+      "expected_http": 401,
+      "response": {
+        "request_id": "30000000-0000-0000-0000-000000000003",
+        "error": {
+          "code": "unauthenticated",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "name": "quota_exceeded",
+      "request": {
+        "request_id": "30000000-0000-0000-0000-000000000004",
+        "text": "🌸日本へ行ったことがあります。",
+        "locale": "vi"
+      },
+      "expected_http": 429,
+      "response": {
+        "request_id": "30000000-0000-0000-0000-000000000004",
+        "error": {
+          "code": "quota_exceeded",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "name": "invalid_input",
+      "request": {
+        "request_id": "30000000-0000-0000-0000-000000000005",
+        "text": "  ",
+        "locale": "vi"
+      },
+      "expected_http": 400,
+      "response": {
+        "request_id": "30000000-0000-0000-0000-000000000005",
+        "error": {
+          "code": "invalid_input",
+          "retryable": false
+        }
+      }
+    },
+    {
+      "name": "timeout",
+      "request": {
+        "request_id": "30000000-0000-0000-0000-000000000006",
+        "text": "🌸日本へ行ったことがあります。",
+        "locale": "vi"
+      },
+      "expected_http": 504,
+      "response": {
+        "request_id": "30000000-0000-0000-0000-000000000006",
+        "error": {
+          "code": "timeout",
+          "retryable": true
+        }
+      }
+    },
+    {
+      "name": "unavailable",
+      "request": {
+        "request_id": "30000000-0000-0000-0000-000000000007",
+        "text": "🌸日本へ行ったことがあります。",
+        "locale": "vi"
+      },
+      "expected_http": 503,
+      "response": {
+        "request_id": "30000000-0000-0000-0000-000000000007",
+        "error": {
+          "code": "unavailable",
+          "retryable": true
+        }
+      }
+    },
+    {
+      "name": "invalid_output",
+      "request": {
+        "request_id": "30000000-0000-0000-0000-000000000008",
+        "text": "🌸日本へ行ったことがあります。",
+        "locale": "vi"
+      },
+      "expected_http": 502,
+      "response": {
+        "request_id": "30000000-0000-0000-0000-000000000008",
+        "error": {
+          "code": "invalid_output",
+          "retryable": false
+        }
+      },
+      "raw_provider_output": {
+        "matches": [
+          {
+            "grammar_id": "ffffffff-ffff-ffff-ffff-ffffffffffff"
+          }
+        ]
+      }
+    },
+    {
+      "name": "duplicate_processing",
+      "request": {
+        "request_id": "30000000-0000-0000-0000-000000000001",
+        "text": "🌸日本へ行ったことがあります。",
+        "locale": "vi"
+      },
+      "expected_http": 202,
+      "response": {
+        "request_id": "30000000-0000-0000-0000-000000000001",
+        "status": "processing",
+        "retry_after_ms": 1000
+      }
+    },
+    {
+      "name": "request_conflict",
+      "request": {
+        "request_id": "30000000-0000-0000-0000-000000000001",
+        "text": "日本語を勉強したいです。",
+        "locale": "vi"
+      },
+      "expected_http": 409,
+      "response": {
+        "request_id": "30000000-0000-0000-0000-000000000001",
+        "error": {
+          "code": "request_conflict",
+          "retryable": false
+        }
+      }
+    }
+  ]
+}

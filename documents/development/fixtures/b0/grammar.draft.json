@@ -1,0 +1,190 @@
+{
+  "fixture_version": 1,
+  "status": "pending_review",
+  "reviewed_by": null,
+  "reviewed_at": null,
+  "purpose": "B0 integration fixtures; not loaded by the app or deployed",
+  "source": "First 3 records copied unchanged from assets/data/grammar.json; 9 AI-authored drafts. JLPT/content/source rights require human review.",
+  "grammar_points": [
+    {
+      "id": "10000000-0000-0000-0000-000000000001",
+      "pattern": "〜たことがある",
+      "level": "N4",
+      "category": "experience",
+      "meaning_vi": "Đã từng làm việc gì",
+      "formula": "Động từ thể た + ことがある",
+      "usage_vi": "Diễn tả trải nghiệm đã xảy ra trước thời điểm nói.",
+      "grammar_examples": [
+        {
+          "sentence_ja": "日本へ行ったことがあります。",
+          "translation_vi": "Tôi đã từng đến Nhật Bản."
+        }
+      ]
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000002",
+      "pattern": "〜たい",
+      "level": "N5",
+      "category": "desire",
+      "meaning_vi": "Muốn làm việc gì",
+      "formula": "Động từ thể ます bỏ ます + たい",
+      "usage_vi": "Diễn tả mong muốn thực hiện một hành động của người nói.",
+      "grammar_examples": [
+        {
+          "sentence_ja": "日本語を勉強したいです。",
+          "translation_vi": "Tôi muốn học tiếng Nhật."
+        }
+      ]
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000003",
+      "pattern": "〜ている",
+      "level": "N5",
+      "category": "aspect",
+      "meaning_vi": "Đang thực hiện hành động",
+      "formula": "Động từ thể て + いる",
+      "usage_vi": "Trong ví dụ này, diễn tả một hành động đang diễn ra.",
+      "grammar_examples": [
+        {
+          "sentence_ja": "本を読んでいます。",
+          "translation_vi": "Tôi đang đọc sách."
+        }
+      ]
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000004",
+      "pattern": "〜てもいい",
+      "level": "N5",
+      "category": "permission",
+      "meaning_vi": "Được phép làm việc gì",
+      "formula": "Động từ thể て + もいい",
+      "usage_vi": "Hỏi hoặc cho phép một hành động; ví dụ dùng câu hỏi lịch sự.",
+      "grammar_examples": [
+        {
+          "sentence_ja": "ここで写真を撮ってもいいですか。",
+          "translation_vi": "Tôi có thể chụp ảnh ở đây không?"
+        }
+      ]
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000005",
+      "pattern": "〜てはいけない",
+      "level": "N5",
+      "category": "prohibition",
+      "meaning_vi": "Không được làm việc gì",
+      "formula": "Động từ thể て + はいけない",
+      "usage_vi": "Nêu điều cấm; cách nói có thể mạnh tùy quan hệ và tình huống.",
+      "grammar_examples": [
+        {
+          "sentence_ja": "ここでタバコを吸ってはいけません。",
+          "translation_vi": "Không được hút thuốc ở đây."
+        }
+      ]
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000006",
+      "pattern": "〜なければならない",
+      "level": "N4",
+      "category": "obligation",
+      "meaning_vi": "Phải làm việc gì",
+      "formula": "Động từ thể ない bỏ い + ければならない",
+      "usage_vi": "Nêu nghĩa vụ; ví dụ しない chuyển thành しなければならない.",
+      "grammar_examples": [
+        {
+          "sentence_ja": "明日までに宿題をしなければなりません。",
+          "translation_vi": "Tôi phải làm bài tập trước hạn ngày mai."
+        }
+      ]
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000007",
+      "pattern": "〜なくてもいい",
+      "level": "N4",
+      "category": "permission",
+      "meaning_vi": "Không cần làm việc gì",
+      "formula": "Động từ thể ない bỏ い + くてもいい",
+      "usage_vi": "Diễn tả không bắt buộc làm, không phải lệnh cấm làm.",
+      "grammar_examples": [
+        {
+          "sentence_ja": "今日は学校へ行かなくてもいいです。",
+          "translation_vi": "Hôm nay không cần đến trường."
+        }
+      ]
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000008",
+      "pattern": "〜つもりだ",
+      "level": "N4",
+      "category": "intention",
+      "meaning_vi": "Dự định làm việc gì",
+      "formula": "Động từ thể từ điển + つもりだ",
+      "usage_vi": "Diễn tả dự định của người nói; ví dụ dùng dạng lịch sự つもりです.",
+      "grammar_examples": [
+        {
+          "sentence_ja": "来年、日本へ行くつもりです。",
+          "translation_vi": "Tôi dự định đến Nhật Bản vào năm sau."
+        }
+      ]
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000009",
+      "pattern": "〜ながら",
+      "level": "N4",
+      "category": "simultaneous",
+      "meaning_vi": "Vừa làm việc này vừa làm việc khác",
+      "formula": "Động từ thể ます bỏ ます + ながら",
+      "usage_vi": "Hai hành động cùng chủ thể; mệnh đề sau là hành động chính trong ví dụ.",
+      "grammar_examples": [
+        {
+          "sentence_ja": "音楽を聞きながら勉強します。",
+          "translation_vi": "Tôi vừa nghe nhạc vừa học."
+        }
+      ]
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000010",
+      "pattern": "〜より〜のほうが",
+      "level": "N5",
+      "category": "comparison",
+      "meaning_vi": "So với A thì B hơn về một mặt",
+      "formula": "A より B のほうが + tính từ",
+      "usage_vi": "So sánh hai đối tượng theo đặc điểm được nêu, không khái quát mọi mặt.",
+      "grammar_examples": [
+        {
+          "sentence_ja": "バスより電車のほうが速いです。",
+          "translation_vi": "So với xe buýt, tàu điện nhanh hơn."
+        }
+      ]
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000011",
+      "pattern": "〜ことができる",
+      "level": "N4",
+      "category": "ability",
+      "meaning_vi": "Có thể làm việc gì",
+      "formula": "Động từ thể từ điển + ことができる",
+      "usage_vi": "Trong ví dụ, diễn tả năng lực thực hiện một hành động.",
+      "grammar_examples": [
+        {
+          "sentence_ja": "私は日本語を話すことができます。",
+          "translation_vi": "Tôi có thể nói tiếng Nhật."
+        }
+      ]
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000012",
+      "pattern": "〜てから",
+      "level": "N5",
+      "category": "sequence",
+      "meaning_vi": "Sau khi làm A thì làm B",
+      "formula": "Động từ thể て + から、B",
+      "usage_vi": "Diễn tả thứ tự hành động A rồi B.",
+      "grammar_examples": [
+        {
+          "sentence_ja": "手を洗ってから、ご飯を食べます。",
+          "translation_vi": "Tôi rửa tay rồi mới ăn cơm."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "fixture_version": 1,
+  "status": "contract_fixture_not_live_sync",
+  "record_cases": [
+    {
+      "name": "stale_edit",
+      "initial": {
+        "revision": 3,
+        "deleted": false,
+        "content": "bản gốc"
+      },
+      "operations": [
+        {
+          "operation_id": "40000000-0000-0000-0000-000000000001",
+          "base_revision": 3,
+          "content": "bản A"
+        },
+        {
+          "operation_id": "40000000-0000-0000-0000-000000000002",
+          "base_revision": 3,
+          "content": "bản B"
+        }
+      ],
+      "expected_statuses": [
+        "applied",
+        "conflict"
+      ],
+      "expected_final": {
+        "revision": 4,
+        "deleted": false,
+        "content": "bản A"
+      },
+      "preserve_pending_operations": [
+        "40000000-0000-0000-0000-000000000002"
+      ]
+    },
+    {
+      "name": "delete_then_stale_edit",
+      "initial": {
+        "revision": 3,
+        "deleted": false,
+        "content": "bản gốc"
+      },
+      "operations": [
+        {
+          "operation_id": "40000000-0000-0000-0000-000000000003",
+          "base_revision": 3,
+          "delete": true
+        },
+        {
+          "operation_id": "40000000-0000-0000-0000-000000000004",
+          "base_revision": 3,
+          "content": "bản B"
+        }
+      ],
+      "expected_statuses": [
+        "applied",
+        "conflict"
+      ],
+      "expected_final": {
+        "revision": 4,
+        "deleted": true,
+        "content": "bản gốc"
+      },
+      "preserve_pending_operations": [
+        "40000000-0000-0000-0000-000000000004"
+      ]
+    },
+    {
+      "name": "timeout_after_commit",
+      "initial": {
+        "revision": 3,
+        "deleted": false,
+        "content": "bản gốc"
+      },
+      "operations": [
+        {
+          "operation_id": "40000000-0000-0000-0000-000000000005",
+          "base_revision": 3,
+          "content": "bản A"
+        },
+        {
+          "operation_id": "40000000-0000-0000-0000-000000000005",
+          "base_revision": 3,
+          "content": "bản A"
+        }
+      ],
+      "expected_statuses": [
+        "applied",
+        "duplicate_ack"
+      ],
+      "expected_final": {
+        "revision": 4,
+        "deleted": false,
+        "content": "bản A"
+      },
+      "preserve_pending_operations": []
+    },
+    {
+      "name": "explicit_conflict_resolution",
+      "initial": {
+        "revision": 3,
+        "deleted": false,
+        "content": "bản gốc"
+      },
+      "operations": [
+        {
+          "operation_id": "40000000-0000-0000-0000-000000000006",
+          "base_revision": 3,
+          "content": "bản A"
+        },
+        {
+          "operation_id": "40000000-0000-0000-0000-000000000007",
+          "base_revision": 3,
+          "content": "bản B"
+        },
+        {
+          "operation_id": "40000000-0000-0000-0000-000000000008",
+          "base_revision": 4,
+          "content": "bản B"
+        }
+      ],
+      "expected_statuses": [
+        "applied",
+        "conflict",
+        "applied"
+      ],
+      "expected_final": {
+        "revision": 5,
+        "deleted": false,
+        "content": "bản B"
+      },
+      "preserve_pending_operations": []
+    }
+  ],
+  "review_case": {
+    "name": "receipt_order_ignores_client_clock",
+    "initial_stage": -1,
+    "attempts": [
+      {
+        "id": "50000000-0000-0000-0000-000000000002",
+        "question_id": "20000000-0000-0000-0000-000000000001",
+        "session_id": "60000000-0000-0000-0000-000000000001",
+        "attempted_at": "2026-11-10T00:00:00Z",
+        "server_received_at": "2026-11-09T10:00:00Z",
+        "correct": false
+      },
+      {
+        "id": "50000000-0000-0000-0000-000000000001",
+        "question_id": "20000000-0000-0000-0000-000000000001",
+        "session_id": "60000000-0000-0000-0000-000000000002",
+        "attempted_at": "2026-11-08T00:00:00Z",
+        "server_received_at": "2026-11-09T10:00:00Z",
+        "correct": true
+      }
+    ],
+    "expected_order": [
+      "50000000-0000-0000-0000-000000000001",
+      "50000000-0000-0000-0000-000000000002"
+    ],
+    "expected_final_stage": 0,
+    "expected_due_at": "2026-11-10T00:00:00Z"
+  },
+  "quota_case": {
+    "name": "last_slot_concurrent_reservation",
+    "daily_limit": 5,
+    "used": 4,
+    "remaining_slots": 1,
+    "request_ids": [
+      "30000000-0000-0000-0000-000000000011",
+      "30000000-0000-0000-0000-000000000012"
+    ],
+    "expected_reserved_count": 1,
+    "expected_quota_exceeded_count": 1
+  }
+}
