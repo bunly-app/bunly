@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/bunly_theme.dart';
+import '../../../app/providers.dart';
+import '../../analysis/domain/on_device_grammar_detector.dart';
+import '../../grammar/domain/grammar_point.dart';
 import '../../learning/presentation/learning_widgets.dart';
+import '../../ocr/data/method_channel_speech_repository.dart';
+import '../../ocr/domain/ocr_draft.dart';
+import '../../ocr/domain/speech_draft.dart';
 
 class WritingPracticeScreen extends StatefulWidget {
   const WritingPracticeScreen({super.key, this.voice = false});
@@ -15,6 +22,9 @@ class _WritingPracticeScreenState extends State<WritingPracticeScreen> {
   bool hint = false;
   bool confirmed = false;
   bool reference = false;
+  bool listening = false;
+  SpeechDraft? speechDraft;
+  String? speechWarning;
 
   @override
   void dispose() {
@@ -32,6 +42,48 @@ class _WritingPracticeScreenState extends State<WritingPracticeScreen> {
       selection: TextSelection.collapsed(offset: start + token.length),
     );
     setState(() {});
+  }
+
+  Future<void> _listenJapaneseSpeech() async {
+    if (confirmed || listening) return;
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      listening = true;
+      speechWarning = null;
+    });
+    ListenJapaneseSpeech useCase;
+    try {
+      useCase = ProviderScope.containerOf(
+        context,
+        listen: false,
+      ).read(listenJapaneseSpeechProvider);
+    } catch (_) {
+      useCase = ListenJapaneseSpeech(MethodChannelSpeechRepository());
+    }
+    try {
+      final draft = await useCase(
+        prompt: 'Hãy nói câu với 〜たことがある (ví dụ: 富士山に登ったことがあります)...',
+      );
+      if (!mounted || draft == null) return;
+      setState(() {
+        input.text = draft.text;
+        input.selection = TextSelection.collapsed(offset: draft.text.length);
+        speechDraft = draft;
+      });
+    } on SpeechException catch (e) {
+      if (mounted) {
+        setState(() => speechWarning = e.message);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => speechWarning =
+              'Chưa thể khởi động Micro nhận dạng giọng nói. Bạn vẫn có thể gõ câu tiếng Nhật bên dưới.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => listening = false);
+    }
   }
 
   @override
@@ -77,11 +129,11 @@ class _WritingPracticeScreenState extends State<WritingPracticeScreen> {
             children: [
               LearningNotice(
                 title: voice
-                    ? 'Micro / nhận dạng giọng nói chưa kết nối'
+                    ? 'Nhận dạng giọng nói tiếng Nhật (ja-JP)'
                     : 'Góp ý AI chưa kết nối',
-                icon: voice ? Icons.mic_off_outlined : Icons.translate,
+                icon: voice ? Icons.mic_outlined : Icons.translate,
                 message: voice
-                    ? 'Bạn có thể gõ văn bản thay lời nói để thử bước xác nhận và xem câu tham khảo. Ứng dụng không thu âm hoặc chấm phát âm.'
+                    ? 'Bấm nút Micro để nói câu tiếng Nhật trực tiếp hoặc nhập tay, sau đó đối chiếu cấu trúc 〜たことがある bằng AI trên máy.'
                     : 'Tự viết bản dịch và đối chiếu câu tham khảo. Bản này không gửi bài cho AI hoặc chấm câu tự do.',
               ),
               const SizedBox(height: 14),
@@ -96,7 +148,7 @@ class _WritingPracticeScreenState extends State<WritingPracticeScreen> {
                     runSpacing: 6,
                     children: [
                       _MetaBadge(
-                        label: voice ? 'JLPT N5' : 'N5',
+                        label: voice ? 'JLPT N4' : 'JLPT N4',
                         bg: colors.secondaryContainer,
                         fg: colors.onSecondaryContainer,
                       ),
@@ -107,7 +159,7 @@ class _WritingPracticeScreenState extends State<WritingPracticeScreen> {
                       ),
                       if (voice)
                         _MetaBadge(
-                          label: 'Cấp độ cơ bản',
+                          label: 'Micro ja-JP',
                           bg: colors.surfaceContainer,
                           fg: colors.secondary,
                         ),
@@ -146,7 +198,23 @@ class _WritingPracticeScreenState extends State<WritingPracticeScreen> {
                 _TranslationContextCard(colors: colors, tones: tones),
               const SizedBox(height: 16),
               if (voice) ...[
-                _VoiceWaveformPreview(colors: colors, tones: tones),
+                _VoiceRecorderCard(
+                  listening: listening,
+                  confirmed: confirmed,
+                  draft: speechDraft,
+                  warning: speechWarning,
+                  onListen: _listenJapaneseSpeech,
+                  onSelectAlternative: confirmed
+                      ? null
+                      : (alt) => setState(() {
+                          input.text = alt;
+                          input.selection = TextSelection.collapsed(
+                            offset: alt.length,
+                          );
+                        }),
+                  colors: colors,
+                  tones: tones,
+                ),
                 const SizedBox(height: 14),
               ],
               LearningSection(
@@ -252,7 +320,7 @@ class _WritingPracticeScreenState extends State<WritingPracticeScreen> {
                           Expanded(
                             child: Text(
                               voice
-                                  ? 'Nhập hoặc dán câu Nhật bằng IME để thử luồng kiểm tra câu.'
+                                  ? 'Câu thu âm từ Micro sẽ tự điền vào đây để bạn rà lại Kanji/Kana (hoặc gõ tay bằng IME).'
                                   : 'Nhiều cách dịch được chấp nhận nếu đúng ngữ pháp mục tiêu và ngữ cảnh.',
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: colors.onSurfaceVariant),
@@ -685,9 +753,24 @@ class _VoiceContextCard extends StatelessWidget {
   );
 }
 
-class _VoiceWaveformPreview extends StatelessWidget {
-  const _VoiceWaveformPreview({required this.colors, required this.tones});
+class _VoiceRecorderCard extends StatelessWidget {
+  const _VoiceRecorderCard({
+    required this.listening,
+    required this.confirmed,
+    required this.draft,
+    required this.warning,
+    required this.onListen,
+    required this.onSelectAlternative,
+    required this.colors,
+    required this.tones,
+  });
 
+  final bool listening;
+  final bool confirmed;
+  final SpeechDraft? draft;
+  final String? warning;
+  final VoidCallback onListen;
+  final ValueChanged<String>? onSelectAlternative;
   final ColorScheme colors;
   final BunlyTones tones;
 
@@ -708,63 +791,166 @@ class _VoiceWaveformPreview extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: colors.surfaceContainerLowest,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: tones.subtleBorder.withValues(alpha: 0.35)),
-    ),
-    child: Column(
-      children: [
-        Row(
-          children: [
-            Icon(Icons.mic_off_outlined, size: 18, color: colors.secondary),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Mô phỏng khung thu âm · Chưa kết nối micro / ASR',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: colors.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
+  Widget build(BuildContext context) {
+    final conf = draft?.confidence;
+    final tier = draft?.confidenceTier ?? OcrConfidenceTier.unknown;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: listening || draft != null
+              ? colors.primary.withValues(alpha: 0.45)
+              : tones.subtleBorder.withValues(alpha: 0.35),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(
+                listening ? Icons.graphic_eq : Icons.mic_outlined,
+                size: 18,
+                color: colors.primary,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  listening
+                      ? 'Đang lắng nghe giọng nói tiếng Nhật (ja-JP)…'
+                      : draft != null
+                      ? 'Đã nhận dạng giọng nói tiếng Nhật (ja-JP)'
+                      : 'Thu âm giọng nói tiếng Nhật qua Micro (ja-JP)',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          FilledButton.tonalIcon(
+            key: const ValueKey('practice-voice-mic-button'),
+            onPressed: confirmed || listening ? null : onListen,
+            icon: listening
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.mic, size: 18),
+            label: Text(
+              listening
+                  ? 'Đang thu âm (ja-JP)…'
+                  : draft == null
+                  ? 'Bấm để nói tiếng Nhật (Micro)'
+                  : 'Đọc lại bằng Micro',
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            height: 46,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (final height in _bars)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: Container(
+                        width: 4,
+                        height: height,
+                        decoration: BoxDecoration(
+                          color:
+                              (listening || draft != null
+                                      ? colors.primary
+                                      : tones.primaryFixedDim)
+                                  .withValues(alpha: 0.78),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          if (warning != null) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: colors.errorContainer,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                warning!,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: colors.onErrorContainer),
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 12),
-        Container(
-          height: 52,
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: colors.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          if (draft != null) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
               children: [
-                for (final height in _bars)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 3),
-                    child: Container(
-                      width: 4,
-                      height: height,
-                      decoration: BoxDecoration(
-                        color: tones.primaryFixedDim.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
+                _MetaBadge(
+                  label: conf != null
+                      ? 'Độ tin cậy: ${ocrConfidenceLabel(tier)} (${(conf * 100).round()}%)'
+                      : 'Nhận dạng ja-JP',
+                  bg: tones.primaryFixed,
+                  fg: tones.onPrimaryFixed,
+                ),
+                if (draft!.latencyMs != null)
+                  _MetaBadge(
+                    label: '${draft!.latencyMs} ms',
+                    bg: colors.surfaceContainerHigh,
+                    fg: colors.onSurfaceVariant,
                   ),
               ],
             ),
-          ),
-        ),
-      ],
-    ),
-  );
+            if (draft!.alternatives.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Chọn phương án Kanji/Kana khác:',
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final alt in draft!.alternatives)
+                    ActionChip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(alt, style: const TextStyle(fontSize: 12)),
+                      onPressed: onSelectAlternative == null
+                          ? null
+                          : () => onSelectAlternative!(alt),
+                    ),
+                ],
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
 }
 
 class _FeedbackComparisonSection extends StatelessWidget {
@@ -780,160 +966,234 @@ class _FeedbackComparisonSection extends StatelessWidget {
   final ColorScheme colors;
   final BunlyTones tones;
 
+  static const GrammarPoint _targetPoint = GrammarPoint(
+    id: '10000000-0000-0000-0000-000000000001',
+    pattern: '〜たことがある',
+    level: 'N4',
+    category: 'experience',
+    meaning: 'Đã từng làm việc gì',
+    formula: 'Động từ thể た + ことがある',
+    usage: 'Diễn tả trải nghiệm trong quá khứ.',
+    examples: [],
+  );
+
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      LearningSection(
-        children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                'Bài làm của bạn',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+  Widget build(BuildContext context) {
+    final detection = voice
+        ? const OnDeviceGrammarDetector().detect(userAnswer, [_targetPoint])
+        : null;
+    final targetMatch = detection != null && detection.matches.isNotEmpty
+        ? detection.matches.first
+        : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        LearningSection(
+          children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  'Bài làm của bạn',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                _MetaBadge(
+                  label: voice
+                      ? (targetMatch != null
+                            ? 'Khớp 〜たことがある'
+                            : 'Chưa thấy 〜たことがある')
+                      : 'Chưa chấm tự động',
+                  bg: voice && targetMatch != null
+                      ? tones.primaryFixed
+                      : colors.surfaceContainer,
+                  fg: voice && targetMatch != null
+                      ? tones.onPrimaryFixed
+                      : colors.secondary,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(12),
               ),
-              _MetaBadge(
-                label: 'Chưa chấm tự động',
-                bg: colors.surfaceContainer,
-                fg: colors.secondary,
+              child: SelectableText(
+                userAnswer,
+                style: const TextStyle(
+                  fontSize: 20,
+                  height: 1.6,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            if (voice) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: targetMatch != null
+                      ? tones.primaryFixed.withValues(alpha: 0.45)
+                      : colors.surfaceContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      targetMatch != null
+                          ? Icons.verified_outlined
+                          : Icons.info_outline,
+                      size: 16,
+                      color: targetMatch != null
+                          ? tones.onPrimaryFixed
+                          : colors.secondary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        targetMatch != null
+                            ? 'AI trên máy (${detection!.latencyMs} ms): Đã nhận diện đúng cấu trúc mục tiêu 〜たことがある${targetMatch.span != null ? ' tại 「${targetMatch.span!.text}」' : ''}.'
+                            : 'AI trên máy chưa thấy cụm V-た + ことがある/あります trong câu bạn vừa đọc. Hãy đối chiếu với gợi ý bên dưới.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: targetMatch != null
+                              ? tones.onPrimaryFixed
+                              : colors.onSurfaceVariant,
+                          fontWeight: targetMatch != null
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
-          ),
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: SelectableText(
-              userAnswer,
-              style: const TextStyle(
-                fontSize: 20,
-                height: 1.6,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 12),
-      LearningSection(
-        children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.menu_book_outlined,
-                    size: 18,
-                    color: colors.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      'Câu tham khảo',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
+          ],
+        ),
+        const SizedBox(height: 12),
+        LearningSection(
+          children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.menu_book_outlined,
+                      size: 18,
+                      color: colors.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'Câu tham khảo',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
+                    ),
+                  ],
+                ),
+                _MetaBadge(
+                  label: '3 tiêu chí mẫu',
+                  bg: colors.secondaryContainer,
+                  fg: colors.onSecondaryContainer,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _CriterionCard(
+              indexLabel: '1. Truyền đạt đúng ý',
+              badge: 'Tiêu chí đối chiếu',
+              body: voice
+                  ? 'Thể hiện rõ bạn đã từng leo núi Phú Sĩ trong quá khứ.'
+                  : 'Thể hiện trải nghiệm đã từng đi Nhật ít nhất một lần, không phải thói quen lặp lại.',
+              colors: colors,
+            ),
+            const SizedBox(height: 8),
+            _CriterionCard(
+              indexLabel: '2. Ngữ pháp mục tiêu',
+              badge: 'V-た + ことがある',
+              body: voice
+                  ? 'Chia động từ 登る → 登った (thể た), sau đó ghép ことがあります.'
+                  : 'Dùng thể quá khứ ngắn 行く → 行った trước ことがあります, tránh dùng thể từ điển.',
+              colors: colors,
+            ),
+            const SizedBox(height: 8),
+            _CriterionCard(
+              indexLabel: '3. Độ tự nhiên',
+              badge: 'Giao tiếp thân thiện',
+              body:
+                  'Mức lịch sự 〜ます phù hợp với ngữ cảnh trò chuyện cùng bạn bè và đồng nghiệp.',
+              colors: colors,
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(12),
+                border: Border(
+                  left: BorderSide(color: colors.primary, width: 3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'GỢI Ý CÂU THAM KHẢO',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SelectableText(
+                    voice
+                        ? '富士山に登ったことがあります。'
+                        : '日本に行ったことがあります。\n日本へ行ったことがあります。',
+                    style: const TextStyle(
+                      fontSize: 21,
+                      height: 1.75,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    voice
+                        ? '“Tôi đã từng leo núi Phú Sĩ.”'
+                        : '“Tôi đã từng đi Nhật Bản.” · Có thể dùng trợ từ 「に」 (điểm đến) hoặc 「へ」 (phương hướng).',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
-              _MetaBadge(
-                label: '3 tiêu chí mẫu',
-                bg: colors.secondaryContainer,
-                fg: colors.onSecondaryContainer,
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          _CriterionCard(
-            indexLabel: '1. Truyền đạt đúng ý',
-            badge: 'Tiêu chí đối chiếu',
-            body: voice
-                ? 'Thể hiện rõ bạn đã từng leo núi Phú Sĩ trong quá khứ.'
-                : 'Thể hiện trải nghiệm đã từng đi Nhật ít nhất một lần, không phải thói quen lặp lại.',
-            colors: colors,
-          ),
-          const SizedBox(height: 8),
-          _CriterionCard(
-            indexLabel: '2. Ngữ pháp mục tiêu',
-            badge: 'V-た + ことがある',
-            body: voice
-                ? 'Chia động từ 登る → 登った (thể た), sau đó ghép ことがあります.'
-                : 'Dùng thể quá khứ ngắn 行く → 行った trước ことがあります, tránh dùng thể từ điển.',
-            colors: colors,
-          ),
-          const SizedBox(height: 8),
-          _CriterionCard(
-            indexLabel: '3. Độ tự nhiên',
-            badge: 'Giao tiếp thân thiện',
-            body:
-                'Mức lịch sự 〜ます phù hợp với ngữ cảnh trò chuyện cùng bạn bè và đồng nghiệp.',
-            colors: colors,
-          ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(12),
-              border: Border(left: BorderSide(color: colors.primary, width: 3)),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'GỢI Ý CÂU THAM KHẢO',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: colors.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                SelectableText(
-                  voice ? '富士山に登ったことがあります。' : '日本に行ったことがあります。\n日本へ行ったことがあります。',
-                  style: const TextStyle(
-                    fontSize: 21,
-                    height: 1.75,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  voice
-                      ? '“Tôi đã từng leo núi Phú Sĩ.”'
-                      : '“Tôi đã từng đi Nhật Bản.” · Có thể dùng trợ từ 「に」 (điểm đến) hoặc 「へ」 (phương hướng).',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 10),
+            Text(
+              'Có thể có cách diễn đạt khác phù hợp. Đây là mẫu tham khảo từ thiết kế, chưa đánh giá đúng/sai hoặc độ tự nhiên của câu bạn nhập.',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Có thể có cách diễn đạt khác phù hợp. Đây là mẫu tham khảo từ thiết kế, chưa đánh giá đúng/sai hoặc độ tự nhiên của câu bạn nhập.',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
-          ),
-        ],
-      ),
-    ],
-  );
+          ],
+        ),
+      ],
+    );
+  }
 }
 
 class _CriterionCard extends StatelessWidget {

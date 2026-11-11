@@ -506,8 +506,8 @@ class _PracticeSetupScreenState extends ConsumerState<PracticeSetupScreen> {
                   _PracticeModeTile(
                     icon: Icons.mic_none,
                     title: 'Nói một câu',
-                    subtitle: 'Nhập văn bản thay cho micro / ASR',
-                    badgeText: 'Chưa thu âm',
+                    subtitle: 'Đọc câu tiếng Nhật qua Micro (ja-JP)',
+                    badgeText: 'Micro ja-JP',
                     colors: colors,
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
@@ -704,8 +704,8 @@ class _PracticeSetupScreenState extends ConsumerState<PracticeSetupScreen> {
                   _PracticeModeTile(
                     icon: Icons.mic_none,
                     title: 'Nói một câu',
-                    subtitle: 'Nhập văn bản thay cho micro / ASR',
-                    badgeText: 'Chưa thu âm',
+                    subtitle: 'Đọc câu tiếng Nhật qua Micro (ja-JP)',
+                    badgeText: 'Micro ja-JP',
                     colors: colors,
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(

@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bunly/app/bunly_theme.dart';
+import 'package:bunly/app/providers.dart';
+import 'package:bunly/features/ocr/domain/speech_draft.dart';
 import 'package:bunly/features/practice/data/stitch_demo_practice.dart';
 import 'package:bunly/features/practice/domain/demo_practice.dart';
 import 'package:bunly/features/practice/presentation/practice_screen.dart';
 import 'package:bunly/features/practice/presentation/writing_practice_screen.dart';
+
+class _TestSpeechRepo implements SpeechRepository {
+  @override
+  Future<SpeechDraft?> listenJapanese({String? prompt}) async => SpeechDraft(
+    draftId: 'voice-test-1',
+    text: '富 士 山 に 登った ことが あります',
+    alternatives: const ['ふじさんにのぼったことがあります'],
+    confidence: 0.94,
+    latencyMs: 310,
+  );
+}
 
 void main() {
   testWidgets(
@@ -58,6 +72,67 @@ void main() {
         tester.widget<TextField>(find.byType(TextField)).readOnly,
         isFalse,
       );
+    },
+  );
+  testWidgets(
+    'Speaking practice mic connects ja-JP speech input and verifies grammar target on-device',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            speechRepositoryProvider.overrideWithValue(_TestSpeechRepo()),
+          ],
+          child: MaterialApp(
+            theme: bunlyTheme(Brightness.light),
+            home: const WritingPracticeScreen(voice: true),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final micFinder = find.byKey(const ValueKey('practice-voice-mic-button'));
+      await tester.scrollUntilVisible(
+        micFinder,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(micFinder);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        '富士山に登ったことがあります。',
+      );
+      await tester.scrollUntilVisible(
+        find.textContaining('Độ tin cậy: Rõ (94%)'),
+        100,
+        scrollable: find
+            .descendant(
+              of: find.byType(ListView),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      expect(find.textContaining('Độ tin cậy: Rõ (94%)'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('Xác nhận văn bản'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('Xác nhận văn bản'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Đối chiếu câu tham khảo'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('Đối chiếu câu tham khảo'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Khớp 〜たことがある'), findsOneWidget);
+      expect(find.textContaining('登ったことがあります'), findsAtLeastNWidgets(1));
     },
   );
   testWidgets(
