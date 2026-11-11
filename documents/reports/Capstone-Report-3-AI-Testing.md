@@ -219,5 +219,5 @@ Lệnh `flutter test --coverage` đo trên toàn bộ thư viện `lib/` của d
 - **Kích thước:** `94.196.007 bytes` (`~89,83 MB`).
 - **SHA-256:** `EB64AF270CA31D840508A76EC6E44D3AA402C127823B6728E6D60C3EFA8BE7A1`.
 - **Thiết bị đã cài đặt:** Samsung Galaxy A11 (`SM-A115F`, `R9JN409P9RJ`).
-- **🔗 Link Tải APK (cập nhật khi nộp Form):** `[Dán link Google Drive hoặc GitHub Release v0.3.0-m3 tại đây]`
+- **🔗 Link Release APK nội bộ:** [https://github.com/bunly-app/bunly/releases/tag/v0.3.0-m3](https://github.com/bunly-app/bunly/releases/tag/v0.3.0-m3)
 - **🎥 Link Video Demo (cập nhật khi nộp Form):** `[Dán link YouTube / Google Drive công khai tại đây]`
