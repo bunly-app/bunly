@@ -5,7 +5,7 @@
 **Đề tài:** **Bunly — Trợ lý Học & Tra cứu Ngữ pháp Tiếng Nhật từ Nội dung Thực tế**<br>
 **Tên tiếng Anh:** **Bunly — AI-Powered Japanese Grammar Coach**<br>
 **Nhóm:** Bunly • **Học kỳ:** Học kỳ 1, năm học 2026–2027 • **Mốc:** M3 (Report 3 — 15%)<br>
-**Ngày lập:** 11/11/2026 • **Nhánh:** `dev` • **Commit mã nguồn kiểm chứng:** `9907e1c`<br>
+**Ngày lập:** 11/11/2026 • **Nhánh:** `dev` • **Commit mã nguồn kiểm chứng:** `f562548`<br>
 **Repository GitHub:** [bunly-app/bunly](https://github.com/bunly-app/bunly)
 
 | Vai trò | Họ và tên | Mã sinh viên |
@@ -14,7 +14,7 @@
 | Thành viên | Nguyễn Thị Ánh Vy | 23IT323 |
 | Thành viên | Đoàn Nhật Ánh | 23IT.B007 |
 
-> **Trạng thái kiểm chứng tại `9907e1c`:** Các tính năng kỹ thuật của Mốc 3 (hậu xử lý OCR + mức tin cậy, nhận diện giọng nói `ja-JP`, bộ nhận diện ngữ pháp 100% offline `OnDeviceGrammarDetector`, lọc ứng viên Hybrid Edge-to-Cloud + hợp nhất span UTF-16, giao diện xử lý xung đột đồng bộ đa thiết bị) đã hoàn thiện mã nguồn, đạt **99/99 Flutter tests** (độ phủ **71,28%** toàn cục, **93,24%** tầng Domain) và **29/29 Edge Function unit tests**, đồng thời đã đóng gói và cài đặt bản Connected Cloud Release APK (`89,30 MB`) lên thiết bị thật **Samsung Galaxy A11 (`SM-A115F`)**. Các hạng mục cần đo/thao tác bổ sung (đo CER/FPS/RAM trực tiếp trên máy thật qua profiler, chạy lại pgTAP trong Docker, redeploy `analyze-grammar` lên Cloud cho tham số `candidate_ids`, tải APK + video demo lên Drive) được ghi nhận rõ trạng thái chưa hoàn tất ở Mục 3.2.
+> **Trạng thái kiểm chứng tại `f562548`:** Các tính năng kỹ thuật của Mốc 3 (hậu xử lý OCR + mức tin cậy, nhận diện giọng nói `ja-JP`, bộ nhận diện ngữ pháp 100% offline `OnDeviceGrammarDetector`, lọc ứng viên Hybrid Edge-to-Cloud + hợp nhất span UTF-16, giao diện xử lý xung đột đồng bộ đa thiết bị) đã hoàn thiện mã nguồn, đạt **100/100 Flutter tests** (độ phủ **71,41%** toàn cục, **93,24%** tầng Domain) và **29/29 Edge Function unit tests**, đồng thời đã đóng gói và cài đặt bản Connected Cloud Release APK (`89,83 MB`) lên thiết bị thật **Samsung Galaxy A11 (`SM-A115F`)**. Các hạng mục cần đo/thao tác bổ sung (đo CER/FPS/RAM trực tiếp trên máy thật qua profiler, chạy lại pgTAP trong Docker, redeploy `analyze-grammar` lên Cloud cho tham số `candidate_ids`, tải APK + video demo lên Drive) được ghi nhận rõ trạng thái chưa hoàn tất ở Mục 3.2.
 
 ---
 
@@ -74,7 +74,8 @@ flowchart TD
 - **Domain & Hậu xử lý ([`speech_draft.dart`](../../lib/features/ocr/domain/speech_draft.dart) & [`method_channel_speech_repository.dart`](../../lib/features/ocr/data/method_channel_speech_repository.dart)):** Use case `ListenJapaneseSpeech` chuẩn hóa văn bản nói qua `JapaneseOcrPostProcessor.normalizeLine`, tự động thêm `。` cuối câu nếu thiếu và khử trùng lặp danh sách gợi ý Kanji/Kana.
 - **Điểm chạm UI:**
   1. Nút **“Giọng nói (Micro)”** trong màn `SentenceReviewScreen`, hiển thị độ tin cậy giọng nói và chip chọn phương án Kanji/Kana khác.
-  2. Biểu tượng **Micro** ngay trên thanh tìm kiếm của tab **Tra cứu** ([`grammar_screen.dart`](../../lib/features/grammar/presentation/grammar_screen.dart)).
+  2. Nút **“Bấm để nói tiếng Nhật (Micro)”** trong chế độ luyện nói **Nói một câu** ([`writing_practice_screen.dart`](../../lib/features/practice/presentation/writing_practice_screen.dart)), tự động kiểm tra câu vừa nói có chứa mẫu ngữ pháp mục tiêu `〜たことがある` bằng `OnDeviceGrammarDetector`.
+  3. Biểu tượng **Micro** ngay trên thanh tìm kiếm của tab **Tra cứu** ([`grammar_screen.dart`](../../lib/features/grammar/presentation/grammar_screen.dart)).
 
 ### 1.4. AI Nhận diện Ngữ pháp 100% Offline & Hybrid Edge-to-Cloud (`M3-03` & `M3-04`)
 
@@ -90,7 +91,7 @@ flowchart TD
 
 ### 1.5. Kết quả Đo lường & Đánh giá (Thực đo vs Hạng mục chờ đo trên Thiết bị thật)
 
-#### A. Số liệu đã đo trực tiếp từ Mã nguồn & Test Harness (Commit `9907e1c`)
+#### A. Số liệu đã đo trực tiếp từ Mã nguồn & Test Harness (Commit `f562548`)
 
 | Hạng mục đo | Phạm vi / Điều kiện đo | Kết quả thực đo | Ghi chú |
 |---|---|---|---|
@@ -99,7 +100,7 @@ flowchart TD
 | **Khả năng tổng quát hóa thuần luật (Ablation — xóa toàn bộ ví dụ khỏi catalog)** | Bắt buộc khớp chỉ bằng 77 luật hình thái (`examples = []`) trên 168 câu + **8 câu mới hoàn toàn** ngoài kho | **131/168 (78,0%)** trên tập ví dụ khi xóa ví dụ; **8/8 (100,0%)** trên 8 câu mới ngoài kho; **131/131** tọa độ UTF-16 span hợp lệ | Chứng minh không "học thuộc ví dụ"; phần thiếu chủ yếu là các mẫu trợ từ đơn cơ bản |
 | **Độ trễ suy luận Offline (`OnDeviceGrammarDetector`)** | Dart VM trên máy phát triển Windows (`n = 168` câu catalog, `n = 400` lượt trên 8 câu mới) | Lần gọi đầu (cold lazy RegExp): **23,31 ms**<br>Steady-state (catalog, `n=168`): **p50 = 0,087 ms · p95 = 0,431 ms** (max `1,867 ms`)<br>Steady-state (câu mới, `n=400`): **p50 = 0,086 ms · p95 = 0,255 ms** | Đạt mục tiêu `< 30 ms` rất xa; chạy tức thì khi bật Chế độ máy bay |
 | **Giảm kích thước ngữ cảnh Hybrid Cloud (`M3-04`)** | So sánh payload JSON danh mục gửi Gemini (`id, pattern, meaning_vi`) giữa toàn kho 90 mẫu và Top-18 đã lọc ứng viên | Toàn kho 90 mẫu: **12.756 bytes**<br>Top-18 Hybrid pre-filtered: **2.353 bytes** (giảm **81,6%** dung lượng catalog JSON) | Trung bình tầng Edge lọc ra **0,98–1,18 ứng viên/câu** |
-| **Dung lượng APK Connected Cloud Release** | `flutter build apk --release --dart-define-from-file=config/development.local.json` | **93.638.723 bytes (~89,30 MB)** | Bao gồm cả model ML Kit tiếng Nhật đóng gói sẵn |
+| **Dung lượng APK Connected Cloud Release** | `flutter build apk --release --dart-define-from-file=config/development.local.json` | **94.196.007 bytes (~89,83 MB)** | Bao gồm cả model ML Kit tiếng Nhật đóng gói sẵn |
 
 #### B. Hạng mục Đánh giá định lượng trên Thiết bị thật & Tập Độc lập (Chưa hoàn tất đo tự động)
 
@@ -174,49 +175,49 @@ sequenceDiagram
 
 ## 3. KIỂM THỬ TỰ ĐỘNG, ĐỘ PHỦ MÃ NGUỒN & BẢN BUILD KIỂM THỬ
 
-### 3.1. Kết quả Chạy Kiểm thử Tự động trên Commit `9907e1c`
+### 3.1. Kết quả Chạy Kiểm thử Tự động trên Commit `f562548`
 
-Tất cả lệnh kiểm tra dưới đây được chạy trực tiếp sau chỉnh sửa cuối cùng của Mốc 3 trên checkout hiện tại (`9907e1c`):
+Tất cả lệnh kiểm tra dưới đây được chạy trực tiếp sau chỉnh sửa cuối cùng của Mốc 3 trên checkout hiện tại (`f562548`):
 
 | Bộ kiểm thử / Công cụ | Lệnh thực thi | Kết quả thực đo | Trạng thái |
 |---|---|---|---|
 | **Code Format** | `dart format --output=none --set-exit-if-changed lib test integration_test test_connected` | 105 files checked, **0 changed** | Đạt |
 | **Static Analysis** | `dart analyze` / `flutter analyze` | **No issues found!** | Đạt |
-| **Flutter Unit + Widget + SQLite Tests** | `flutter test --coverage` (gồm 22 file test trong `test/domain/`, `test/data/`, `test/presentation/`) | **99/99 tests passed** (`0` fail, `0` skip) | Đạt |
+| **Flutter Unit + Widget + SQLite Tests** | `flutter test --coverage` (gồm 22 file test trong `test/domain/`, `test/data/`, `test/presentation/`) | **100/100 tests passed** (`0` fail, `0` skip) | Đạt |
 | **Edge Function Unit Tests (Contract & Service)** | `node --test supabase/functions/tests/analysis-contract.test.mjs supabase/functions/tests/analysis-service.test.mjs` | **29/29 tests passed** (`289,84 ms`) | Đạt |
 
 #### Phân rã Kết quả Độ phủ Mã nguồn (`coverage/lcov.info`)
 
-Lệnh `flutter test --coverage` đo trên toàn bộ thư viện `lib/` của dự án (`11.258` dòng có thể thực thi):
+Lệnh `flutter test --coverage` đo trên toàn bộ thư viện `lib/` của dự án (`11.369` dòng có thể thực thi):
 
 | Tầng Clean Architecture | Dòng đã phủ (Hit) / Tổng dòng (Found) | Tỉ lệ phủ thực đo | Đánh giá |
 |---|---|---|---|
 | **Domain (`lib/features/*/domain/`)** | **897 / 962** | **93,24%** | Rất cao; bao phủ post-processor, detector 77 luật, UTF-16 validation, SRS & use case |
-| **Presentation (`lib/features/*/presentation/`)** | **4.891 / 5.664** | **86,35%** | Bao phủ toàn bộ luồng màn hình chính, responsive 320px/scale 2.0 & dark mode |
+| **Presentation (`lib/features/*/presentation/`)** | **4.981 / 5.775** | **86,25%** | Bao phủ toàn bộ luồng màn hình chính, nói/viết, responsive 320px/scale 2.0 & dark mode |
 | **Data (`lib/features/*/data/`)** | **829 / 1.265** | **65,53%** | Phần chưa phủ chủ yếu là nhánh gọi SDK camera/platform channel & HTTP live |
-| **App & Core (`lib/app/`, `lib/core/` — gồm `*.g.dart`)** | **1.408 / 3.367** | **41,82%** | Do mã sinh tự động Drift `app_database.g.dart` chiếm dung lượng lớn |
-| **TOÀN BỘ DỰ ÁN (`TOTAL`)** | **8.025 / 11.258** | **71,28%** | Thấp hơn mốc tham khảo `80%` của template nếu tính cả file `.g.dart`; đạt **> 85%** ở tầng Domain & Presentation |
+| **App & Core (`lib/app/`, `lib/core/` — gồm `*.g.dart`)** | **1.412 / 3.367** | **41,94%** | Do mã sinh tự động Drift `app_database.g.dart` chiếm dung lượng lớn |
+| **TOÀN BỘ DỰ ÁN (`TOTAL`)** | **8.119 / 11.369** | **71,41%** | Thấp hơn mốc tham khảo `80%` của template nếu tính cả file `.g.dart`; đạt **> 85%** ở tầng Domain & Presentation |
 
 #### Chi tiết nhóm Test Case mới bổ sung ở Mốc 3
 - [`test/domain/on_device_ai_test.dart`](../../test/domain/on_device_ai_test.dart): 11 test cases kiểm tra `JapaneseOcrPostProcessor` (xóa space CJK, giữ space Latin, ghép dòng, chuẩn hóa NFKC, tách câu), `OcrConfidenceTier`, `OnDeviceGrammarDetector` trên 8 câu thực tế ngoài kho `< 30 ms`, cặp surrogate emoji `🍣`, `AnalyzeGrammarSentence` (Hybrid Edge + Cloud span fusion) và `ListenJapaneseSpeech`.
 - [`test/data/learning_sync_test.dart`](../../test/data/learning_sync_test.dart): Bổ sung test `M3-05` kiểm tra phát hiện xung đột chỉnh sửa đồng thời (giữ dữ liệu local không mất), giải quyết **Giữ bản trên máy** và **Dùng bản trên máy chủ**.
-- [`test/presentation/ocr_ai_practice_flow_test.dart`](../../test/presentation/ocr_ai_practice_flow_test.dart): Widget test xác minh thanh độ tin cậy OCR, chip tách câu, kết quả AI 100% offline tô sáng UTF-16 span và quy trình Retry giữ nguyên `request_id` idempotent.
+- [`test/presentation/ocr_ai_practice_flow_test.dart`](../../test/presentation/ocr_ai_practice_flow_test.dart) & [`test/presentation/practice_flow_test.dart`](../../test/presentation/practice_flow_test.dart): Widget test xác minh thanh độ tin cậy OCR, chip tách câu, kết quả AI 100% offline tô sáng UTF-16 span, Retry giữ nguyên `request_id` idempotent và luyện nói Micro `ja-JP` kiểm tra cấu trúc mục tiêu trên máy.
 
 ### 3.2. Các Kiểm chứng Hạ tầng / Hồ sơ Bổ sung cần theo dõi
 
 | Hạng mục | Trạng thái hiện tại | Ghi chú trung thực |
 |---|---|---|
-| **pgTAP RLS & DB Lint (`supabase/tests/database/`)** | **Chưa chạy lại ở commit `9907e1c`** | Bộ pgTAP đã có 3 file (`rls.test.sql`, `analysis.test.sql`, `practice_review_sync.test.sql`); ở phiên làm việc này chưa chạy lại trên Docker local |
+| **pgTAP RLS & DB Lint (`supabase/tests/database/`)** | **Chưa chạy lại ở commit `f562548`** | Bộ pgTAP đã có 3 file (`rls.test.sql`, `analysis.test.sql`, `practice_review_sync.test.sql`); ở phiên làm việc này chưa chạy lại trên Docker local |
 | **Edge Function `analyze-grammar` trên `bunly-dev`** | **Đã chạy bản Cloud M2/A05; chưa deploy cập nhật `candidate_ids`** | Khi client gửi `candidate_ids`, repository tự động fallback nếu hàm Cloud từ chối để đảm bảo app không lỗi trong khi chờ deploy |
-| **Đo thực tế trên Samsung Galaxy A11 (`SM-A115F`)** | **Đã cài & mở chạy trực tiếp APK `9907e1c`** | Đã build Release APK, cài qua ADB và chạy thực tế; chưa thu log Profiler/ADB (FPS, RAM PSS, CER 15 ảnh) |
+| **Đo thực tế trên Samsung Galaxy A11 (`SM-A115F`)** | **Đã cài & mở chạy trực tiếp APK `f562548`** | Đã build Release APK, cài qua ADB và chạy thực tế; chưa thu log Profiler/ADB (FPS, RAM PSS, CER 15 ảnh) |
 | **Video Demo 2–5 phút & Link Drive APK** | **Đang thực hiện** | Kịch bản demo 3 phút 45 giây đã sẵn sàng để quay trên Samsung Galaxy A11 |
 
 ### 3.3. Thông tin Bản cài đặt APK Kiểm thử Nội bộ
 
 - **Tên file:** [`build/release-assets/bunly-connected-cloud-release.apk`](../../build/release-assets/bunly-connected-cloud-release.apk) (cần upload lên Google Drive công khai hoặc GitHub Releases `v0.3.0-m3` trước khi dán link vào Google Form).
 - **Cấu hình build:** `--release` (Connected Cloud Supabase `bunly-dev`), ký bằng debug keystore phục vụ cài đặt QA trên Android 5.0+ (thử nghiệm trực tiếp trên Android 12 — Samsung Galaxy A11 `SM-A115F`).
-- **Kích thước:** `93.638.723 bytes` (`~89,30 MB`).
-- **SHA-256:** `302BD1962D1EE7B2B4658670CED497D84B4F8AC7BF7A6E28FDFC0EB107113833`.
+- **Kích thước:** `94.196.007 bytes` (`~89,83 MB`).
+- **SHA-256:** `EB64AF270CA31D840508A76EC6E44D3AA402C127823B6728E6D60C3EFA8BE7A1`.
 - **Thiết bị đã cài đặt:** Samsung Galaxy A11 (`SM-A115F`, `R9JN409P9RJ`).
 - **🔗 Link Tải APK (cập nhật khi nộp Form):** `[Dán link Google Drive hoặc GitHub Release v0.3.0-m3 tại đây]`
 - **🎥 Link Video Demo (cập nhật khi nộp Form):** `[Dán link YouTube / Google Drive công khai tại đây]`
